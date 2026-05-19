@@ -16,6 +16,9 @@ public class Hero extends Actor
     public void act()
     {
         // Add your action code here.
+        GreenfootImage image = new GreenfootImage("alligator.png");
+        image.scale(50, 50);
+        setImage(image);
         if(Greenfoot.isKeyDown("left"))
         {
             move(-2);
