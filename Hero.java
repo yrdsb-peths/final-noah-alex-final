@@ -21,11 +21,11 @@ public class Hero extends Actor
         setImage(image);
         if(Greenfoot.isKeyDown("left"))
         {
-            move(-5);
+            move(-10);
         }
         else if(Greenfoot.isKeyDown("right"))
         {
-            move(5);
+            move(10);
         }
     }
 }
