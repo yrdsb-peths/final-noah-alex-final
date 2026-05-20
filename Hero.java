@@ -23,8 +23,8 @@ public class Hero extends Actor
     }
         
         // Add your action code here.
-        GreenfootImage image = new GreenfootImage("alligator.png");
-        image.scale(60, 20);
+        GreenfootImage image = new GreenfootImage("baseguy.png");
+        image.scale(50, 50);
         setImage(image);
         if (Greenfoot.isKeyDown("a"))
         {
