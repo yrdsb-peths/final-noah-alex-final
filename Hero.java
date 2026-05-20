@@ -15,17 +15,32 @@ public class Hero extends Actor
     
     public void act()
     {
+        MouseInfo mouse = Greenfoot.getMouseInfo();
+    
+    if (mouse != null) 
+    {
+        turnTowards(mouse.getX(), mouse.getY());
+    }
+        
         // Add your action code here.
         GreenfootImage image = new GreenfootImage("alligator.png");
-        image.scale(300, 10);
+        image.scale(60, 20);
         setImage(image);
-        if(Greenfoot.isKeyDown("left"))
+        if (Greenfoot.isKeyDown("a"))
         {
-            move(-10);
+            setLocation(getX() - 5, getY());
         }
-        else if(Greenfoot.isKeyDown("right"))
+        if (Greenfoot.isKeyDown("d"))
         {
-            move(10);
+            setLocation(getX() + 5, getY());
+        }
+        if (Greenfoot.isKeyDown("w"))
+        {
+            setLocation(getX(), getY() - 5);
+        }
+        if (Greenfoot.isKeyDown("s"))
+        {
+            setLocation(getX(), getY() + 5);
         }
     }
 }
