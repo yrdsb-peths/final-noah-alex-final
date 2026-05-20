@@ -1,64 +1,90 @@
 import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 
-/**
- * Write a description of class Hero here.
- * 
- * @author (your name) 
- * @version (a version number or a date)
- */
 public class Hero extends Actor
 {
-    /**
-     * Act - do whatever the Hero wants to do. This method is called whenever
-     * the 'Act' or 'Run' button gets pressed in the environment.
-     */
-    
     private int laserCooldown = 0;
+    
+    // image
+    private GreenfootImage idleImage;
+    private GreenfootImage upImage;
+    private GreenfootImage leftImage;
+    private GreenfootImage rightImage;
+
+    // COONSTRUCTORR
+    public Hero() 
+    {
+        idleImage = new GreenfootImage("baseguy.png");
+        idleImage.scale(50, 50);
+        
+        upImage = new GreenfootImage("baseguy-up.png");
+        upImage.scale(50, 50);
+        
+        leftImage = new GreenfootImage("baseguy-left.png");
+        leftImage.scale(50, 50);
+        
+        rightImage = new GreenfootImage("baseguy-right.png");
+        rightImage.scale(50, 50);
+        
+        // set idle
+        setImage(idleImage);
+    }
+
     public void act()
     {
+        //mouse track
         MouseInfo mouse = Greenfoot.getMouseInfo();
-    
-    if (mouse != null) 
-    {
-        turnTowards(mouse.getX(), mouse.getY());
-    }
+        if (mouse != null) 
+        {
+            turnTowards(mouse.getX(), mouse.getY());
+        }
         
-        // Add your action code here.
-        GreenfootImage image = new GreenfootImage("baseguy.png");
-        image.scale(50, 50);
-        setImage(image);
+        //Track if any key is pressed to reset to idle later
+        boolean keyIsPressed = false;
+
+        //movement + directional sprite maps
         if (Greenfoot.isKeyDown("a"))
         {
             setLocation(getX() - 5, getY());
+            setImage(leftImage);
+            keyIsPressed = true;
         }
         if (Greenfoot.isKeyDown("d"))
         {
             setLocation(getX() + 5, getY());
+            setImage(rightImage);
+            keyIsPressed = true;
         }
         if (Greenfoot.isKeyDown("w"))
         {
             setLocation(getX(), getY() - 5);
+            setImage(upImage);
+            keyIsPressed = true;
         }
         if (Greenfoot.isKeyDown("s"))
         {
             setLocation(getX(), getY() + 5);
+            setImage(idleImage); // Uses regular baseguy for down
+            keyIsPressed = true;
         }
         
-        //laser stuff
+        //default to baseguy
+        if (!keyIsPressed) 
+        {
+            setImage(idleImage);
+        }
+        
+        //Laser cooldown
         if (laserCooldown > 0) {
-            laserCooldown--; // Decrease cooldown every frame
+            laserCooldown--; 
         }
         
-        // Shoot when space is pressed and cooldown is ready
+        //Shooting controls
         if (Greenfoot.isKeyDown("space") && laserCooldown == 0)
         {
             Lazer laser = new Lazer();
             getWorld().addObject(laser, getX(), getY());
-            
-            // Match the laser's rotation to the alligator's mouth orientation
             laser.setRotation(getRotation()); 
-            
-            laserCooldown = 20; // Wait about 1/3 of a second before shooting again
+            laserCooldown = 20; 
         }
     }
 }
