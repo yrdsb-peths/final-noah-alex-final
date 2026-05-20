@@ -7,6 +7,11 @@ public class MyWorld extends World {
         Hero al = new Hero();
         addObject(al, 300, 300);
         
+        HpBar bar = new HpBar();
+        // Placing it near the bottom-left corner (X: 90, Y: 370)
+        addObject(bar, 90, 370);
+        al.setHpBar(bar);
+        
         spawnFish();
     }
     
