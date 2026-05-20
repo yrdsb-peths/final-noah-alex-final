@@ -15,7 +15,7 @@ public class Hero extends Actor
     
     private int laserCooldown = 0;
     private int hp = 5;
-    private int damageTimer = 60; // 60 frames = 1 second at normal speed
+    private int invincibilityTimer = 0; // Cooldown after getting hit
     private HpBar healthBar;
     
     public void setHpBar(HpBar bar)
@@ -68,33 +68,41 @@ public class Hero extends Actor
             
             laserCooldown = 20; // Wait about 1/3 of a second before shooting again
         }
+        
+        if (invincibilityTimer > 0)
+        {
+            invincibilityTimer--;
+            
+            // Optional Polish: Make the alligator blink or turn translucent while invincible
+            if (invincibilityTimer % 4 == 0) {
+                getImage().setTransparency(100); // Semi-transparent
+            } else {
+                getImage().setTransparency(255); // Normal
+            }
+        }
+        else
+        {
+            getImage().setTransparency(255); // Reset transparency completely
+        }
+        
         checkEnemyContact();
     }
     
     private void checkEnemyContact()
     {
-        // If a Fish is currently touching the Alligator
-        if (isTouching(Fish.class))
+        // If touching a fish AND not currently invincible
+        if (isTouching(Fish.class) && invincibilityTimer == 0)
         {
-            damageTimer--; // Count down towards 1 second
+            hp--; // Take 1 damage instantly
             
-            if (damageTimer <= 0)
+            // Give the player 30 frames (0.5 seconds) of invincibility to escape
+            invincibilityTimer = 30; 
+            
+            // Update the health bar UI
+            if (healthBar != null)
             {
-                hp--; // Deal 1 damage
-                damageTimer = 60; // Reset the 1-second timer
-                
-                // Update the visual health bar if it exists
-                if (healthBar != null)
-                {
-                    healthBar.updateBar(hp);
-                }
+                healthBar.updateBar(hp);
             }
-        }
-        else
-        {
-            // If the fish steps away, reset the timer so they can't land 
-            // a rapid hit by stepping on and off your hitbox.
-            damageTimer = 60; 
         }
     }
 }
