@@ -15,7 +15,7 @@ public class Fish extends Actor
      */
     public void act()
     {
-        GreenfootImage image = new GreenfootImage("fihs.jpeg");
+        GreenfootImage image = new GreenfootImage("fish.png");
         image.scale(30, 30);
         setImage(image);
         // Add your action code here.
