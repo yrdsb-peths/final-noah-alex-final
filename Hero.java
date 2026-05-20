@@ -13,6 +13,7 @@ public class Hero extends Actor
      * the 'Act' or 'Run' button gets pressed in the environment.
      */
     
+    private int laserCooldown = 0;
     public void act()
     {
         MouseInfo mouse = Greenfoot.getMouseInfo();
@@ -41,6 +42,23 @@ public class Hero extends Actor
         if (Greenfoot.isKeyDown("s"))
         {
             setLocation(getX(), getY() + 5);
+        }
+        
+        //laser stuff
+        if (laserCooldown > 0) {
+            laserCooldown--; // Decrease cooldown every frame
+        }
+        
+        // Shoot when space is pressed and cooldown is ready
+        if (Greenfoot.isKeyDown("space") && laserCooldown == 0)
+        {
+            Lazer laser = new Lazer();
+            getWorld().addObject(laser, getX(), getY());
+            
+            // Match the laser's rotation to the alligator's mouth orientation
+            laser.setRotation(getRotation()); 
+            
+            laserCooldown = 20; // Wait about 1/3 of a second before shooting again
         }
     }
 }
