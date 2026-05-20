@@ -17,6 +17,11 @@ public class Hero extends Actor
     private int hp = 5;
     private int damageTimer = 60; // 60 frames = 1 second at normal speed
     private HpBar healthBar;
+    
+    public void setHpBar(HpBar bar)
+    {
+        this.healthBar = bar;
+    }
     public void act()
     {
         MouseInfo mouse = Greenfoot.getMouseInfo();
@@ -62,6 +67,34 @@ public class Hero extends Actor
             laser.setRotation(getRotation()); 
             
             laserCooldown = 20; // Wait about 1/3 of a second before shooting again
+        }
+        checkEnemyContact();
+    }
+    
+    private void checkEnemyContact()
+    {
+        // If a Fish is currently touching the Alligator
+        if (isTouching(Fish.class))
+        {
+            damageTimer--; // Count down towards 1 second
+            
+            if (damageTimer <= 0)
+            {
+                hp--; // Deal 1 damage
+                damageTimer = 60; // Reset the 1-second timer
+                
+                // Update the visual health bar if it exists
+                if (healthBar != null)
+                {
+                    healthBar.updateBar(hp);
+                }
+            }
+        }
+        else
+        {
+            // If the fish steps away, reset the timer so they can't land 
+            // a rapid hit by stepping on and off your hitbox.
+            damageTimer = 60; 
         }
     }
 }
