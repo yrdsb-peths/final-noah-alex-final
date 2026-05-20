@@ -15,6 +15,9 @@ public class Lazer extends Actor
     private int lifeTimer = 120;
     public void act()
     {
+        GreenfootImage image = new GreenfootImage("lazer.png");
+        image.scale(60, 20);
+        setImage(image);
         // Add your action code here.
         move(10);
         
