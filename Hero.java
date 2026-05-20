@@ -14,6 +14,9 @@ public class Hero extends Actor
      */
     
     private int laserCooldown = 0;
+    private int hp = 5;
+    private int damageTimer = 60; // 60 frames = 1 second at normal speed
+    private HpBar healthBar;
     public void act()
     {
         MouseInfo mouse = Greenfoot.getMouseInfo();
