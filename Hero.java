@@ -36,6 +36,7 @@ public class Hero extends Actor
         if (mouse != null) 
         {
             turnTowards(mouse.getX(), mouse.getY());
+            setRotation(getRotation() + 90);
         }
         
         //Track if any key is pressed to reset to idle later
@@ -83,7 +84,7 @@ public class Hero extends Actor
         {
             Lazer laser = new Lazer();
             getWorld().addObject(laser, getX(), getY());
-            laser.setRotation(getRotation()); 
+            laser.setRotation(getRotation()-90); 
             laserCooldown = 20; 
         }
     }
