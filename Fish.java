@@ -18,6 +18,9 @@ public class Fish extends Actor
         // Add your action code here.
         // 1. Move towards the Hero
         moveTowardsHero();
+        
+        // 2. Check if hit by a laser
+        checkLaserCollision();
     }
     
     private void moveTowardsHero()
@@ -31,6 +34,21 @@ public class Fish extends Actor
             Hero alligator = heroes.get(0);
             turnTowards(alligator.getX(), alligator.getY());
             move(5);
+        }
+    }
+    
+    private void checkLaserCollision()
+    {
+        // Check if a Lazer object is overlapping with this fish
+        Actor laser = getOneIntersectingObject(Lazer.class);
+        
+        if (laser != null)
+        {
+            // Remove the laser so it doesn't pierce through multiple enemies
+            getWorld().removeObject(laser);
+            
+            // Remove this fish from the world
+            getWorld().removeObject(this);
         }
     }
 }
