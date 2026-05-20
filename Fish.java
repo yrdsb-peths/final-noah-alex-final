@@ -15,12 +15,16 @@ public class Fish extends Actor
      */
     public void act()
     {
+        GreenfootImage image = new GreenfootImage("baseguy.png");
+        image.scale(50, 50);
+        setImage(image);
         // Add your action code here.
         // 1. Move towards the Hero
         moveTowardsHero();
         
         // 2. Check if hit by a laser
         checkLaserCollision();
+        
     }
     
     private void moveTowardsHero()
