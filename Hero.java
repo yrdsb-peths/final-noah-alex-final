@@ -80,7 +80,7 @@ public class Hero extends Actor
         }
         
         //Shooting controls
-        if (Greenfoot.isKeyDown("space") && laserCooldown == 0)
+        if (Greenfoot.mousePressed(null) && laserCooldown == 0)
         {
             Lazer laser = new Lazer();
             getWorld().addObject(laser, getX(), getY());
