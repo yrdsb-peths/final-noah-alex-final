@@ -116,39 +116,30 @@ public class Hero extends Actor
         checkEnemyContact();
     }
     
+    // 1. Make sure your checkEnemyContact ONLY checks for normal Fish now!
     private void checkEnemyContact()
     {
         if (isTouching(Fish.class) && invincibilityTimer == 0)
         {
-            hp--; 
-            invincibilityTimer = 30;  
-            
-            if (healthBar != null)
-            {
-                healthBar.updateBar(hp);
-            }
-            
-            // --- NEW GAME OVER TRIGGER ---
-            if (hp <= 0)
-            {
-                // Switch the screen to the GameOver world
-                Greenfoot.setWorld(new GameOver());
-            }
+            takeDamage(1); // Normal fish does 1 damage
         }
-        if (isTouching(SwordfishBoss.class) && invincibilityTimer == 0)
+    }
+    
+    // 2. Add this new public method so the Boss can cleanly deal damage to the player
+    public void takeDamage(int damageAmount)
+    {
+        if (invincibilityTimer == 0)
         {
-            hp -= 3; 
-            invincibilityTimer = 30;  
+            hp -= damageAmount;
+            invincibilityTimer = 30; // 0.5 seconds of i-frames
             
             if (healthBar != null)
             {
                 healthBar.updateBar(hp);
             }
             
-            // --- NEW GAME OVER TRIGGER ---
             if (hp <= 0)
             {
-                // Switch the screen to the GameOver world
                 Greenfoot.setWorld(new GameOver());
             }
         }
