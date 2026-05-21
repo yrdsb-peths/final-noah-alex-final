@@ -127,6 +127,13 @@ public class Hero extends Actor
             {
                 healthBar.updateBar(hp);
             }
+            
+            // --- NEW GAME OVER TRIGGER ---
+            if (hp <= 0)
+            {
+                // Switch the screen to the GameOver world
+                Greenfoot.setWorld(new GameOver());
+            }
         }
     }
 }
