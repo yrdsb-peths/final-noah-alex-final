@@ -116,7 +116,6 @@ public class Hero extends Actor
         checkEnemyContact();
     }
     
-    // 1. Make sure your checkEnemyContact ONLY checks for normal Fish now!
     private void checkEnemyContact()
     {
         if (isTouching(Fish.class) && invincibilityTimer == 0)
@@ -125,7 +124,6 @@ public class Hero extends Actor
         }
     }
     
-    // 2. Add this new public method so the Boss can cleanly deal damage to the player
     public void takeDamage(int damageAmount)
     {
         if (invincibilityTimer == 0)

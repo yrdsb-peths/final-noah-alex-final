@@ -109,6 +109,8 @@ public class SwordfishBoss extends Actor
         setRotation(dashAngle);
         move(20); // Rush forward fast!
         
+        checkHeroCollision();
+        
         // If it impacts the world boundaries, smash into it and get stuck
         if (isAtEdge())
         {
@@ -190,5 +192,17 @@ public class SwordfishBoss extends Actor
         }
         
         setImage(canvas);
+    }
+    
+    private void checkHeroCollision()
+    {
+        // Look for an overlapping Hero object
+        Hero target = (Hero) getOneIntersectingObject(Hero.class);
+        
+        if (target != null)
+        {
+            // Deliver the massive 3-damage strike directly via the public method!
+            target.takeDamage(3);
+        }
     }
 }
