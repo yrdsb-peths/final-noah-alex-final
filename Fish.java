@@ -69,6 +69,8 @@ public class Fish extends Actor
             
             if (fishHp <= 0)
             {
+                MyWorld world = (MyWorld) getWorld();
+                world.increaseScore();
                 // If health runs out, the fish dies
                 getWorld().removeObject(this);
             }
