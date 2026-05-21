@@ -107,7 +107,7 @@ public class SwordfishBoss extends Actor
     private void handleDashingState()
     {
         setRotation(dashAngle);
-        move(20); // Rush forward fast!
+        move(30); // Rush forward fast!
         
         checkHeroCollision();
         
