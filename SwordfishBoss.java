@@ -129,5 +129,66 @@ public class SwordfishBoss extends Actor
         }
     }
 
-    
+    private void checkLaserCollision()
+    {
+        Actor laser = getOneIntersectingObject(Lazer.class);
+        if (laser != null)
+        {
+            getWorld().removeObject(laser);
+            bossHp--;
+            
+            if (bossHp <= 0)
+            {
+                getWorld().removeObject(this);
+            }
+            else
+            {
+                // Redraw canvas with the updated health bar width
+                updateBossAppearance(currentState == TRACKING);
+            }
+        }
+    }
+
+    /**
+     * Draws the composite graphic including Boss Sprite, HP bar, and optional Target line
+     */
+    private void updateBossAppearance(boolean drawTargetLine)
+    {
+        int spriteWidth = baseBossImage.getWidth();
+        int spriteHeight = baseBossImage.getHeight();
+        int barHeight = 8;
+        int spacing = 6;
+        
+        // If drawing targeting laser, make an ultra-long canvas stretching rightward out of its nose
+        int canvasWidth = drawTargetLine ? 800 : spriteWidth;
+        
+        GreenfootImage canvas = new GreenfootImage(canvasWidth, spriteHeight + barHeight + spacing);
+        
+        // Draw the base boss body centered horizontally if tracking line isn't extended
+        canvas.drawImage(baseBossImage, 0, barHeight + spacing);
+        
+        // Draw Boss HP bar frame directly over its head
+        canvas.setColor(Color.BLACK);
+        canvas.fillRect(0, 0, spriteWidth, barHeight);
+        
+        int healthBarWidth = (int)(((double)bossHp / 10) * (spriteWidth - 2));
+        if (healthBarWidth < 0) healthBarWidth = 0;
+        
+        // Color shifts from Green -> Yellow -> Red as boss loses health
+        if (bossHp > 6) canvas.setColor(Color.GREEN);
+        else if (bossHp > 3) canvas.setColor(Color.YELLOW);
+        else canvas.setColor(Color.RED);
+        
+        canvas.fillRect(1, 1, healthBarWidth, barHeight - 2);
+        
+        // --- DRAW THE TELEGRAPH TARGET LINE ---
+        if (drawTargetLine)
+        {
+            canvas.setColor(new Color(255, 0, 0, 130)); // Semi-transparent Red
+            // Draws a straight targeting vector projecting forward from the nose
+            canvas.fillRect(spriteWidth, (spriteHeight / 2) + barHeight + spacing - 1, 700, 3);
+        }
+        
+        setImage(canvas);
+    }
 }
