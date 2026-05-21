@@ -107,7 +107,7 @@ public class SwordfishBoss extends Actor
     private void handleDashingState()
     {
         setRotation(dashAngle);
-        move(30); // Rush forward fast!
+        move(20); // Rush forward fast!
         
         // If it impacts the world boundaries, smash into it and get stuck
         if (isAtEdge())
