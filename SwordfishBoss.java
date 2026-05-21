@@ -83,4 +83,51 @@ public class SwordfishBoss extends Actor
         }
     }
     
+    
+    private void handleChargingState()
+    {
+        setRotation(dashAngle); // Keep looking exactly at the targeted path
+        
+        // Flash transparency
+        if (stateTimer % 6 < 3) {
+            getImage().setTransparency(80);
+        } else {
+            getImage().setTransparency(255);
+        }
+        
+        stateTimer--;
+        if (stateTimer <= 0)
+        {
+            getImage().setTransparency(255); // Reset transparency
+            updateBossAppearance(false);    // Turn off targeting line
+            currentState = DASHING;
+        }
+    }
+    
+    private void handleDashingState()
+    {
+        setRotation(dashAngle);
+        move(15); // Rush forward fast!
+        
+        // If it impacts the world boundaries, smash into it and get stuck
+        if (isAtEdge())
+        {
+            currentState = STUCK;
+            stateTimer = 90; // Stuck for 1.5 seconds
+        }
+    }
+    
+    private void handleStuckState()
+    {
+        // Stand completely still
+        stateTimer--;
+        if (stateTimer <= 0)
+        {
+            // Reset loop back to tracking the player
+            currentState = TRACKING;
+            stateTimer = 120; // 2 seconds tracking
+        }
+    }
+
+    
 }
