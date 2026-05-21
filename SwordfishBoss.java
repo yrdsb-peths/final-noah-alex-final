@@ -35,11 +35,52 @@ public class SwordfishBoss extends Actor
         baseBossImage = new GreenfootImage("swordfish.png");
         baseBossImage.scale(60, 60); // Made a bit bigger since it's a boss
         
+        updateBossAppearance(false);
     }
     
     public void act()
     {
         // Add your action code here.
+        // 1. Run behavior based on current state
+        switch (currentState)
+        {
+            case TRACKING:
+                handleTrackingState();
+                break;
+            case CHARGING:
+                handleChargingState();
+                break;
+            case DASHING:
+                handleDashingState();
+                break;
+            case STUCK:
+                handleStuckState();
+                break;
+        }
+        
+        // 2. Check if a laser hits the boss
+        checkLaserCollision();
+    }
+    
+    private void handleTrackingState()
+    {
+        updateBossAppearance(true); // Draw image WITH the red targeting line
+        
+        List<Hero> heroes = getWorld().getObjects(Hero.class);
+        if (!heroes.isEmpty())
+        {
+            Hero alligator = heroes.get(0);
+            turnTowards(alligator.getX(), alligator.getY());
+        }
+        
+        stateTimer--;
+        if (stateTimer <= 0)
+        {
+            // Transition to charging: Save the angle, stop tracking, set 1.5s timer
+            dashAngle = getRotation();
+            currentState = CHARGING;
+            stateTimer = 90; // 90 frames = 1.5 seconds
+        }
     }
     
 }
