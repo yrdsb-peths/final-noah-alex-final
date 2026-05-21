@@ -132,24 +132,25 @@ public class SwordfishBoss extends Actor
     }
 
     private void checkLaserCollision()
+{
+    Actor laser = getOneIntersectingObject(Lazer.class);
+    if (laser != null)
     {
-        Actor laser = getOneIntersectingObject(Lazer.class);
-        if (laser != null)
+        MyWorld world = (MyWorld) getWorld(); // grab reference first
+        world.removeObject(laser);
+        bossHp--;
+
+        if (bossHp <= 0)
         {
-            getWorld().removeObject(laser);
-            bossHp--;
-            
-            if (bossHp <= 0)
-            {
-                getWorld().removeObject(this);
-            }
-            else
-            {
-                // Redraw canvas with the updated health bar width
-                updateBossAppearance(currentState == TRACKING);
-            }
+            world.notifyBossDefeated();
+            world.removeObject(this); // world is already stored, no second getWorld() call
+        }
+        else
+        {
+            updateBossAppearance(currentState == TRACKING);
         }
     }
+}
 
     /**
      * Draws the composite graphic including Boss Sprite, HP bar, and optional Target line
@@ -205,4 +206,5 @@ public class SwordfishBoss extends Actor
             target.takeDamage(3);
         }
     }
+    
 }

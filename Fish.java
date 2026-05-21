@@ -115,4 +115,19 @@ public class Fish extends Actor
         // Assign this combined custom graphic to the actor
         setImage(canvas);
     }
+    public void takeDamage(int amount)
+{
+    fishHp -= amount;
+    if (fishHp <= 0)
+    {
+        MyWorld world = (MyWorld) getWorld();
+        world.increaseScore();
+        world.notifyNemoKilled();
+        world.removeObject(this);
+    }
+    else
+    {
+        updateFishAppearance();
+    }
+}
 }
