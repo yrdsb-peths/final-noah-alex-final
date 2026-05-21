@@ -12,7 +12,7 @@ public class HpBar extends Actor
      * Act - do whatever the HpBar wants to do. This method is called whenever
      * the 'Act' or 'Run' button gets pressed in the environment.
      */
-    private final int MAX_HP = 5;
+    private final int MAX_HP = 10;
     private final int BAR_WIDTH = 150;
     private final int BAR_HEIGHT = 20;
 
