@@ -15,7 +15,7 @@ public class SwordfishBoss extends Actor
      */
     
     // Boss Core Stats
-    private int bossHp = 10;
+    private int bossHp = 15;
     private GreenfootImage baseBossImage;
     
     // State Machine Enums (Representing the states as numbers)
@@ -26,14 +26,14 @@ public class SwordfishBoss extends Actor
     private int currentState = TRACKING;
     
     // Timers (Assuming ~60 frames per second)
-    private int stateTimer = 120; // 2 seconds to track initially
+    private int stateTimer = 80; // 2 seconds to track initially
     private int dashAngle = 0;    // Locks the angle before charging/dashing
     
     public SwordfishBoss()
     {
         // Replace "swordfish.png" with your actual file name!
         baseBossImage = new GreenfootImage("swordfish.png");
-        baseBossImage.scale(60, 60); // Made a bit bigger since it's a boss
+        baseBossImage.scale(80, 80); // Made a bit bigger since it's a boss
         
         updateBossAppearance(false);
     }
@@ -69,8 +69,8 @@ public class SwordfishBoss extends Actor
         List<Hero> heroes = getWorld().getObjects(Hero.class);
         if (!heroes.isEmpty())
         {
-            Hero alligator = heroes.get(0);
-            turnTowards(alligator.getX(), alligator.getY());
+            Hero hero = heroes.get(0);
+            turnTowards(hero.getX(), hero.getY());
         }
         
         stateTimer--;
@@ -79,7 +79,7 @@ public class SwordfishBoss extends Actor
             // Transition to charging: Save the angle, stop tracking, set 1.5s timer
             dashAngle = getRotation();
             currentState = CHARGING;
-            stateTimer = 90; // 90 frames = 1.5 seconds
+            stateTimer = 30; // 90 frames = 1.5 seconds
         }
     }
     
@@ -107,7 +107,9 @@ public class SwordfishBoss extends Actor
     private void handleDashingState()
     {
         setRotation(dashAngle);
-        move(15); // Rush forward fast!
+        move(30); // Rush forward fast!
+        
+        checkHeroCollision();
         
         // If it impacts the world boundaries, smash into it and get stuck
         if (isAtEdge())
@@ -125,7 +127,7 @@ public class SwordfishBoss extends Actor
         {
             // Reset loop back to tracking the player
             currentState = TRACKING;
-            stateTimer = 120; // 2 seconds tracking
+            stateTimer = 30; // 2 seconds tracking
         }
     }
 
@@ -160,7 +162,7 @@ public class SwordfishBoss extends Actor
         int spacing = 6;
         
         // If drawing targeting laser, make an ultra-long canvas stretching rightward out of its nose
-        int canvasWidth = drawTargetLine ? 800 : spriteWidth;
+        int canvasWidth = drawTargetLine ? 1000 : spriteWidth;
         
         GreenfootImage canvas = new GreenfootImage(canvasWidth, spriteHeight + barHeight + spacing);
         
@@ -186,9 +188,21 @@ public class SwordfishBoss extends Actor
         {
             canvas.setColor(new Color(255, 0, 0, 130)); // Semi-transparent Red
             // Draws a straight targeting vector projecting forward from the nose
-            canvas.fillRect(spriteWidth, (spriteHeight / 2) + barHeight + spacing - 1, 700, 3);
+            canvas.fillRect(spriteWidth, (spriteHeight / 2) + barHeight + spacing - 1, 1000, 3);
         }
         
         setImage(canvas);
+    }
+    
+    private void checkHeroCollision()
+    {
+        // Look for an overlapping Hero object
+        Hero target = (Hero) getOneIntersectingObject(Hero.class);
+        
+        if (target != null)
+        {
+            // Deliver the massive 3-damage strike directly via the public method!
+            target.takeDamage(3);
+        }
     }
 }

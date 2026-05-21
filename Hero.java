@@ -3,7 +3,7 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 public class Hero extends Actor
 {
     private int laserCooldown = 0;
-    private int hp = 5;
+    private int hp = 10;
     private int invincibilityTimer = 0; 
     private HpBar healthBar;
     
@@ -120,18 +120,24 @@ public class Hero extends Actor
     {
         if (isTouching(Fish.class) && invincibilityTimer == 0)
         {
-            hp--; 
-            invincibilityTimer = 30;  
+            takeDamage(1); // Normal fish does 1 damage
+        }
+    }
+    
+    public void takeDamage(int damageAmount)
+    {
+        if (invincibilityTimer == 0)
+        {
+            hp -= damageAmount;
+            invincibilityTimer = 30; // 0.5 seconds of i-frames
             
             if (healthBar != null)
             {
                 healthBar.updateBar(hp);
             }
             
-            // --- NEW GAME OVER TRIGGER ---
             if (hp <= 0)
             {
-                // Switch the screen to the GameOver world
                 Greenfoot.setWorld(new GameOver());
             }
         }
