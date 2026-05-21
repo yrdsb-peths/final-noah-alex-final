@@ -1,9 +1,11 @@
 import greenfoot.*;
 
 public class MyWorld extends World {
+    private int score = 0;
+    private boolean bossSpawned = false;
     public MyWorld() {
         super(600, 400, 1);
-        
+
         Hero al = new Hero();
         addObject(al, 300, 300);
         
@@ -17,13 +19,28 @@ public class MyWorld extends World {
     
     public void act()
     {
-        // Constantly check how many fish are currently alive in the world
         int fishCount = getObjects(Fish.class).size();
+        int bossCount = getObjects(SwordfishBoss.class).size();
         
         // If there is 1 or 0 fish left, spawn a new one randomly
-        if (fishCount < 2)
+        if(!bossSpawned)
         {
-            spawnFish();
+           if (fishCount < 2)
+            {
+                spawnFish();
+            } 
+        }
+    }
+    
+    public void increaseScore()
+    {
+        score++;
+        
+        // If the player defeats 5 fish, unleash the boss!
+        if (score >= 5 && !bossSpawned)
+        {
+            bossSpawned = true;
+            spawnBoss();
         }
     }
     
@@ -36,5 +53,12 @@ public class MyWorld extends World {
         int randomY = Greenfoot.getRandomNumber(getHeight());
         
         addObject(enemy, randomX, randomY);
+    }
+    
+    private void spawnBoss()
+    {
+        SwordfishBoss boss = new SwordfishBoss();
+        // Spawn the boss right in the top-center of the screen
+        addObject(boss, 300, 80);
     }
 }
