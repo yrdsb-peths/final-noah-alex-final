@@ -7,7 +7,7 @@ public class MyWorld extends World {
     private boolean pufferWaveSpawned = false;
     private int spawnTimer = 0;
     private int nemoSpawnCount = 0; // how many nemos have been spawned in puffer wave
-
+    private Label scoreLabel;
     public MyWorld() {
         super(600, 400, 1);
         Hero al = new Hero();
@@ -16,7 +16,11 @@ public class MyWorld extends World {
         HpBar bar = new HpBar();
         addObject(bar, 90, 370);
         al.setHpBar(bar);
-
+        
+        scoreLabel = new Label("Score: 0", 30);
+        scoreLabel.setLineColor(Color.WHITE);
+        addObject(scoreLabel, 80, 30);
+        
         spawnFish();
     }
 
@@ -25,7 +29,7 @@ public class MyWorld extends World {
         int fishCount = getObjects(Fish.class).size();
 
         // Phase 1: Normal nemo spawning before boss
-        if (!bossSpawned)
+        if (!bossSpawned && !bossDefeated)
         {
             if (fishCount < 2)
             {
@@ -59,6 +63,7 @@ public class MyWorld extends World {
     public void increaseScore()
     {
         score++;
+        scoreLabel.setValue("Score: " + score);
         if (score >= 5 && !bossSpawned)
         {
             bossSpawned = true;

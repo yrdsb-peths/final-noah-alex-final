@@ -156,6 +156,8 @@ public class SwordfishBoss extends Actor
             
             if (bossHp <= 0)
             {
+                MyWorld world = (MyWorld) getWorld();
+                world.notifyBossDefeated();
                 getWorld().removeObject(this);
                 return; // Stop running the method immediately since the boss is dead
             }

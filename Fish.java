@@ -116,18 +116,22 @@ public class Fish extends Actor
         setImage(canvas);
     }
     public void takeDamage(int amount)
-{
-    fishHp -= amount;
-    if (fishHp <= 0)
     {
-        MyWorld world = (MyWorld) getWorld();
-        world.increaseScore();
-        world.notifyNemoKilled();
-        world.removeObject(this);
+        fishHp -= amount;
+        if (fishHp <= 0)
+        {
+            MyWorld world = (MyWorld) getWorld();
+            if (world != null)
+            {
+                // Update score or notify phase mechanics
+                world.increaseScore(); 
+                world.notifyNemoKilled();
+            }
+            getWorld().removeObject(this);
+        }
+        else
+        {
+            updateFishAppearance();
+        }
     }
-    else
-    {
-        updateFishAppearance();
-    }
-}
 }
