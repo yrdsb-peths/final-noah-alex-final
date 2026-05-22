@@ -133,21 +133,38 @@ public class SwordfishBoss extends Actor
 
     private void checkLaserCollision()
 {
-    Actor laser = getOneIntersectingObject(Lazer.class);
-    if (laser != null)
+    // 1. Get a list of ALL lasers currently in the world
+    List<Lazer> lasers = getWorld().getObjects(Lazer.class);
+    
+    // 2. Loop through the lasers to check their actual distance from the boss's core
+    for (int i = 0; i < lasers.size(); i++)
     {
-        MyWorld world = (MyWorld) getWorld(); // grab reference first
-        world.removeObject(laser);
-        bossHp--;
-
-        if (bossHp <= 0)
+        Lazer currentLaser = lasers.get(i);
+        
+        // Calculate horizontal and vertical distance
+        int dx = currentLaser.getX() - this.getX();
+        int dy = currentLaser.getY() - this.getY();
+        
+        // Use standard distance formula (or check bounding radius)
+        // Since the boss image is scaled to 60x60, a radius of ~30 pixels is perfect for its real body
+        if (Math.abs(dx) < 30 && Math.abs(dy) < 30)
         {
-            world.notifyBossDefeated();
-            world.removeObject(this); // world is already stored, no second getWorld() call
-        }
-        else
-        {
-            updateBossAppearance(currentState == TRACKING);
+            // Valid physical hit! Remove the laser safely
+            getWorld().removeObject(currentLaser);
+            
+            bossHp--;
+            
+            if (bossHp <= 0)
+            {
+                getWorld().removeObject(this);
+                return; // Stop running the method immediately since the boss is dead
+            }
+            else
+            {
+                updateBossAppearance(currentState == TRACKING);
+            }
+            
+            break; // Exit the loop since we handled this frame's hit
         }
     }
 }
