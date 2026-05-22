@@ -20,6 +20,8 @@ public class Pufferfish extends Actor
         inflatedImage = new GreenfootImage("inflated-pufferfish.png");
         inflatedImage.scale(50, 50);
         setImage(normalImage);
+        
+        updatePuffAppearance();
 
         targetX = 50 + Greenfoot.getRandomNumber(500);
         targetY = 50 + Greenfoot.getRandomNumber(300);
@@ -82,7 +84,14 @@ public class Pufferfish extends Actor
 
             if (pufferHp <= 0)
             {
+                world.increaseScore();
+                // If health runs out, the fish dies
                 die();
+            }
+            else
+            {
+                // If it survives, redraw its health bar to show the lower HP
+                updatePuffAppearance();
             }
         }
     }
@@ -96,5 +105,40 @@ public class Pufferfish extends Actor
         world.addObject(cloud, getX(), getY());
 
         world.removeObject(this);
+    }
+    
+    private void updatePuffAppearance()
+    {
+        int spriteWidth = inflatedImage.getWidth();
+        int spriteHeight = inflatedImage.getHeight();
+        
+        // 1. Create a larger transparent canvas to fit both the fish and its HP bar overhead
+        int barHeight = 6;
+        int spacing = 4;
+        GreenfootImage canvas = new GreenfootImage(spriteWidth, spriteHeight + barHeight + spacing);
+        
+        // 2. Draw the base fish sprite at the bottom of our canvas
+        canvas.drawImage(normalImage, 0, barHeight + spacing);
+        
+        // 3. Draw the background of the mini health bar (Dark Gray/Black background)
+        canvas.setColor(Color.BLACK);
+        canvas.fillRect(0, 0, spriteWidth, barHeight);
+        
+        // 4. Calculate the width of the remaining health segment
+        int healthBarWidth = (int)(((double)pufferHp / 3) * (spriteWidth - 2));
+        if (healthBarWidth < 0) healthBarWidth = 0;
+        
+        // 5. Change color based on health remaining (Green for healthy, Red for low health)
+        if (pufferHp > 1) {
+            canvas.setColor(Color.GREEN);
+        } else {
+            canvas.setColor(Color.RED);
+        }
+        
+        // 6. Draw the foreground health level
+        canvas.fillRect(1, 1, healthBarWidth, barHeight - 2);
+        
+        // Assign this combined custom graphic to the actor
+        setImage(canvas);
     }
 }
