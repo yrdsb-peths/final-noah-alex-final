@@ -113,12 +113,33 @@ public class MyWorld extends World {
     public void notifyPufferKilled() {}
 
     private void spawnFish()
+{
+    Fish enemy = new Fish();
+    int x, y;
+    int edge = Greenfoot.getRandomNumber(4);
+
+    switch (edge)
     {
-        Fish enemy = new Fish();
-        int randomX = Greenfoot.getRandomNumber(getWidth());
-        int randomY = FLOOR_Y; // spawn on the floor
-        addObject(enemy, randomX, randomY);
+        case 0: // top
+            x = Greenfoot.getRandomNumber(getWidth());
+            y = 0;
+            break;
+        case 1: // bottom
+            x = Greenfoot.getRandomNumber(getWidth());
+            y = getHeight() - 1;
+            break;
+        case 2: // left
+            x = 0;
+            y = Greenfoot.getRandomNumber(getHeight());
+            break;
+        default: // right
+            x = getWidth() - 1;
+            y = Greenfoot.getRandomNumber(getHeight());
+            break;
     }
+
+    addObject(enemy, x, y);
+}
 
     private void spawnBoss()
     {
