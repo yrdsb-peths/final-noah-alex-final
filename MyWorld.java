@@ -1,4 +1,6 @@
 import greenfoot.*;
+import java.util.List;
+
 public class MyWorld extends World {
     private int score = 0;
     private boolean bossSpawned = false;
@@ -6,57 +8,86 @@ public class MyWorld extends World {
     private int nemoKillsAfterBoss = 0;
     private boolean pufferWaveSpawned = false;
     private int spawnTimer = 0;
-    private int nemoSpawnCount = 0; // how many nemos have been spawned in puffer wave
+    private int nemoSpawnCount = 0;
     private Label scoreLabel;
+
+    // Scrolling
+    private int bgOffsetX = 0;
+    private GreenfootImage bgImage;
+    private static final int BG_WIDTH = 600; // same as world, tiles seamlessly
+    private static final int BG_HEIGHT = 400;
+
+    public static final int FLOOR_Y = 380; // hero stands here
+    public static final int GRAVITY = 1;
+
     public MyWorld() {
         super(600, 400, 1);
+
+        bgImage = new GreenfootImage("background.png");
+        bgImage.scale(BG_WIDTH, BG_HEIGHT);
+        drawBackground();
+
         Hero al = new Hero();
-        addObject(al, 300, 300);
+        addObject(al, 300, FLOOR_Y);
 
         HpBar bar = new HpBar();
         addObject(bar, 90, 370);
         al.setHpBar(bar);
-        
+
         scoreLabel = new Label("Score: 0", 30);
         scoreLabel.setLineColor(Color.WHITE);
         addObject(scoreLabel, 80, 30);
-        
+
         spawnFish();
+    }
+
+    public void scrollWorld(int dx)
+    {
+        bgOffsetX -= dx;
+        drawBackground();
+
+        List<Actor> allActors = getObjects(Actor.class);
+        for (Actor a : allActors)
+        {
+            if (!(a instanceof Hero) && !(a instanceof HpBar) && !(a instanceof Label))
+            {
+                a.setLocation(a.getX() - dx, a.getY());
+            }
+        }
+    }
+
+    private void drawBackground()
+    {
+        GreenfootImage screen = new GreenfootImage(600, 400);
+
+        // Wrap offset so background tiles seamlessly
+        int ox = ((bgOffsetX % BG_WIDTH) + BG_WIDTH) % BG_WIDTH;
+
+        screen.drawImage(bgImage, -ox, 0);
+        screen.drawImage(bgImage, -ox + BG_WIDTH, 0);
+
+        setBackground(screen);
     }
 
     public void act()
     {
         int fishCount = getObjects(Fish.class).size();
 
-        // Phase 1: Normal nemo spawning before boss
         if (!bossSpawned && !bossDefeated)
         {
-            if (fishCount < 2)
-            {
-                spawnFish();
-            }
+            if (fishCount < 2) spawnFish();
         }
 
-        // Phase 2: After boss dies, spawn 4 nemos in intervals + 1 pufferfish
         if (bossDefeated && !pufferWaveSpawned)
         {
             spawnTimer++;
-            if (spawnTimer % 60 == 0 && nemoSpawnCount < 4) // one nemo every 60 frames
+            if (spawnTimer % 60 == 0 && nemoSpawnCount < 4)
             {
                 spawnFish();
                 nemoSpawnCount++;
-
-                // Spawn the pufferfish alongside the first nemo
-                if (nemoSpawnCount == 1)
-                {
-                    spawnPufferfish();
-                }
+                if (nemoSpawnCount == 1) spawnPufferfish();
             }
-
-            if (nemoSpawnCount >= 4)
-            {
-                pufferWaveSpawned = true;
-            }
+            if (nemoSpawnCount >= 4) pufferWaveSpawned = true;
         }
     }
 
@@ -71,47 +102,34 @@ public class MyWorld extends World {
         }
     }
 
-    // Called by SwordfishBoss when it dies
-    public void notifyBossDefeated()
-    {
-        bossDefeated = true;
-    }
+    public void notifyBossDefeated() { bossDefeated = true; }
 
-    // Called by Fish when killed during post-boss phase
     public void notifyNemoKilled()
     {
-        if (bossDefeated && !pufferWaveSpawned) return; // still spawning, don't count yet
-        if (bossDefeated)
-        {
-            nemoKillsAfterBoss++;
-        }
+        if (bossDefeated && !pufferWaveSpawned) return;
+        if (bossDefeated) nemoKillsAfterBoss++;
     }
 
-    // Called by Pufferfish when it dies
-    public void notifyPufferKilled()
-    {
-        // hook for future waves or effects
-    }
+    public void notifyPufferKilled() {}
 
     private void spawnFish()
     {
         Fish enemy = new Fish();
         int randomX = Greenfoot.getRandomNumber(getWidth());
-        int randomY = Greenfoot.getRandomNumber(getHeight());
+        int randomY = FLOOR_Y; // spawn on the floor
         addObject(enemy, randomX, randomY);
     }
 
     private void spawnBoss()
     {
         SwordfishBoss boss = new SwordfishBoss();
-        addObject(boss, 300, 80);
+        addObject(boss, 300, FLOOR_Y);
     }
 
     private void spawnPufferfish()
     {
         Pufferfish puffer = new Pufferfish();
         int randomX = Greenfoot.getRandomNumber(getWidth());
-        int randomY = Greenfoot.getRandomNumber(getHeight());
-        addObject(puffer, randomX, randomY);
+        addObject(puffer, randomX, FLOOR_Y);
     }
 }
