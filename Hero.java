@@ -100,17 +100,27 @@ public class Hero extends Actor
     }
 
     private void handleShooting()
-    {
-        if (laserCooldown > 0) laserCooldown--;
+{
+    if (laserCooldown > 0) laserCooldown--;
 
-        if (Greenfoot.mousePressed(null) && laserCooldown == 0)
+    if (Greenfoot.mousePressed(null) && laserCooldown == 0)
+    {
+        MouseInfo mouse = Greenfoot.getMouseInfo();
+        if (mouse != null)
         {
             Lazer laser = new Lazer();
             getWorld().addObject(laser, getX(), getY());
-            laser.setRotation(getRotation() - 90);
+            
+            // Calculate angle from hero to mouse
+            int dx = mouse.getX() - getX();
+            int dy = mouse.getY() - getY();
+            double angle = Math.toDegrees(Math.atan2(dy, dx));
+            laser.setRotation((int) angle);
+            
             laserCooldown = 20;
         }
     }
+}
 
     private void handleInvincibility()
     {
