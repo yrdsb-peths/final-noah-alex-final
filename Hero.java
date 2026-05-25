@@ -65,12 +65,6 @@ public class Hero extends Actor
 
     private void handleMovement()
     {
-        MouseInfo mouse = Greenfoot.getMouseInfo();
-        if (mouse != null)
-        {
-            turnTowards(mouse.getX(), mouse.getY());
-            setRotation(getRotation() + 90);
-        }
 
         int dx = 0;
 
