@@ -126,4 +126,22 @@ public class MyWorld extends World {
         int randomY = 40 + Greenfoot.getRandomNumber(getHeight() - 110);
         addObject(pack, randomX, randomY);
     }
+    
+    private void spawnKrakenBoss()
+    {
+        // 1. Create the HP Bar (Scaled larger for a 20HP boss)
+        HpBar krakenBar = new HpBar();
+        krakenBar.setMaxHp(20); // We assume you have a public setMaxHp method on HpBar now
+        krakenBar.setLineColor(new Color(128, 0, 128));
+        // Position it under the existing HP bar, e.g., (110, 370)
+        addObject(krakenBar, 110, 370); 
+        
+        // 2. Create the Kraken
+        Kraken boss = new Kraken();
+        // Link it to the bar
+        boss.setHpBar(krakenBar);
+        
+        // 3. Add to the world at the initial position
+        addObject(boss, 500, 300); // Spawns in a corner
+    }
 }
