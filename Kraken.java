@@ -41,9 +41,12 @@ public class Kraken extends Actor
     public Kraken()
     {
         // Load and Prepare Images
-        tentaclesBaseImage = new GreenfootImage("octopus_tentacles_base.png"); // image_4.png base
-        straightTentacleImage = new GreenfootImage("octopus_tentacle_straight.png"); // single from image_3.png
-        krakenHeadImage = new GreenfootImage("octopus_head.png"); // image_2.png head
+        tentaclesBaseImage = new GreenfootImage("octopus_tentacles_base.png");
+        tentaclesBaseImage.scale(80, 80);
+        straightTentacleImage = new GreenfootImage("octopus_tentacle_straight.png"); 
+        straightTentacleImage.scale(120, 25);
+        krakenHeadImage = new GreenfootImage("octopus_head.png"); 
+        krakenHeadImage.scale(70, 70);
         
         // Initial state is the base cluster in the corner
         updateKrakenAppearance();
