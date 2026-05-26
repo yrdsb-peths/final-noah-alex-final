@@ -10,6 +10,8 @@ public class MyWorld extends World {
     private Label scoreLabel;
     public MyWorld() {
         super(600, 400, 1);
+        setBackground("background.png");
+        
         Hero al = new Hero();
         addObject(al, 300, 300);
 
