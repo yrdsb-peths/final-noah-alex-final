@@ -41,11 +41,6 @@ public class Hero extends Actor
     {
         // 1. Friend's Mouse Tracking (with rotation correction)
         MouseInfo mouse = Greenfoot.getMouseInfo();
-        if (mouse != null) 
-        {
-            turnTowards(mouse.getX(), mouse.getY());
-            setRotation(getRotation() + 90);
-        }
         
         // Track if a key is held down to manage idle states
         boolean keyIsPressed = false;
@@ -88,11 +83,15 @@ public class Hero extends Actor
         }
         
         // 4. Friend's Mouse Click Shooting (with matching laser rotation fix)
-        if (Greenfoot.mousePressed(null) && laserCooldown == 0)
+        if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
         {
+            turnTowards(mouse.getX(), mouse.getY());
+            int angleToMouse = getRotation();
+            setRotation(0); // or whatever default rotation you want
+            
             Lazer laser = new Lazer();
             getWorld().addObject(laser, getX(), getY());
-            laser.setRotation(getRotation() - 90); 
+            laser.setRotation(angleToMouse);
             laserCooldown = 20; 
         }
         
