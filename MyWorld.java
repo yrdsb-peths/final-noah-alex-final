@@ -11,6 +11,10 @@ public class MyWorld extends World {
     private int phase2EndScore = -1;
     public MyWorld() {
         super(600, 400, 1);
+        GreenfootImage bg = new GreenfootImage("background.png");
+        bg.scale(600, 400); // match your world dimensions
+        setBackground(bg);
+        
         Hero al = new Hero();
         addObject(al, 300, 300);
 
