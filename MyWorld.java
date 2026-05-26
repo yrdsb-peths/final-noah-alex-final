@@ -43,7 +43,7 @@ public class MyWorld extends World {
         if (bossDefeated && !pufferWaveSpawned)
         {
             spawnTimer++;
-            if (spawnTimer % 60 == 0 && nemoSpawnCount < 4) // one nemo every 60 frames
+            if (spawnTimer % 60 == 0 && nemoSpawnCount < 7) // one nemo every 60 frames
             {
                 spawnFish();
                 nemoSpawnCount++;
@@ -55,7 +55,7 @@ public class MyWorld extends World {
                 }
             }
 
-            if (nemoSpawnCount >= 4)
+            if (nemoSpawnCount >= 7)
             {
                 pufferWaveSpawned = true;
                 phase2EndScore = score;
