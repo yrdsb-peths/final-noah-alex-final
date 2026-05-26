@@ -142,19 +142,20 @@ private void spawnTridentPickup()
     
     private void spawnKrakenBoss()
     {
-        // 1. Create the HP Bar (Scaled larger for a 20HP boss)
         HpBar krakenBar = new HpBar();
-        krakenBar.setMaxHp(20); // We assume you have a public setMaxHp method on HpBar now
-        krakenBar.setLineColor(new Color(128, 0, 128));
-        // Position it under the existing HP bar, e.g., (110, 370)
-        addObject(krakenBar, 300, 30);
+    
+        // 1. Make the boss bar massive (Width: 350, Height: 25)
+        krakenBar.setBarDimensions(500, 15); 
         
-        // 2. Create the Kraken
+        // 2. Set its stats and purple color
+        krakenBar.setMaxHp(20); 
+        krakenBar.setLineColor(new Color(128, 0, 128)); 
+        
+        // 3. Put it at the top center
+        addObject(krakenBar, 300, 65); 
+        
         Kraken boss = new Kraken();
-        // Link it to the bar
         boss.setHpBar(krakenBar);
-        
-        // 3. Add to the world at the initial position
-        addObject(boss, 500, 300); // Spawns in a corner
+        addObject(boss, 500, 300);
     }
 }

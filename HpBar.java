@@ -30,6 +30,13 @@ public class HpBar extends Actor
         updateBar(currentHp);
     }
     
+    public void setBarDimensions(int width, int height)
+    {
+        this.barWidth = width;
+        this.barHeight = height;
+        updateBar(currentHp); // Redraw the canvas with the new size
+    }
+    
     public void setLineColor(Color newColor)
     {
         this.barColor = newColor;
