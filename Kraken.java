@@ -1,77 +1,51 @@
 import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 import java.util.List;
 
-/**
- * Write a description of class Kraken here.
- * 
- * @author (your name) 
- * @version (a version number or a date)
- */
 public class Kraken extends Actor
 {
-    /**
-     * Act - do whatever the Kraken wants to do. This method is called whenever
-     * the 'Act' or 'Run' button gets pressed in the environment.
-     */
-    // Kraken Base Stats
     private int maxHp = 20;
     private int krakenHp = 20;
-    private HpBar krakenBar; // We will create a public method to assign this
+    private HpBar krakenBar; 
     
-    // Core Images
-    private GreenfootImage tentaclesBaseImage;
+    // Core Base Images
     private GreenfootImage straightTentacleImage;
     private GreenfootImage krakenHeadImage;
     
     // State Machine States
-    private final int STATE_SPAWN_PREP = 0; // The base cluster appears
-    private final int STATE_AIMING     = 1; // 3 targeting lines appear
-    private final int STATE_LAUNCHING  = 2; // Tentacles rush forward
-    private final int STATE_RETRACTING = 3; // Tentacles pull back
-    private final int STATE_VULNERABLE = 4; // Head appears for attack
-    private int currentState = STATE_SPAWN_PREP;
+    private final int STATE_AIMING     = 0; // Huge thick red warning box appears
+    private final int STATE_LAUNCHING  = 1; // Tentacle spawns and rushes across
+    private final int STATE_RETRACTING = 2; // Tentacle pulls back out of bounds
+    private final int STATE_VULNERABLE = 3; // Head appears in center for counter-attack
+    private int currentState = STATE_AIMING;
     
-    // State Timer
-    private int stateTimer = 60; // 2 seconds (assuming ~60fps)
+    private int stateTimer = 90; // 90 frames = 1.5 seconds warning time
     
-    // We will keep references to the three tentacles we launch
-    private TentaclePart[] activeTentacles = new TentaclePart[3];
-    private boolean tentaclesDrawnOnEdge = false;
-    
+    // Wall Configuration variables
+    private int attackSide = 0;       // 0 = Top, 1 = Bottom, 2 = Left, 3 = Right
+    private int wallThickness = 280;  // Covers 70% of a 400px high screen height
+    private TentacleWall activeWall;
+
     public Kraken()
     {
-        // Load and Prepare Images
-        tentaclesBaseImage = new GreenfootImage("octopus_tentacles_base.png");
-        tentaclesBaseImage.scale(200, 200);
         straightTentacleImage = new GreenfootImage("octopus_tentacle_straight.png"); 
-        straightTentacleImage.scale(200, 100);
         krakenHeadImage = new GreenfootImage("octopus_head.png"); 
-        krakenHeadImage.scale(300, 300);
+        krakenHeadImage.scale(70, 70); 
         
-        // Initial state is the base cluster in the corner
-        updateKrakenAppearance();
+        // Pick a random side for the very first attack
+        pickRandomAttackSide();
     }
     
-    // Method for MyWorld to assign the HP bar
     public void setHpBar(HpBar bar)
     {
         this.krakenBar = bar;
     }
-    
+
     public void act()
     {
-        // Add your action code here.
-        // Run specific behavior loop based on the current state
         switch (currentState)
         {
-            case STATE_SPAWN_PREP:
-                if (!tentaclesDrawnOnEdge) drawBaseInCorner();
-                stateTimer--;
-                if (stateTimer <= 0) changeState(STATE_AIMING);
-                break;
-                
             case STATE_AIMING:
-                updateKrakenAppearance(); // Will draw indicator lines
+                updateKrakenAppearance(); // Constantly handles drawing the telegraph warning
                 stateTimer--;
                 if (stateTimer <= 0) changeState(STATE_LAUNCHING);
                 break;
@@ -91,7 +65,7 @@ public class Kraken extends Actor
             case STATE_VULNERABLE:
                 handleVulnerableState();
                 stateTimer--;
-                if (stateTimer <= 0) changeState(STATE_SPAWN_PREP); // Reset loop
+                if (stateTimer <= 0) changeState(STATE_AIMING); // Reset loop
                 break;
         }
     }
@@ -99,107 +73,111 @@ public class Kraken extends Actor
     private void changeState(int nextState)
     {
         currentState = nextState;
+        
+        if (krakenBar != null)
+        {
+            if (currentState == STATE_VULNERABLE) krakenBar.getImage().setTransparency(255);
+            else krakenBar.getImage().setTransparency(0);
+        }
+
         switch (nextState)
         {
-            case STATE_SPAWN_PREP:
-                tentaclesDrawnOnEdge = false;
-                stateTimer = 120; // 2s delay
-                updateKrakenAppearance(); 
-                break;
             case STATE_AIMING:
-                stateTimer = 120; // 2s aiming
-                updateKrakenAppearance(); 
+                pickRandomAttackSide();
+                stateTimer = 90; // 1.5 seconds to dodge to the safe zone!
+                updateKrakenAppearance();
                 break;
+                
             case STATE_LAUNCHING:
-                stateTimer = 15; // Quick launch (0.25s)
-                spawnTentaclesForLaunch();
-                updateKrakenAppearance(); // Remove aiming lines
+                stateTimer = 20; // Rushes across screen in 1/3rd of a second
+                spawnGiantTentacleWall();
+                updateKrakenAppearance(); // Invisible root anchor body
                 break;
+                
             case STATE_RETRACTING:
-                stateTimer = 60; // 1s retraction
-                updateKrakenAppearance(); // Base cluster returns
+                stateTimer = 40; // Takes a little bit longer to slide backwards out of bounds
                 break;
+                
             case STATE_VULNERABLE:
-                stateTimer = 300; // 5s vulnerable
-                updateKrakenAppearance(); // Draw the head only
+                stateTimer = 240; // 4 full seconds to shoot the head in the center!
+                setLocation(300, 200); // Snap to exact center of world
+                updateKrakenAppearance();
                 break;
         }
+    }
+
+    private void pickRandomAttackSide()
+    {
+        attackSide = Greenfoot.getRandomNumber(4); // 0, 1, 2, or 3
+        
+        // Lock positioning off-screen during targeting telegraph so player only looks at the warning red overlay
+        if (attackSide == 0) setLocation(300, -50);  // Top
+        else if (attackSide == 1) setLocation(300, 450); // Bottom
+        else if (attackSide == 2) setLocation(-50, 200); // Left
+        else if (attackSide == 3) setLocation(650, 200); // Right
+    }
+
+    private void spawnGiantTentacleWall()
+    {
+        // Dimensions to cleanly swallow up 70% of the game space lengthways
+        int width = (attackSide == 0 || attackSide == 1) ? 600 : wallThickness;
+        int height = (attackSide == 0 || attackSide == 1) ? wallThickness : 400;
+        
+        GreenfootImage wallImg = new GreenfootImage(width, height);
+        
+        // Stretch your tentacle sprite texture to fill up the massive obstacle boundary frame
+        wallImg.drawImage(straightTentacleImage, 0, 0); 
+        // Polish step: Tile or paint it solid crimson so it matches a massive eldritch strike zone
+        wallImg.setColor(new Color(150, 20, 20));
+        wallImg.fillRect(0, 0, width, height); 
+        
+        activeWall = new TentacleWall(wallImg);
+        getWorld().addObject(activeWall, getX(), getY());
     }
 
     private void handleLaunchingState()
     {
-        // Tentacles rush forward quickly
-        for (TentaclePart t : activeTentacles) if (t != null) t.move(20);
-        checkTentacleCollisions();
+        // Drive the wall forward into the map based on attack vector
+        if (attackSide == 0) activeWall.setLocation(activeWall.getX(), activeWall.getY() + 15); // Downwards
+        else if (attackSide == 1) activeWall.setLocation(activeWall.getX(), activeWall.getY() - 15); // Upwards
+        else if (attackSide == 2) activeWall.setLocation(activeWall.getX() + 15, activeWall.getY()); // Rightwards
+        else if (attackSide == 3) activeWall.setLocation(activeWall.getX() - 15, activeWall.getY()); // Leftwards
+        
+        checkWallDamage();
     }
     
     private void handleRetractingState()
     {
-        // Tentacles pull back slowly
-        for (TentaclePart t : activeTentacles) if (t != null) t.move(-8);
-        checkTentacleCollisions();
-        if (stateTimer == 1) cleanUpTentacles(); // Remove them from world
+        // Pull it back out of bounds backwards
+        if (attackSide == 0) activeWall.setLocation(activeWall.getX(), activeWall.getY() - 10);
+        else if (attackSide == 1) activeWall.setLocation(activeWall.getX(), activeWall.getY() + 10);
+        else if (attackSide == 2) activeWall.setLocation(activeWall.getX() - 10, activeWall.getY());
+        else if (attackSide == 3) activeWall.setLocation(activeWall.getX() + 10, activeWall.getY());
+        
+        checkWallDamage();
+        if (stateTimer == 1 && activeWall != null && activeWall.getWorld() != null)
+        {
+            getWorld().removeObject(activeWall);
+            activeWall = null;
+        }
     }
     
     private void handleVulnerableState()
     {
-        // The head is visible. It doesn't move. We only check for lasers.
         checkLaserCollision();
     }
 
-    private void drawBaseInCorner()
+    private void checkWallDamage()
     {
-        setImage(tentaclesBaseImage);
-        // Position on a bottom corner
-        setLocation(500, 300); // Specific coordinate, not center
-        tentaclesDrawnOnEdge = true;
-    }
-    
-    private void spawnTentaclesForLaunch()
-    {
-        // Spawn 3 straight tentacles pointing in different directions
-        activeTentacles[0] = new TentaclePart(straightTentacleImage);
-        activeTentacles[1] = new TentaclePart(straightTentacleImage);
-        activeTentacles[2] = new TentaclePart(straightTentacleImage);
-        
-        // Spawn them stacked at the core location of the corner cluster
-        getWorld().addObject(activeTentacles[0], getX(), getY());
-        getWorld().addObject(activeTentacles[1], getX(), getY());
-        getWorld().addObject(activeTentacles[2], getX(), getY());
-        
-        // Set distinct, fixed directions
-        activeTentacles[0].setRotation(180); // Pointing left
-        activeTentacles[1].setRotation(225); // Pointing top-left
-        activeTentacles[2].setRotation(270); // Pointing up
-        
-        // Ensure they can pass through each other initially
-    }
-    
-    private void cleanUpTentacles()
-    {
-        for (int i = 0; i < activeTentacles.length; i++) {
-            if (activeTentacles[i] != null && activeTentacles[i].getWorld() != null) {
-                getWorld().removeObject(activeTentacles[i]);
-            }
-            activeTentacles[i] = null;
-        }
-    }
-    
-    private void checkTentacleCollisions()
-    {
-        for (TentaclePart t : activeTentacles)
+        if (activeWall != null && activeWall.getWorld() != null)
         {
-            if (t != null && t.getWorld() != null)
-            {
-                Hero h = t.getTouchingHero(); 
-                if (h != null) h.takeDamage(1);
-            }
+            Hero h = activeWall.getTouchingHero();
+            if (h != null) h.takeDamage(2); // Taking a wall to the face deals double damage!
         }
     }
 
     private void checkLaserCollision()
     {
-        // Laser collision method (same proximity fix as the Swordfish)
         List<Lazer> lasers = getWorld().getObjects(Lazer.class);
         for (int i = 0; i < lasers.size(); i++)
         {
@@ -207,8 +185,7 @@ public class Kraken extends Actor
             int dx = currentLaser.getX() - this.getX();
             int dy = currentLaser.getY() - this.getY();
             
-            // Check real body bounding box (~30 radius for head)
-            if (Math.abs(dx) < 30 && Math.abs(dy) < 30)
+            if (Math.abs(dx) < 35 && Math.abs(dy) < 35)
             {
                 getWorld().removeObject(currentLaser);
                 krakenHp--;
@@ -221,73 +198,48 @@ public class Kraken extends Actor
     
     private void die()
     {
-        // Add Victory Label
         Label win = new Label("KRAKEN DEFEATED!", 60);
         win.setLineColor(Color.GREEN);
         getWorld().addObject(win, getWorld().getWidth()/2, getWorld().getHeight()/2);
         
-        cleanUpTentacles(); // In case it died mid-attack
+        if (activeWall != null && activeWall.getWorld() != null) getWorld().removeObject(activeWall);
         getWorld().removeObject(this);
     }
 
-    /**
-     * Updates the main Kraken image based on the state. It handles:
-     * - The Vulnerable Head
-     * - The Aiming indicators (on a wide canvas, like the swordfish)
-     */
     private void updateKrakenAppearance()
     {
         if (currentState == STATE_VULNERABLE)
         {
-            // Only draw the vulnerable head mantle
             setImage(krakenHeadImage);
         }
         else if (currentState == STATE_AIMING)
         {
-            // Similar giant-canvas logic as the swordfish for aiming lines.
-            // But we cannot rotate the base image (image_4.png), so we draw
-            // 3 fixed indicator lines pointing from a wide transparent canvas.
+            // Create a canvas covering the entire 600x400 viewable window frame
+            GreenfootImage canvas = new GreenfootImage(600, 400);
+            canvas.setColor(new Color(255, 0, 0, 95)); // Soft semi-transparent crimson tell
             
-            int baseWidth = tentaclesBaseImage.getWidth();
-            int baseHeight = tentaclesBaseImage.getHeight();
-            
-            // Create giant transparent canvas
-            int indicatorLength = 800;
-            GreenfootImage canvas = new GreenfootImage(indicatorLength, baseHeight);
-            
-            // Draw base tentacles (image_4.png) centered on the canvas
-            canvas.drawImage(tentaclesBaseImage, 0, 0);
-            
-            // Draw 3 indicator lines from the nose outwards
-            canvas.setColor(new Color(255, 0, 0, 130)); // Semi-transparent Red
-            
-            // We use fixed angles since the base cannot turn
-            // Angles: 180 (straight), 225 (diagonal up-left), 270 (straight up)
-            
-            // Line 1 (straight)
-            canvas.fillRect(baseWidth, (baseHeight/2)-1, 700, 3);
-            
-            // (Standard rectangles cannot be rotated. For diagonal lines,
-            // we would need an advanced rotation method which is beyond
-            // basic Greenfoot drawing commands.)
-            
-            // For basic compatibility, we will only show one line (180).
-            // A professional version would use dynamic line drawing math or pre-rotated images.
+            // Draw a thick block matching the upcoming attack side zone
+            if (attackSide == 0) canvas.fillRect(0, 0, 600, wallThickness); // Top slice
+            else if (attackSide == 1) canvas.fillRect(0, 400 - wallThickness, 600, wallThickness); // Bottom slice
+            else if (attackSide == 2) canvas.fillRect(0, 0, wallThickness, 400); // Left slice
+            else if (attackSide == 3) canvas.fillRect(600 - wallThickness, 0, wallThickness, 400); // Right slice
             
             setImage(canvas);
+            setLocation(300, 200); // Anchor canvas dead center to center warning perfectly
         }
-        else // In other states (SPAWN, RETRACTING), use the corner cluster base
+        else
         {
-            setImage(tentaclesBaseImage);
+            // During layout active state phases, hide the anchor node completely
+            setImage(new GreenfootImage(1, 1)); 
         }
     }
     
     /**
-     * Simple inner class used by the Kraken to manage its temporary, independent parts.
+     * Inner class helper managing the independent massive collision block mask
      */
-    private class TentaclePart extends Actor {
-        public TentaclePart(GreenfootImage img) {
-            setImage(img);
+    private class TentacleWall extends Actor {
+        public TentacleWall(GreenfootImage customImg) {
+            setImage(customImg);
         }
         public Hero getTouchingHero() {
             return (Hero) getOneIntersectingObject(Hero.class);
