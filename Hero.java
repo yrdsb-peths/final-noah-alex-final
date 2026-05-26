@@ -142,4 +142,19 @@ public class Hero extends Actor
             }
         }
     }
+    
+    public void heal(int amount)
+    {
+        hp += amount;
+        if (hp > 10) 
+        {
+            hp = 10; // Prevent healing past maximum health
+        }
+        
+        // Update the visual health bar layout
+        if (healthBar != null)
+        {
+            healthBar.updateBar(hp);
+        }
+    }
 }

@@ -8,6 +8,7 @@ public class MyWorld extends World {
     private int spawnTimer = 0;
     private int nemoSpawnCount = 0; // how many nemos have been spawned in puffer wave
     private Label scoreLabel;
+    private int phase2EndScore = -1;
     public MyWorld() {
         super(600, 400, 1);
         Hero al = new Hero();
@@ -56,6 +57,7 @@ public class MyWorld extends World {
             if (nemoSpawnCount >= 4)
             {
                 pufferWaveSpawned = true;
+                phase2EndScore = score;
             }
         }
     }
@@ -105,6 +107,7 @@ public class MyWorld extends World {
     {
         SwordfishBoss boss = new SwordfishBoss();
         addObject(boss, 300, 80);
+        spawnHealthPack();
     }
 
     private void spawnPufferfish()
@@ -113,5 +116,14 @@ public class MyWorld extends World {
         int randomX = Greenfoot.getRandomNumber(getWidth());
         int randomY = Greenfoot.getRandomNumber(getHeight());
         addObject(puffer, randomX, randomY);
+    }
+    
+    private void spawnHealthPack()
+    {
+        HealthPack pack = new HealthPack();
+        // Spawns with a safety padding inside the world edges
+        int randomX = 40 + Greenfoot.getRandomNumber(getWidth() - 80);
+        int randomY = 40 + Greenfoot.getRandomNumber(getHeight() - 110);
+        addObject(pack, randomX, randomY);
     }
 }
