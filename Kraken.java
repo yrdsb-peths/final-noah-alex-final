@@ -119,29 +119,74 @@ public class Kraken extends Actor
 
     private void spawnGiantTentacleWall()
     {
-        // Dimensions to cleanly swallow up 70% of the game space lengthways
         int width = (attackSide == 0 || attackSide == 1) ? 600 : wallThickness;
         int height = (attackSide == 0 || attackSide == 1) ? wallThickness : 400;
         
         GreenfootImage wallImg = new GreenfootImage(width, height);
         
-        // Stretch your tentacle sprite texture to fill up the massive obstacle boundary frame
-        wallImg.drawImage(straightTentacleImage, 0, 0); 
-        // Polish step: Tile or paint it solid crimson so it matches a massive eldritch strike zone
+        // Fill the wall with a solid color to match the warning zone perfectly
         wallImg.setColor(new Color(150, 20, 20));
         wallImg.fillRect(0, 0, width, height); 
         
         activeWall = new TentacleWall(wallImg);
-        getWorld().addObject(activeWall, getX(), getY());
+        
+        // --- CORRECTED STARTING POSITIONS (Spawns deep off-screen behind the danger zone) ---
+        int startX = 300;
+        int startY = 200;
+        
+        if (attackSide == 0) // Warning is at TOP. Wall spawns ABOVE ceiling, rushes DOWN, STOPS at top.
+        {
+            startX = 300;
+            startY = -(height / 2);
+        }
+        else if (attackSide == 1) // Warning is at BOTTOM. Wall spawns BELOW floor, rushes UP, STOPS at bottom.
+        {
+            startX = 300;
+            startY = 400 + (height / 2);
+        }
+        else if (attackSide == 2) // Warning is on LEFT. Wall spawns past LEFT edge, rushes RIGHT, STOPS on left.
+        {
+            startX = -(width / 2);
+            startY = 200;
+        }
+        else if (attackSide == 3) // Warning is on RIGHT. Wall spawns past RIGHT edge, rushes LEFT, STOPS on right.
+        {
+            startX = 600 + (width / 2);
+            startY = 200;
+        }
+        
+        getWorld().addObject(activeWall, startX, startY);
     }
 
     private void handleLaunchingState()
     {
-        // Drive the wall forward into the map based on attack vector
-        if (attackSide == 0) activeWall.setLocation(activeWall.getX(), activeWall.getY() + 15); // Downwards
-        else if (attackSide == 1) activeWall.setLocation(activeWall.getX(), activeWall.getY() - 15); // Upwards
-        else if (attackSide == 2) activeWall.setLocation(activeWall.getX() + 15, activeWall.getY()); // Rightwards
-        else if (attackSide == 3) activeWall.setLocation(activeWall.getX() - 15, activeWall.getY()); // Leftwards
+        if (activeWall == null) return;
+
+        // Drive the wall forward until it perfectly fills the red warning box, then STOP IT
+        if (attackSide == 0) // Moving DOWN to fill the top slice
+        {
+            if (activeWall.getY() < (wallThickness / 2)) {
+                activeWall.setLocation(activeWall.getX(), activeWall.getY() + 20);
+            }
+        }
+        else if (attackSide == 1) // Moving UP to fill the bottom slice
+        {
+            if (activeWall.getY() > 400 - (wallThickness / 2)) {
+                activeWall.setLocation(activeWall.getX(), activeWall.getY() - 20);
+            }
+        }
+        else if (attackSide == 2) // Moving RIGHT to fill the left slice
+        {
+            if (activeWall.getX() < (wallThickness / 2)) {
+                activeWall.setLocation(activeWall.getX() + 20, activeWall.getY());
+            }
+        }
+        else if (attackSide == 3) // Moving LEFT to fill the right slice
+        {
+            if (activeWall.getX() > 600 - (wallThickness / 2)) {
+                activeWall.setLocation(activeWall.getX() - 20, activeWall.getY());
+            }
+        }
         
         checkWallDamage();
     }
