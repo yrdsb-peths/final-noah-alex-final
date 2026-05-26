@@ -95,9 +95,17 @@ public class MyWorld extends World {
 
     // Called by Pufferfish when it dies
     public void notifyPufferKilled()
-    {
-        // hook for future waves or effects
-    }
+{
+    spawnTridentPickup();
+}
+
+private void spawnTridentPickup()
+{
+    TridentPickup pickup = new TridentPickup();
+    // Spawns off the left edge, slides right, sticks to right wall
+    addObject(pickup, -10, 100 + Greenfoot.getRandomNumber(200));
+    pickup.setRotation(0); // slides rightward
+}
 
     private void spawnFish()
     {

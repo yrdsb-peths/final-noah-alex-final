@@ -226,4 +226,19 @@ public class SwordfishBoss extends Actor
         }
     }
     
+    public void takeDamage(int amount)
+{
+    bossHp -= amount;
+    if (bossHp <= 0)
+    {
+        MyWorld world = (MyWorld) getWorld();
+        world.notifyBossDefeated();
+        getWorld().removeObject(this);
+    }
+    else
+    {
+        updateBossAppearance(currentState == TRACKING);
+    }
+}
+    
 }
