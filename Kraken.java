@@ -243,10 +243,6 @@ public class Kraken extends Actor
     
     private void die()
     {
-        Label win = new Label("KRAKEN DEFEATED!", 60);
-        win.setLineColor(Color.GREEN);
-        getWorld().addObject(win, getWorld().getWidth()/2, getWorld().getHeight()/2);
-        
         if (activeWall != null && activeWall.getWorld() != null) getWorld().removeObject(activeWall);
         getWorld().removeObject(this);
     }

@@ -9,6 +9,7 @@ public class MyWorld extends World {
     private int nemoSpawnCount = 0; // how many nemos have been spawned in puffer wave
     private Label scoreLabel;
     private int phase2EndScore = -1;
+    private boolean krakenSpawned = false;
     public MyWorld() {
         super(600, 400, 1);
         GreenfootImage bg = new GreenfootImage("background.png");
@@ -27,12 +28,12 @@ public class MyWorld extends World {
         addObject(scoreLabel, 80, 30);
         
         spawnFish();
-        spawnKrakenBoss();
     }
 
     public void act()
     {
         int fishCount = getObjects(Fish.class).size();
+        int pufferCount = getObjects(Pufferfish.class).size();
 
         // Phase 1: Normal nemo spawning before boss
         if (!bossSpawned && !bossDefeated)
@@ -42,12 +43,20 @@ public class MyWorld extends World {
                 spawnFish();
             }
         }
+        int swordfishCount = getObjects(SwordfishBoss.class).size();
+        if (bossSpawned && !bossDefeated)
+        {
+            if (swordfishCount < 3) // Change 3 to whatever maximum cap you want!
+            {
+                spawnBoss();
+            }
+        }
 
         // Phase 2: After boss dies, spawn 4 nemos in intervals + 1 pufferfish
         if (bossDefeated && !pufferWaveSpawned)
         {
             spawnTimer++;
-            if (spawnTimer % 60 == 0 && nemoSpawnCount < 7) // one nemo every 60 frames
+            if (spawnTimer % 60 == 0 && nemoSpawnCount < 15) // one nemo every 60 frames
             {
                 spawnFish();
                 nemoSpawnCount++;
@@ -59,11 +68,32 @@ public class MyWorld extends World {
                 }
             }
 
-            if (nemoSpawnCount >= 7)
+            if (nemoSpawnCount >= 15)
             {
                 pufferWaveSpawned = true;
                 phase2EndScore = score;
             }
+        }
+        
+        if (pufferWaveSpawned && !krakenSpawned)
+        {
+            if (fishCount == 0 && pufferCount == 0)
+            {
+                krakenSpawned = true; // Flips safety gate
+                spawnKrakenBoss();    // Unleash the kraken!
+                spawnBoss();
+                spawnBoss();
+                spawnBoss();
+            }
+        }
+        if (Greenfoot.isKeyDown("p"))
+        {
+            // Set the flag to true just in case other mechanics depend on it
+            bossSpawned = true; 
+            spawnBoss();
+            
+            // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
+            Greenfoot.delay(10); 
         }
     }
 
@@ -75,6 +105,14 @@ public class MyWorld extends World {
         {
             bossSpawned = true;
             spawnBoss();
+        }
+        if (pufferWaveSpawned && phase2EndScore != -1)
+        {
+            int currentKillsInPhase3 = score - phase2EndScore;
+            if (currentKillsInPhase3 > 0 && currentKillsInPhase3 % 7 == 0)
+            {
+                spawnHealthPack();
+            }
         }
     }
 
@@ -96,17 +134,17 @@ public class MyWorld extends World {
 
     // Called by Pufferfish when it dies
     public void notifyPufferKilled()
-{
-    spawnTridentPickup();
-}
+    {
+        spawnTridentPickup();
+    }
 
-private void spawnTridentPickup()
-{
-    TridentPickup pickup = new TridentPickup();
-    // Spawns off the left edge, slides right, sticks to right wall
-    addObject(pickup, -10, 100 + Greenfoot.getRandomNumber(200));
-    pickup.setRotation(0); // slides rightward
-}
+    private void spawnTridentPickup()
+    {
+        TridentPickup pickup = new TridentPickup();
+        // Spawns off the left edge, slides right, sticks to right wall
+        addObject(pickup, -10, 100 + Greenfoot.getRandomNumber(200));
+        pickup.setRotation(0); // slides rightward
+    }
 
     private void spawnFish()
     {
