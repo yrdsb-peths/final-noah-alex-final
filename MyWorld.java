@@ -11,6 +11,10 @@ public class MyWorld extends World {
     private int phase2EndScore = -1;
     public MyWorld() {
         super(600, 400, 1);
+        GreenfootImage bg = new GreenfootImage("background.png");
+        bg.scale(600, 400); // match your world dimensions
+        setBackground(bg);
+        
         Hero al = new Hero();
         addObject(al, 300, 300);
 
@@ -92,9 +96,17 @@ public class MyWorld extends World {
 
     // Called by Pufferfish when it dies
     public void notifyPufferKilled()
-    {
-        // hook for future waves or effects
-    }
+{
+    spawnTridentPickup();
+}
+
+private void spawnTridentPickup()
+{
+    TridentPickup pickup = new TridentPickup();
+    // Spawns off the left edge, slides right, sticks to right wall
+    addObject(pickup, -10, 100 + Greenfoot.getRandomNumber(200));
+    pickup.setRotation(0); // slides rightward
+}
 
     private void spawnFish()
     {

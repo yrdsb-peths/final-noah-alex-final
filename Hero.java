@@ -7,6 +7,10 @@ public class Hero extends Actor
     private int invincibilityTimer = 0; 
     private HpBar healthBar;
     
+    //trident
+    private Trident activeTrident = null;
+private boolean hasTrident = false;
+    
     // --- Friend's Sprite Variables ---
     private GreenfootImage idleImage;
     private GreenfootImage upImage;
@@ -41,11 +45,6 @@ public class Hero extends Actor
     {
         // 1. Friend's Mouse Tracking (with rotation correction)
         MouseInfo mouse = Greenfoot.getMouseInfo();
-        if (mouse != null) 
-        {
-            turnTowards(mouse.getX(), mouse.getY());
-            setRotation(getRotation() + 90);
-        }
         
         // Track if a key is held down to manage idle states
         boolean keyIsPressed = false;
@@ -76,6 +75,71 @@ public class Hero extends Actor
             keyIsPressed = true;
         }
         
+        // Toggle trident mode with E
+// Toggle trident mode with E
+// Show trident on hero's back when carrying it
+if (hasTrident)
+{
+    // Offset slightly so it appears beside the hero
+    if (activeTrident != null && activeTrident.isStuck())
+    {
+        // ignore, it's on the wall
+    }
+    else
+    {
+        // Keep a visual trident stuck to hero — handled by Trident class below
+    }
+}
+
+// Pick up stuck trident by walking to it
+if (activeTrident != null && activeTrident.isStuck())
+{
+    int dx = Math.abs(activeTrident.getX() - getX());
+    int dy = Math.abs(activeTrident.getY() - getY());
+    if (dx < 25 && dy < 25)
+    {
+        getWorld().removeObject(activeTrident);
+        activeTrident = null;
+        hasTrident = true;
+    }
+}
+
+// E to throw trident
+// E to throw trident
+if (Greenfoot.isKeyDown("e") && hasTrident && mouse != null)
+{
+    turnTowards(mouse.getX(), mouse.getY());
+    int angle = getRotation();
+    setRotation(0);
+
+    // If there's a carried trident, launch it directly instead of making a new one
+    if (activeTrident != null)
+    {
+        activeTrident.launch(angle);
+    }
+    else
+    {
+        activeTrident = new Trident();
+        getWorld().addObject(activeTrident, getX(), getY());
+        activeTrident.launch(angle);
+    }
+    
+    hasTrident = false;
+}
+
+// Normal laser with mouse click, always available
+if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
+{
+    turnTowards(mouse.getX(), mouse.getY());
+    int angleToMouse = getRotation();
+    setRotation(0);
+
+    Lazer laser = new Lazer();
+    getWorld().addObject(laser, getX(), getY());
+    laser.setRotation(angleToMouse);
+    laserCooldown = 20;
+}
+        
         // If no keys are pressed, return to base idle sprite
         if (!keyIsPressed) 
         {
@@ -88,11 +152,15 @@ public class Hero extends Actor
         }
         
         // 4. Friend's Mouse Click Shooting (with matching laser rotation fix)
-        if (Greenfoot.mousePressed(null) && laserCooldown == 0)
+        if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
         {
+            turnTowards(mouse.getX(), mouse.getY());
+            int angleToMouse = getRotation();
+            setRotation(0); // or whatever default rotation you want
+            
             Lazer laser = new Lazer();
             getWorld().addObject(laser, getX(), getY());
-            laser.setRotation(getRotation() - 90); 
+            laser.setRotation(angleToMouse);
             laserCooldown = 20; 
         }
         
@@ -157,4 +225,10 @@ public class Hero extends Actor
             healthBar.updateBar(hp);
         }
     }
+    
+    public void pickUpTrident(Trident t)
+{
+    hasTrident = true;
+    activeTrident = t;
+}
 }

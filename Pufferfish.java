@@ -141,4 +141,17 @@ public class Pufferfish extends Actor
         // Assign this combined custom graphic to the actor
         setImage(canvas);
     }
+    
+    public void takeDamage(int amount)
+{
+    pufferHp -= amount;
+    if (pufferHp <= 0)
+    {
+        die();
+    }
+    else
+    {
+        updatePuffAppearance();
+    }
+}
 }
