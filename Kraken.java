@@ -32,7 +32,7 @@ public class Kraken extends Actor
     private int currentState = STATE_SPAWN_PREP;
     
     // State Timer
-    private int stateTimer = 120; // 2 seconds (assuming ~60fps)
+    private int stateTimer = 60; // 2 seconds (assuming ~60fps)
     
     // We will keep references to the three tentacles we launch
     private TentaclePart[] activeTentacles = new TentaclePart[3];
@@ -42,11 +42,11 @@ public class Kraken extends Actor
     {
         // Load and Prepare Images
         tentaclesBaseImage = new GreenfootImage("octopus_tentacles_base.png");
-        tentaclesBaseImage.scale(80, 80);
+        tentaclesBaseImage.scale(200, 200);
         straightTentacleImage = new GreenfootImage("octopus_tentacle_straight.png"); 
-        straightTentacleImage.scale(120, 25);
+        straightTentacleImage.scale(200, 100);
         krakenHeadImage = new GreenfootImage("octopus_head.png"); 
-        krakenHeadImage.scale(70, 70);
+        krakenHeadImage.scale(300, 300);
         
         // Initial state is the base cluster in the corner
         updateKrakenAppearance();
