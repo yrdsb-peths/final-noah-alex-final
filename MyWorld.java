@@ -23,6 +23,7 @@ public class MyWorld extends World {
         addObject(scoreLabel, 80, 30);
         
         spawnFish();
+        spawnKrakenBoss();
     }
 
     public void act()
@@ -134,7 +135,7 @@ public class MyWorld extends World {
         krakenBar.setMaxHp(20); // We assume you have a public setMaxHp method on HpBar now
         krakenBar.setLineColor(new Color(128, 0, 128));
         // Position it under the existing HP bar, e.g., (110, 370)
-        addObject(krakenBar, 110, 370); 
+        addObject(krakenBar, 300, 30);
         
         // 2. Create the Kraken
         Kraken boss = new Kraken();
