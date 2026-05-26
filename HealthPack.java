@@ -27,7 +27,7 @@ public class HealthPack extends Actor
         if (hero != null)
         {
             // Heal the hero by 1 HP (or up to your max cap)
-            hero.heal(1);
+            hero.heal(3);
             
             // Remove the health pack from the world
             getWorld().removeObject(this);
