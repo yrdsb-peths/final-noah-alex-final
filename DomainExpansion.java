@@ -26,7 +26,7 @@ public class DomainExpansion extends Actor
         }
 
         // 2. Spawn random rapid-fire Dismantle cuts around the screen frame
-        if (Greenfoot.getRandomNumber(10) < 6) 
+        if (Greenfoot.getRandomNumber(50) < 10000) 
         {
             spawnDismantleCut();
         }
@@ -63,15 +63,15 @@ public class DomainExpansion extends Actor
     {
         // Hit standard Fish
         List<Fish> allFish = getWorld().getObjects(Fish.class);
-        for (Fish f : allFish) f.takeDamage(2);
+        for (Fish f : allFish) f.takeDamage(3);
 
         // Hit Pufferfish
         List<Pufferfish> allPuffers = getWorld().getObjects(Pufferfish.class);
-        for (Pufferfish p : allPuffers) p.takeDamage(2);
+        for (Pufferfish p : allPuffers) p.takeDamage(3);
 
         // Hit Swordfish Bosses
         List<SwordfishBoss> allSwordfish = getWorld().getObjects(SwordfishBoss.class);
-        for (SwordfishBoss s : allSwordfish) s.takeDamage(2);
+        for (SwordfishBoss s : allSwordfish) s.takeDamage(3);
         
         // Hit the Kraken Boss (This will now run completely error-free!)
         List<Kraken> allKraken = getWorld().getObjects(Kraken.class);

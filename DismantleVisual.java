@@ -8,7 +8,7 @@ public class DismantleVisual extends Actor
     {
         GreenfootImage img = new GreenfootImage("dismantle.png");
         // Scale it down to fit nicely across your 600x400 map
-        img.scale(160, 35); 
+        img.scale(400, 35); 
         setImage(img);
     }
 
