@@ -238,6 +238,7 @@ public class SwordfishBoss extends Actor
     else
     {
         updateBossAppearance(currentState == TRACKING);
+        updateBossAppearance(false);
     }
 }
     

@@ -276,6 +276,25 @@ public class Kraken extends Actor
     }
     
     /**
+     * Allows external ultimate abilities like Domain Expansion to deal damage directly
+     */
+    public void takeDamage(int amount)
+    {
+        krakenHp -= amount;
+        
+        // Update the boss bar if it exists
+        if (krakenBar != null)
+        {
+            krakenBar.updateBar(krakenHp);
+        }
+        
+        if (krakenHp <= 0)
+        {
+            die();
+        }
+    }
+    
+    /**
      * Inner class helper managing the independent massive collision block mask
      */
     private class TentacleWall extends Actor {

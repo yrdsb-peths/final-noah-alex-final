@@ -77,68 +77,68 @@ public class Hero extends Actor
         
         // Toggle trident mode with E
         // Toggle trident mode with E
-    // Show trident on hero's back when carrying it
-    if (hasTrident)
-    {
-        // Offset slightly so it appears beside the hero
+        // Show trident on hero's back when carrying it
+        if (hasTrident)
+        {
+            // Offset slightly so it appears beside the hero
+            if (activeTrident != null && activeTrident.isStuck())
+            {
+                // ignore, it's on the wall
+            }
+            else
+            {
+                // Keep a visual trident stuck to hero — handled by Trident class below
+            }
+        }
+    
+        // Pick up stuck trident by walking to it
         if (activeTrident != null && activeTrident.isStuck())
         {
-            // ignore, it's on the wall
+            int dx = Math.abs(activeTrident.getX() - getX());
+            int dy = Math.abs(activeTrident.getY() - getY());
+            if (dx < 25 && dy < 25)
+            {
+                getWorld().removeObject(activeTrident);
+                activeTrident = null;
+                hasTrident = true;
+            }
         }
-        else
-        {
-            // Keep a visual trident stuck to hero — handled by Trident class below
-        }
-    }
 
-    // Pick up stuck trident by walking to it
-    if (activeTrident != null && activeTrident.isStuck())
-    {
-        int dx = Math.abs(activeTrident.getX() - getX());
-        int dy = Math.abs(activeTrident.getY() - getY());
-        if (dx < 25 && dy < 25)
+        // E to throw trident
+        // E to throw trident
+        if (Greenfoot.isKeyDown("e") && hasTrident && mouse != null)
         {
-            getWorld().removeObject(activeTrident);
-            activeTrident = null;
-            hasTrident = true;
-        }
-    }
-
-    // E to throw trident
-    // E to throw trident
-    if (Greenfoot.isKeyDown("e") && hasTrident && mouse != null)
-    {
-        turnTowards(mouse.getX(), mouse.getY());
-        int angle = getRotation();
-        setRotation(0);
-    
-        // If there's a carried trident, launch it directly instead of making a new one
-        if (activeTrident != null)
-        {
-            activeTrident.launch(angle);
-        }
-        else
-        {
-            activeTrident = new Trident();
-            getWorld().addObject(activeTrident, getX(), getY());
-            activeTrident.launch(angle);
-        }
+            turnTowards(mouse.getX(), mouse.getY());
+            int angle = getRotation();
+            setRotation(0);
         
-        hasTrident = false;
-    }
+            // If there's a carried trident, launch it directly instead of making a new one
+            if (activeTrident != null)
+            {
+                activeTrident.launch(angle);
+            }
+            else
+            {
+                activeTrident = new Trident();
+                getWorld().addObject(activeTrident, getX(), getY());
+                activeTrident.launch(angle);
+            }
+            
+            hasTrident = false;
+        }
 
-    // Normal laser with mouse click, always available
-    if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
-    {
-        turnTowards(mouse.getX(), mouse.getY());
-        int angleToMouse = getRotation();
-        setRotation(0);
-    
-        Lazer laser = new Lazer();
-        getWorld().addObject(laser, getX(), getY());
-        laser.setRotation(angleToMouse);
-        laserCooldown = 20;
-    }
+        // Normal laser with mouse click, always available
+        if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
+        {
+            turnTowards(mouse.getX(), mouse.getY());
+            int angleToMouse = getRotation();
+            setRotation(0);
+        
+            Lazer laser = new Lazer();
+            getWorld().addObject(laser, getX(), getY());
+            laser.setRotation(angleToMouse);
+            laserCooldown = 20;
+        }
         
         // If no keys are pressed, return to base idle sprite
         if (!keyIsPressed) 
@@ -178,6 +178,18 @@ public class Hero extends Actor
         {
             if (getImage() != null) {
                 getImage().setTransparency(255); 
+            }
+        }
+        
+        // --- DOMAIN EXPANSION TRIGGER ---
+        if (Greenfoot.isKeyDown("k"))
+        {
+            // Only activate if a Domain isn't already running
+            if (getWorld().getObjects(DomainExpansion.class).isEmpty())
+            {
+                DomainExpansion domain = new DomainExpansion();
+                // Spawn it out of view at (0,0); it manages the screen effects internally
+                getWorld().addObject(domain, 0, 0); 
             }
         }
         
