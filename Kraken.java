@@ -217,7 +217,7 @@ public class Kraken extends Actor
         if (activeWall != null && activeWall.getWorld() != null)
         {
             Hero h = activeWall.getTouchingHero();
-            if (h != null) h.takeDamage(2); // Taking a wall to the face deals double damage!
+            if (h != null) h.takeDamage(4); // Taking a wall to the face deals double damage!
         }
     }
 
