@@ -1,5 +1,6 @@
 import greenfoot.*;
 public class MyWorld extends World {
+    GreenfootSound kraken = new GreenfootSound("kraken_spawn.mp3");
     private int score = 0;
     private boolean bossSpawned = false;
     private boolean bossDefeated = false;
@@ -80,7 +81,8 @@ public class MyWorld extends World {
             if (fishCount == 0 && pufferCount == 0)
             {
                 krakenSpawned = true; // Flips safety gate
-                spawnKrakenBoss();    // Unleash the kraken!
+                spawnKrakenBoss();
+                kraken.play();// Unleash the kraken!
                 spawnBoss();
             }
         }

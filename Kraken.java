@@ -121,7 +121,8 @@ public class Kraken extends Actor
     {
         int width = (attackSide == 0 || attackSide == 1) ? 600 : wallThickness;
         int height = (attackSide == 0 || attackSide == 1) ? wallThickness : 400;
-        
+        GreenfootSound clash = new GreenfootSound("tentacles.mp3");
+        clash.play();
         GreenfootImage wallImg = new GreenfootImage(width, height);
         
         // Fill the wall with a solid color to match the warning zone perfectly

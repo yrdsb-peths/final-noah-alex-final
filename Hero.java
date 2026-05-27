@@ -7,6 +7,8 @@ public class Hero extends Actor
     private int invincibilityTimer = 0; 
     private HpBar healthBar;
     
+    GreenfootSound bubble = new GreenfootSound("bubble.mp3");
+    GreenfootSound trident = new GreenfootSound("trident.mp3");
     //trident
     private Trident activeTrident = null;
 private boolean hasTrident = false;
@@ -116,6 +118,7 @@ if (Greenfoot.isKeyDown("e") && hasTrident && mouse != null)
     if (activeTrident != null)
     {
         activeTrident.launch(angle);
+        trident.play();
     }
     else
     {
@@ -133,7 +136,7 @@ if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
     turnTowards(mouse.getX(), mouse.getY());
     int angleToMouse = getRotation();
     setRotation(0);
-
+    bubble.play();
     Lazer laser = new Lazer();
     getWorld().addObject(laser, getX(), getY());
     laser.setRotation(angleToMouse);

@@ -28,6 +28,8 @@ public class TridentPickup extends Actor
             Hero hero = (Hero) getOneIntersectingObject(Hero.class);
             if (hero != null)
             {
+                GreenfootSound pickup = new GreenfootSound("trident_pickup.mp3");
+                pickup.play();
                 Trident t = new Trident();
                 getWorld().addObject(t, hero.getX() + 15, hero.getY() + 15);
                 t.setCarried(true);
