@@ -10,7 +10,7 @@ public class Trident extends Actor
     public Trident()
     {
         GreenfootImage img = new GreenfootImage("trident.png"); // add a trident image to your images folder
-        img.scale(30, 30);
+        img.scale(100, 100);
         setImage(img);
     }
 

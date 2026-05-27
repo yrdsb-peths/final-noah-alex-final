@@ -46,7 +46,7 @@ public class MyWorld extends World {
         int swordfishCount = getObjects(SwordfishBoss.class).size();
         if (bossSpawned && !bossDefeated)
         {
-            if (swordfishCount < 3) // Change 3 to whatever maximum cap you want!
+            if (swordfishCount < 1) // Change 3 to whatever maximum cap you want!
             {
                 spawnBoss();
             }
@@ -81,8 +81,6 @@ public class MyWorld extends World {
             {
                 krakenSpawned = true; // Flips safety gate
                 spawnKrakenBoss();    // Unleash the kraken!
-                spawnBoss();
-                spawnBoss();
                 spawnBoss();
             }
         }
