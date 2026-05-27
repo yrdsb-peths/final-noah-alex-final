@@ -56,7 +56,7 @@ public class MyWorld extends World {
         if (bossDefeated && !pufferWaveSpawned)
         {
             spawnTimer++;
-            if (spawnTimer % 60 == 0 && nemoSpawnCount < 10) // one nemo every 60 frames
+            if (spawnTimer % 60 == 0 && nemoSpawnCount < 50) // one nemo every 60 frames
             {
                 spawnFish();
                 nemoSpawnCount++;
@@ -68,7 +68,7 @@ public class MyWorld extends World {
                 }
             }
 
-            if (nemoSpawnCount >= 10)
+            if (nemoSpawnCount >= 50)
             {
                 pufferWaveSpawned = true;
                 phase2EndScore = score;
@@ -91,7 +91,7 @@ public class MyWorld extends World {
             spawnBoss();
             
             // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
-            Greenfoot.delay(10); 
+            Greenfoot.delay(1); 
         }
     }
 
