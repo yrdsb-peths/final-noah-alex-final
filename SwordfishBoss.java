@@ -13,7 +13,7 @@ public class SwordfishBoss extends Actor
      * Act - do whatever the SwordfishBoss wants to do. This method is called whenever
      * the 'Act' or 'Run' button gets pressed in the environment.
      */
-    
+    GreenfootSound slash = new GreenfootSound("swordfish.mp3");
     // Boss Core Stats
     private int bossHp = 15;
     private GreenfootImage baseBossImage;
@@ -33,7 +33,7 @@ public class SwordfishBoss extends Actor
     {
         // Replace "swordfish.png" with your actual file name!
         baseBossImage = new GreenfootImage("swordfish.png");
-        baseBossImage.scale(80, 80); // Made a bit bigger since it's a boss
+        baseBossImage.scale(80, 40); // Made a bit bigger since it's a boss
         
         updateBossAppearance(false);
     }
@@ -107,6 +107,7 @@ public class SwordfishBoss extends Actor
     private void handleDashingState()
     {
         setRotation(dashAngle);
+        slash.play();
         move(30); // Rush forward fast!
         
         checkHeroCollision();

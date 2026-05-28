@@ -7,71 +7,95 @@ public class Trident extends Actor
     private boolean stuck = false;
     private boolean carried = false;
 
+    private java.util.ArrayList<Actor> hitActors = new java.util.ArrayList<>();
+    
     public Trident()
     {
-        GreenfootImage img = new GreenfootImage("trident.png"); // add a trident image to your images folder
-        img.scale(100, 100);
+        GreenfootImage img = new GreenfootImage("trident.png");
+        img.scale(80, 80);
         setImage(img);
     }
 
-    public void setCarried(boolean c) { carried = c; }
-    
-    public void act()
-{
-    if (carried)
+    public void setCarried(boolean c)
     {
-        // Follow hero position with a small offset
-        List<Hero> heroes = getWorld().getObjects(Hero.class);
-        if (!heroes.isEmpty())
+        carried = c;
+        stuck = false;  // clear stuck when picked up
+        flying = false; // clear flying when picked up
+    }
+
+    public void act()
+    {
+        if (carried)
         {
-            Hero hero = heroes.get(0);
-            setLocation(hero.getX() + 15, hero.getY() + 15);
+            List<Hero> heroes = getWorld().getObjects(Hero.class);
+            if (!heroes.isEmpty())
+            {
+                Hero hero = heroes.get(0);
+                setLocation(hero.getX() + 20, hero.getY());
+
+                MouseInfo mouse = Greenfoot.getMouseInfo();
+                if (mouse != null)
+                {
+                    turnTowards(mouse.getX(), mouse.getY());
+                }
+            }
+        }
+        else if (flying)
+        {
+            move(15);
+            pierceEnemies();
+            if (isAtEdge())
+            {
+                flying = false;
+                stuck = true;
+            }
         }
     }
-    else if (flying)
+
+private void pierceEnemies()
+{
+    List<Fish> fish = getObjectsInRange(15, Fish.class);
+    for (Fish f : fish)
     {
-        move(15);
-        pierceEnemies();
-        if (isAtEdge())
+        if (!hitActors.contains(f)) { f.takeDamage(5); hitActors.add(f); }
+    }
+
+    List<Pufferfish> puffers = getObjectsInRange(15, Pufferfish.class);
+    for (Pufferfish p : puffers)
+    {
+        if (!hitActors.contains(p)) { p.takeDamage(5); hitActors.add(p); }
+    }
+
+    List<SwordfishBoss> bosses = getObjectsInRange(15, SwordfishBoss.class);
+    for (SwordfishBoss b : bosses)
+    {
+        if (!hitActors.contains(b)) { b.takeDamage(5); hitActors.add(b); }
+    }
+
+    List<Kraken> kraken = getObjectsInRange(50, Kraken.class); // increase range to 50 to test
+for (Kraken k : kraken)
+{
+    if (!hitActors.contains(k))
+    {
+        if (k.isVulnerable())
         {
-            flying = false;
-            stuck = true;
+            k.takeDamage(5);
+            hitActors.add(k);
         }
     }
 }
-
-    private void pierceEnemies()
-    {
-        // Damage Fish (pierces, does NOT remove trident)
-        List<Fish> fish = getObjectsInRange(15, Fish.class);
-        for (Fish f : fish)
-        {
-            f.takeDamage(5);
-        }
-
-        // Damage Pufferfish
-        List<Pufferfish> puffers = getObjectsInRange(15, Pufferfish.class);
-        for (Pufferfish p : puffers)
-        {
-            p.takeDamage(5); // you'll need to add takeDamage to Pufferfish (see below)
-        }
-
-        // Damage Boss
-        List<SwordfishBoss> bosses = getObjectsInRange(15, SwordfishBoss.class);
-        for (SwordfishBoss b : bosses)
-        {
-            b.takeDamage(5); // you'll need to add takeDamage to SwordfishBoss (see below)
-        }
-    }
+}
 
     public void launch(int angle)
-{
-    carried = false;
-    setRotation(angle);
-    flying = true;
-    stuck = false;
-}
+    {
+        carried = false;
+        stuck = false;
+        setRotation(angle);
+        flying = true;
+        hitActors.clear();
+    }
 
     public boolean isStuck() { return stuck; }
     public boolean isFlying() { return flying; }
+    public boolean isCarried() { return carried; }
 }

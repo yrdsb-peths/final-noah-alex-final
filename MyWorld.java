@@ -1,5 +1,6 @@
 import greenfoot.*;
 public class MyWorld extends World {
+    GreenfootSound kraken = new GreenfootSound("kraken_spawn.mp3");
     private int score = 0;
     private boolean bossSpawned = false;
     private boolean bossDefeated = false;
@@ -28,6 +29,12 @@ public class MyWorld extends World {
         addObject(scoreLabel, 80, 30);
         
         spawnFish();
+        
+        // --- NEW: ADD DASH ICON TO THE BOTTOM LEFT ---
+        DashIcon dIcon = new DashIcon();
+        // Positioned at X: 210, Y: 370 (cleanly sitting to the right of your health bar)
+        addObject(dIcon, 210, 370);
+        al.setDashIcon(dIcon);
     }
 
     public void act()
@@ -80,7 +87,8 @@ public class MyWorld extends World {
             if (fishCount == 0 && pufferCount == 0)
             {
                 krakenSpawned = true; // Flips safety gate
-                spawnKrakenBoss();    // Unleash the kraken!
+                spawnKrakenBoss();
+                kraken.play();// Unleash the kraken!
                 spawnBoss();
             }
         }
@@ -92,6 +100,22 @@ public class MyWorld extends World {
             
             // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
             Greenfoot.delay(1); 
+        }
+        if (Greenfoot.isKeyDown("k"))
+        {
+            // Set the flag to true just in case other mechanics depend on it
+            spawnKrakenBoss();
+            
+            // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
+            Greenfoot.delay(10); 
+        }
+        if (Greenfoot.isKeyDown("t"))
+        {
+            // Set the flag to true just in case other mechanics depend on it
+            spawnTridentPickup();
+            
+            // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
+            Greenfoot.delay(10); 
         }
     }
 
@@ -184,7 +208,7 @@ public class MyWorld extends World {
         krakenBar.setBarDimensions(500, 15); 
         
         // 2. Set its stats and purple color
-        krakenBar.setMaxHp(20); 
+        krakenBar.setMaxHp(35); 
         krakenBar.setLineColor(new Color(128, 0, 128)); 
         
         // 3. Put it at the top center
