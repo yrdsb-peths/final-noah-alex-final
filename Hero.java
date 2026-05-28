@@ -80,19 +80,7 @@ private boolean hasTrident = false;
         // Toggle trident mode with E
 // Toggle trident mode with E
 // Show trident on hero's back when carrying it
-if (hasTrident)
-{
-    // Offset slightly so it appears beside the hero
-    if (activeTrident != null && activeTrident.isStuck())
-    {
-        // ignore, it's on the wall
-    }
-    else
-    {
-        // Keep a visual trident stuck to hero — handled by Trident class below
-    }
-}
-
+// Pick up stuck trident by walking to it
 // Pick up stuck trident by walking to it
 if (activeTrident != null && activeTrident.isStuck())
 {
@@ -100,33 +88,19 @@ if (activeTrident != null && activeTrident.isStuck())
     int dy = Math.abs(activeTrident.getY() - getY());
     if (dx < 25 && dy < 25)
     {
-        getWorld().removeObject(activeTrident);
-        activeTrident = null;
+        activeTrident.setCarried(true);
         hasTrident = true;
     }
 }
 
-// E to throw trident
-// E to throw trident
-if (Greenfoot.isKeyDown("e") && hasTrident && mouse != null)
+// E to throw trident - only when not already flying
+if (Greenfoot.isKeyDown("e") && hasTrident && activeTrident != null && !activeTrident.isFlying() && mouse != null)
 {
     turnTowards(mouse.getX(), mouse.getY());
     int angle = getRotation();
     setRotation(0);
-
-    // If there's a carried trident, launch it directly instead of making a new one
-    if (activeTrident != null)
-    {
-        activeTrident.launch(angle);
-        trident.play();
-    }
-    else
-    {
-        activeTrident = new Trident();
-        getWorld().addObject(activeTrident, getX(), getY());
-        activeTrident.launch(angle);
-    }
-    
+    activeTrident.launch(angle);
+    trident.play();
     hasTrident = false;
 }
 

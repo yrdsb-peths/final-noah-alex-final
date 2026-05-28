@@ -211,7 +211,40 @@ public class Kraken extends Actor
     private void handleVulnerableState()
     {
         checkLaserCollision();
+        checkTridentCollision();
     }
+    
+    private void checkTridentCollision()
+{
+    List<Trident> tridents = getWorld().getObjects(Trident.class);
+    for (Trident t : tridents)
+    {
+        if (!t.isFlying()) continue; // only flying tridents deal damage
+        
+        int dx = t.getX() - this.getX();
+        int dy = t.getY() - this.getY();
+        
+        if (Math.abs(dx) < 35 && Math.abs(dy) < 35)
+        {
+            krakenHp -= 5;
+            if (krakenBar != null) krakenBar.updateBar(krakenHp);
+            if (krakenHp <= 0) die();
+            break;
+        }
+    }
+}
+
+public void takeDamage(int amount)
+{
+    krakenHp -= amount;
+    if (krakenBar != null) krakenBar.updateBar(krakenHp);
+    if (krakenHp <= 0) die();
+}
+
+public boolean isVulnerable()
+{
+    return currentState == STATE_VULNERABLE;
+}
 
     private void checkWallDamage()
     {
