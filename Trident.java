@@ -72,11 +72,18 @@ private void pierceEnemies()
         if (!hitActors.contains(b)) { b.takeDamage(5); hitActors.add(b); }
     }
 
-    List<Kraken> kraken = getObjectsInRange(15, Kraken.class);
-    for (Kraken k : kraken)
+    List<Kraken> kraken = getObjectsInRange(50, Kraken.class); // increase range to 50 to test
+for (Kraken k : kraken)
+{
+    if (!hitActors.contains(k))
     {
-        if (!hitActors.contains(k) && k.isVulnerable()) { k.takeDamage(5); hitActors.add(k); }
+        if (k.isVulnerable())
+        {
+            k.takeDamage(5);
+            hitActors.add(k);
+        }
     }
+}
 }
 
     public void launch(int angle)
