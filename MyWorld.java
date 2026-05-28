@@ -28,6 +28,12 @@ public class MyWorld extends World {
         addObject(scoreLabel, 80, 30);
         
         spawnFish();
+        
+        // --- NEW: ADD DASH ICON TO THE BOTTOM LEFT ---
+        DashIcon dIcon = new DashIcon();
+        // Positioned at X: 210, Y: 370 (cleanly sitting to the right of your health bar)
+        addObject(dIcon, 210, 370);
+        al.setDashIcon(dIcon);
     }
 
     public void act()
