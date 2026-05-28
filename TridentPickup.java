@@ -8,7 +8,7 @@ public class TridentPickup extends Actor
     public TridentPickup()
     {
         GreenfootImage img = new GreenfootImage("trident.png");
-        img.scale(30, 30);
+        img.scale(100, 100);
         setImage(img);
     }
 
