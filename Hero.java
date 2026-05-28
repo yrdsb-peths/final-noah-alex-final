@@ -7,16 +7,13 @@ public class Hero extends Actor
     private int invincibilityTimer = 0; 
     private HpBar healthBar;
     
+    GreenfootSound bubble = new GreenfootSound("bubble.mp3");
+    GreenfootSound trident = new GreenfootSound("trident.mp3");
     //trident
     private Trident activeTrident = null;
-    private boolean hasTrident = false;
+private boolean hasTrident = false;
     
-    private int dashCooldown = 0;      // Ticks down from 180 (3 seconds)
-    private int dashDuration = 0;      // Ticks down from 10 frames during active burst
-    private int moveAngle = 0;         // Stores movement vector angle
-    private DashIcon dashIcon;
-    
-    // Sprite Variables 
+    // --- Friend's Sprite Variables ---
     private GreenfootImage idleImage;
     private GreenfootImage upImage;
     private GreenfootImage leftImage;
@@ -41,169 +38,84 @@ public class Hero extends Actor
         setImage(idleImage);
     }
     
-    public void setHpBar(HpBar bar) {this.healthBar = bar;}
-    public void setDashIcon(DashIcon icon) { this.dashIcon = icon; }
+    public void setHpBar(HpBar bar)
+    {
+        this.healthBar = bar;
+    }
+
     public void act()
     {
-        if (laserCooldown > 0) laserCooldown--; 
-        if (invincibilityTimer > 0) 
-        {
-            invincibilityTimer--;
-            if (invincibilityTimer % 4 == 0) getImage().setTransparency(100); 
-            else getImage().setTransparency(255); 
-        }
-        else if (getImage() != null) 
-        {
-            getImage().setTransparency(255); 
-        }
-        
-        // --- NEW: COOLDOWN CLOCK CONVERTER ---
-        if (dashCooldown > 0)
-        {
-            dashCooldown--;
-            // Every 60 frames (1 second), update the visual number on the icon
-            if (dashCooldown % 60 == 0 && dashIcon != null)
-            {
-                dashIcon.updateIcon((dashCooldown / 60) + (dashCooldown % 60 > 0 ? 1 : 0));
-            }
-        }
-
-        // 2. Dash Movement Execution Overrides Regular Controls
-        if (dashDuration > 0)
-        {
-            dashDuration--;
-            invincibilityTimer = 2; // Lock invulnerability completely while zooming
-            
-            // Move fast in whatever direction you were moving when you hit R
-            // 15 pixels per frame for 10 frames = 150 pixel total distance covered instantly
-            int currentRotation = getRotation();
-            setRotation(moveAngle); 
-            move(15);               
-            setRotation(currentRotation); // Restore original mouse targeting look direction
-            
-            checkEnemyContact();
-            return; // Skip normal WASD input scripts while slicing ahead
-        }
-        
-        // Mouse Tracking 
+        // 1. Friend's Mouse Tracking (with rotation correction)
         MouseInfo mouse = Greenfoot.getMouseInfo();
         
         // Track if a key is held down to manage idle states
         boolean keyIsPressed = false;
-        
-        int dx1 = 0;
-        int dy1 = 0;
 
-        // Movement & Sprite Swapping 
+        // 2. Movement & Sprite Swapping (Combined)
         if (Greenfoot.isKeyDown("a"))
         {
-            setLocation(getX() - 4, getY());
+            setLocation(getX() - 5, getY());
             setImage(leftImage);
             keyIsPressed = true;
-            dx1 = -1;
         }
         if (Greenfoot.isKeyDown("d"))
         {
-            setLocation(getX() + 4, getY());
+            setLocation(getX() + 5, getY());
             setImage(rightImage);
             keyIsPressed = true;
-            dx1 = 1;
         }
         if (Greenfoot.isKeyDown("w"))
         {
-            setLocation(getX(), getY() - 4);
+            setLocation(getX(), getY() - 5);
             setImage(upImage);
             keyIsPressed = true;
-            dy1 = -1;
         }
         if (Greenfoot.isKeyDown("s"))
         {
-            setLocation(getX(), getY() + 4);
+            setLocation(getX(), getY() + 5);
             setImage(idleImage); 
             keyIsPressed = true;
-            dy1 = 1;
-        }
-        
-        if (!keyIsPressed) 
-        {
-            setImage(idleImage);
-        }
-        
-        if (Greenfoot.isKeyDown("r") && dashCooldown == 0 && (dx1 != 0 || dy1 != 0))
-        {
-            dashDuration = 10;    // Active movement frame windows
-            dashCooldown = 180;   // 3 seconds total reset clock
-            
-            // Convert current WASD directions to an operational angle
-            moveAngle = (int) Math.toDegrees(Math.atan2(dy1, dx1)); 
-            
-            if (dashIcon != null) dashIcon.updateIcon(3); // Start UI clock text immediately at 3
         }
         
         // Toggle trident mode with E
-        // Toggle trident mode with E
-        // Show trident on hero's back when carrying it
-        if (hasTrident)
-        {
-            // Offset slightly so it appears beside the hero
-            if (activeTrident != null && activeTrident.isStuck())
-            {
-                // ignore, it's on the wall
-            }
-            else
-            {
-                // Keep a visual trident stuck to hero — handled by Trident class below
-            }
-        }
-        
-        // Pick up stuck trident by walking to it
-        if (activeTrident != null && activeTrident.isStuck())
-        {
-            int dx = Math.abs(activeTrident.getX() - getX());
-            int dy = Math.abs(activeTrident.getY() - getY());
-            if (dx < 25 && dy < 25)
-            {
-                getWorld().removeObject(activeTrident);
-                activeTrident = null;
-                hasTrident = true;
-            }
-        }
-        
-        // E to throw trident
-        // E to throw trident
-        if (Greenfoot.isKeyDown("e") && hasTrident && mouse != null)
-        {
-            turnTowards(mouse.getX(), mouse.getY());
-            int angle = getRotation();
-            setRotation(0);
-        
-            // If there's a carried trident, launch it directly instead of making a new one
-            if (activeTrident != null)
-            {
-                activeTrident.launch(angle);
-            }
-            else
-            {
-                activeTrident = new Trident();
-                getWorld().addObject(activeTrident, getX(), getY());
-                activeTrident.launch(angle);
-            }
-            
-            hasTrident = false;
-        }
-        
-        // Normal laser with mouse click, always available
-        if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
-        {
-            turnTowards(mouse.getX(), mouse.getY());
-            int angleToMouse = getRotation();
-            setRotation(0);
-        
-            Lazer laser = new Lazer();
-            getWorld().addObject(laser, getX(), getY());
-            laser.setRotation(angleToMouse);
-            laserCooldown = 20;
-        }
+// Toggle trident mode with E
+// Show trident on hero's back when carrying it
+// Pick up stuck trident by walking to it
+// Pick up stuck trident by walking to it
+if (activeTrident != null && activeTrident.isStuck())
+{
+    int dx = Math.abs(activeTrident.getX() - getX());
+    int dy = Math.abs(activeTrident.getY() - getY());
+    if (dx < 25 && dy < 25)
+    {
+        activeTrident.setCarried(true);
+        hasTrident = true;
+    }
+}
+
+// E to throw trident - only when not already flying
+if (Greenfoot.isKeyDown("e") && hasTrident && activeTrident != null && !activeTrident.isFlying() && mouse != null)
+{
+    turnTowards(mouse.getX(), mouse.getY());
+    int angle = getRotation();
+    setRotation(0);
+    activeTrident.launch(angle);
+    trident.play();
+    hasTrident = false;
+}
+
+// Normal laser with mouse click, always available
+if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
+{
+    turnTowards(mouse.getX(), mouse.getY());
+    int angleToMouse = getRotation();
+    setRotation(0);
+    bubble.play();
+    Lazer laser = new Lazer();
+    getWorld().addObject(laser, getX(), getY());
+    laser.setRotation(angleToMouse);
+    laserCooldown = 20;
+}
         
         // If no keys are pressed, return to base idle sprite
         if (!keyIsPressed) 
@@ -247,13 +159,6 @@ public class Hero extends Actor
         }
         
         checkEnemyContact();
-    }
-    
-    private void handleInvincibilityFrames()
-    {
-        invincibilityTimer--;
-        if (invincibilityTimer % 4 == 0) getImage().setTransparency(100);
-        else getImage().setTransparency(255);
     }
     
     private void checkEnemyContact()
