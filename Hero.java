@@ -184,7 +184,7 @@ if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
     Lazer laser = new Lazer();
     getWorld().addObject(laser, getX(), getY());
     laser.setRotation(angleToMouse);
-    laserCooldown = 20;
+    laserCooldown = 0;
 }
         
         // If no keys are pressed, return to base idle sprite
@@ -208,7 +208,7 @@ if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
             Lazer laser = new Lazer();
             getWorld().addObject(laser, getX(), getY());
             laser.setRotation(angleToMouse);
-            laserCooldown = 20; 
+            laserCooldown = 00; 
         }
         
         // 5. Your Invincibility Frame Polish
