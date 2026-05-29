@@ -30,7 +30,7 @@ public class MyWorld extends World {
         
         spawnFish();
         
-        // --- NEW: ADD DASH ICON TO THE BOTTOM LEFT ---
+        // ADDED DASH ICON TO THE BOTTOM LEFT 
         DashIcon dIcon = new DashIcon();
         // Positioned at X: 210, Y: 370 (cleanly sitting to the right of your health bar)
         addObject(dIcon, 210, 370);
@@ -51,13 +51,6 @@ public class MyWorld extends World {
             }
         }
         int swordfishCount = getObjects(SwordfishBoss.class).size();
-        if (bossSpawned && !bossDefeated)
-        {
-            if (swordfishCount < 1) // Change 3 to whatever maximum cap you want!
-            {
-                spawnBoss();
-            }
-        }
 
         // Phase 2: After boss dies, spawn 4 nemos in intervals + 1 pufferfish
         if (bossDefeated && !pufferWaveSpawned)
@@ -89,7 +82,6 @@ public class MyWorld extends World {
                 krakenSpawned = true; // Flips safety gate
                 spawnKrakenBoss();
                 kraken.play();// Unleash the kraken!
-                spawnBoss();
             }
         }
         if (Greenfoot.isKeyDown("p"))
