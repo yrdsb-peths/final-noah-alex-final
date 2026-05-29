@@ -24,11 +24,11 @@ public class CutsceneWorld extends World
     // --- 1. CONSTRUCTOR (Runs ONLY once when the world is first loaded) ---
     public CutsceneWorld()
     {    
-        super(600, 400, 1); 
+        super(800, 600, 1); 
         
         // Setup initial water depth background
         GreenfootImage bg = new GreenfootImage("background.png"); // Match your main game background file name
-        bg.scale(600, 400);
+        bg.scale(800, 600);
         setBackground(bg);
 
         // Initialize UI Boxes at the bottom

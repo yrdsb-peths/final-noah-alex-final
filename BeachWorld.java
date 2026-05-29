@@ -15,16 +15,16 @@ public class BeachWorld extends World
      */
     public BeachWorld()
     {    
-        super(600, 400, 1); 
+        super(800, 600, 1); 
         
         // Set the world background to the beach image
         GreenfootImage beachBg = new GreenfootImage("beach.jpg");
-        beachBg.scale(600, 400);
+        beachBg.scale(800, 600);
         setBackground(beachBg);
         
         // Re-inject your Hero and gameplay loop setups back here!
         Hero player = new Hero();
-        addObject(player, 300, 200);
+        addObject(player, 400, 300);
         
         // Add your gameplay HP meters, score labels, etc.
     }
