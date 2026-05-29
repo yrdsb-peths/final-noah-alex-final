@@ -182,7 +182,7 @@ public class Hero extends Actor
         }
         
         // --- DOMAIN EXPANSION TRIGGER ---
-        if (Greenfoot.isKeyDown("k"))
+        if (Greenfoot.isKeyDown("g"))
         {
             // Only activate if a Domain isn't already running
             if (getWorld().getObjects(DomainExpansion.class).isEmpty())

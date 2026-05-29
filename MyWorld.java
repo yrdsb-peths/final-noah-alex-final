@@ -34,7 +34,6 @@ public class MyWorld extends World {
         DashIcon dIcon = new DashIcon();
         // Positioned at X: 210, Y: 370 (cleanly sitting to the right of your health bar)
         addObject(dIcon, 210, 370);
-        al.setDashIcon(dIcon);
     }
 
     public void act()
@@ -114,6 +113,13 @@ public class MyWorld extends World {
             // Set the flag to true just in case other mechanics depend on it
             spawnTridentPickup();
             
+            // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
+            Greenfoot.delay(10); 
+        }
+        if (Greenfoot.isKeyDown("f"))
+        {
+            // Set the flag to true just in case other mechanics depend on it
+        spawnFish();            
             // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
             Greenfoot.delay(10); 
         }

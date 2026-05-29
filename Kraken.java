@@ -212,15 +212,7 @@ public class Kraken extends Actor
     {
         checkLaserCollision();
     }
-    
-    
 
-public void takeDamage(int amount)
-{
-    krakenHp -= amount;
-    if (krakenBar != null) krakenBar.updateBar(krakenHp);
-    if (krakenHp <= 0) die();
-}
 
 public boolean isVulnerable()
 {
