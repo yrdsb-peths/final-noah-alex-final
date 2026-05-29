@@ -1,5 +1,6 @@
 import greenfoot.*;
 public class MyWorld extends World {
+    GreenfootSound kraken = new GreenfootSound("kraken_spawn.mp3");
     private int score = 0;
     private boolean bossSpawned = false;
     private boolean bossDefeated = false;
@@ -62,7 +63,7 @@ public class MyWorld extends World {
         if (bossDefeated && !pufferWaveSpawned)
         {
             spawnTimer++;
-            if (spawnTimer % 60 == 0 && nemoSpawnCount < 15) // one nemo every 60 frames
+            if (spawnTimer % 60 == 0 && nemoSpawnCount < 10) // one nemo every 60 frames
             {
                 spawnFish();
                 nemoSpawnCount++;
@@ -74,7 +75,7 @@ public class MyWorld extends World {
                 }
             }
 
-            if (nemoSpawnCount >= 15)
+            if (nemoSpawnCount >= 10)
             {
                 pufferWaveSpawned = true;
                 phase2EndScore = score;
@@ -86,7 +87,8 @@ public class MyWorld extends World {
             if (fishCount == 0 && pufferCount == 0)
             {
                 krakenSpawned = true; // Flips safety gate
-                spawnKrakenBoss();    // Unleash the kraken!
+                spawnKrakenBoss();
+                kraken.play();// Unleash the kraken!
                 spawnBoss();
             }
         }
@@ -95,6 +97,22 @@ public class MyWorld extends World {
             // Set the flag to true just in case other mechanics depend on it
             bossSpawned = true; 
             spawnBoss();
+            
+            // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
+            Greenfoot.delay(10); 
+        }
+        if (Greenfoot.isKeyDown("k"))
+        {
+            // Set the flag to true just in case other mechanics depend on it
+            spawnKrakenBoss();
+            
+            // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
+            Greenfoot.delay(10); 
+        }
+        if (Greenfoot.isKeyDown("t"))
+        {
+            // Set the flag to true just in case other mechanics depend on it
+            spawnTridentPickup();
             
             // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
             Greenfoot.delay(10); 
@@ -190,7 +208,7 @@ public class MyWorld extends World {
         krakenBar.setBarDimensions(500, 15); 
         
         // 2. Set its stats and purple color
-        krakenBar.setMaxHp(20); 
+        krakenBar.setMaxHp(35); 
         krakenBar.setLineColor(new Color(128, 0, 128)); 
         
         // 3. Put it at the top center

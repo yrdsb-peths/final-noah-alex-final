@@ -3,8 +3,8 @@ import java.util.List;
 
 public class Kraken extends Actor
 {
-    private int maxHp = 20;
-    private int krakenHp = 20;
+    private int maxHp = 35;
+    private int krakenHp = 35;
     private HpBar krakenBar; 
     
     // Core Base Images
@@ -121,7 +121,8 @@ public class Kraken extends Actor
     {
         int width = (attackSide == 0 || attackSide == 1) ? 600 : wallThickness;
         int height = (attackSide == 0 || attackSide == 1) ? wallThickness : 400;
-        
+        GreenfootSound clash = new GreenfootSound("tentacles.mp3");
+        clash.play();
         GreenfootImage wallImg = new GreenfootImage(width, height);
         
         // Fill the wall with a solid color to match the warning zone perfectly
@@ -211,13 +212,27 @@ public class Kraken extends Actor
     {
         checkLaserCollision();
     }
+    
+    
+
+public void takeDamage(int amount)
+{
+    krakenHp -= amount;
+    if (krakenBar != null) krakenBar.updateBar(krakenHp);
+    if (krakenHp <= 0) die();
+}
+
+public boolean isVulnerable()
+{
+    return currentState == STATE_VULNERABLE;
+}
 
     private void checkWallDamage()
     {
         if (activeWall != null && activeWall.getWorld() != null)
         {
             Hero h = activeWall.getTouchingHero();
-            if (h != null) h.takeDamage(2); // Taking a wall to the face deals double damage!
+            if (h != null) h.takeDamage(4); // Taking a wall to the face deals double damage!
         }
     }
 
