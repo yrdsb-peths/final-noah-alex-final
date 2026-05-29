@@ -15,7 +15,7 @@ public class SwordfishBoss extends Actor
      */
     GreenfootSound slash = new GreenfootSound("swordfish.mp3");
     // Boss Core Stats
-    private int bossHp = 15;
+    private int bossHp = 6;
     private GreenfootImage baseBossImage;
     
     // State Machine Enums (Representing the states as numbers)

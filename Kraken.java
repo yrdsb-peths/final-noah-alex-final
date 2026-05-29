@@ -270,6 +270,7 @@ public class Kraken extends Actor
     {
         if (activeWall != null && activeWall.getWorld() != null) getWorld().removeObject(activeWall);
         getWorld().removeObject(this);
+        Greenfoot.setWorld(new CutsceneWorld());
     }
 
     private void updateKrakenAppearance()
