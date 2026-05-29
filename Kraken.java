@@ -20,16 +20,16 @@ public class Kraken extends Actor
     
     private int stateTimer = 90; // 90 frames = 1.5 seconds warning time
     
-    // Wall Configuration variables
+    // Wall Configuration variables (Scaled for 800x600 World)
     private int attackSide = 0;       // 0 = Top, 1 = Bottom, 2 = Left, 3 = Right
-    private int wallThickness = 280;  // Covers 70% of a 400px high screen height
+    private int wallThickness = 420;  // Covers 70% of a 600px high screen height (or 800px width dynamically)
     private TentacleWall activeWall;
 
     public Kraken()
     {
         straightTentacleImage = new GreenfootImage("octopus_tentacle_straight.png"); 
         krakenHeadImage = new GreenfootImage("octopus_head.png"); 
-        krakenHeadImage.scale(70, 70); 
+        krakenHeadImage.scale(90, 90); // Slightly scaled up head to match larger world resolution
         
         // Pick a random side for the very first attack
         pickRandomAttackSide();
@@ -89,18 +89,18 @@ public class Kraken extends Actor
                 break;
                 
             case STATE_LAUNCHING:
-                stateTimer = 20; // Rushes across screen in 1/3rd of a second
+                stateTimer = 25; // Adjusted slightly from 20 to 25 to accommodate traveling a longer distance
                 spawnGiantTentacleWall();
                 updateKrakenAppearance(); // Invisible root anchor body
                 break;
                 
             case STATE_RETRACTING:
-                stateTimer = 40; // Takes a little bit longer to slide backwards out of bounds
+                stateTimer = 45; // Adjusted slightly for the larger arena frame layout
                 break;
                 
             case STATE_VULNERABLE:
                 stateTimer = 240; // 4 full seconds to shoot the head in the center!
-                setLocation(300, 200); // Snap to exact center of world
+                setLocation(400, 300); // Snap to exact center of 800x600 world
                 updateKrakenAppearance();
                 break;
         }
@@ -110,17 +110,17 @@ public class Kraken extends Actor
     {
         attackSide = Greenfoot.getRandomNumber(4); // 0, 1, 2, or 3
         
-        // Lock positioning off-screen during targeting telegraph so player only looks at the warning red overlay
-        if (attackSide == 0) setLocation(300, -50);  // Top
-        else if (attackSide == 1) setLocation(300, 450); // Bottom
-        else if (attackSide == 2) setLocation(-50, 200); // Left
-        else if (attackSide == 3) setLocation(650, 200); // Right
+        // Lock positioning deep off-screen relative to 800x600 limits
+        if (attackSide == 0) setLocation(400, -100);  // Top
+        else if (attackSide == 1) setLocation(400, 700); // Bottom
+        else if (attackSide == 2) setLocation(-100, 300); // Left
+        else if (attackSide == 3) setLocation(900, 300); // Right
     }
 
     private void spawnGiantTentacleWall()
     {
-        int width = (attackSide == 0 || attackSide == 1) ? 600 : wallThickness;
-        int height = (attackSide == 0 || attackSide == 1) ? wallThickness : 400;
+        int width = (attackSide == 0 || attackSide == 1) ? 800 : wallThickness;
+        int height = (attackSide == 0 || attackSide == 1) ? wallThickness : 600;
         GreenfootSound clash = new GreenfootSound("tentacles.mp3");
         clash.play();
         GreenfootImage wallImg = new GreenfootImage(width, height);
@@ -131,29 +131,29 @@ public class Kraken extends Actor
         
         activeWall = new TentacleWall(wallImg);
         
-        // --- CORRECTED STARTING POSITIONS (Spawns deep off-screen behind the danger zone) ---
-        int startX = 300;
-        int startY = 200;
+        // --- SCALED STARTING POSITIONS ---
+        int startX = 400;
+        int startY = 300;
         
-        if (attackSide == 0) // Warning is at TOP. Wall spawns ABOVE ceiling, rushes DOWN, STOPS at top.
+        if (attackSide == 0) // Warning is at TOP. Wall spawns ABOVE ceiling, rushes DOWN
         {
-            startX = 300;
+            startX = 400;
             startY = -(height / 2);
         }
-        else if (attackSide == 1) // Warning is at BOTTOM. Wall spawns BELOW floor, rushes UP, STOPS at bottom.
+        else if (attackSide == 1) // Warning is at BOTTOM. Wall spawns BELOW floor, rushes UP
         {
-            startX = 300;
-            startY = 400 + (height / 2);
+            startX = 400;
+            startY = 600 + (height / 2);
         }
-        else if (attackSide == 2) // Warning is on LEFT. Wall spawns past LEFT edge, rushes RIGHT, STOPS on left.
+        else if (attackSide == 2) // Warning is on LEFT. Wall spawns past LEFT edge, rushes RIGHT
         {
             startX = -(width / 2);
-            startY = 200;
+            startY = 300;
         }
-        else if (attackSide == 3) // Warning is on RIGHT. Wall spawns past RIGHT edge, rushes LEFT, STOPS on right.
+        else if (attackSide == 3) // Warning is on RIGHT. Wall spawns past RIGHT edge, rushes LEFT
         {
-            startX = 600 + (width / 2);
-            startY = 200;
+            startX = 800 + (width / 2);
+            startY = 300;
         }
         
         getWorld().addObject(activeWall, startX, startY);
@@ -164,28 +164,29 @@ public class Kraken extends Actor
         if (activeWall == null) return;
 
         // Drive the wall forward until it perfectly fills the red warning box, then STOP IT
+        // Speed slightly increased (+25) to compensate for larger spatial distance coverage requirements
         if (attackSide == 0) // Moving DOWN to fill the top slice
         {
             if (activeWall.getY() < (wallThickness / 2)) {
-                activeWall.setLocation(activeWall.getX(), activeWall.getY() + 20);
+                activeWall.setLocation(activeWall.getX(), activeWall.getY() + 25);
             }
         }
         else if (attackSide == 1) // Moving UP to fill the bottom slice
         {
-            if (activeWall.getY() > 400 - (wallThickness / 2)) {
-                activeWall.setLocation(activeWall.getX(), activeWall.getY() - 20);
+            if (activeWall.getY() > 600 - (wallThickness / 2)) {
+                activeWall.setLocation(activeWall.getX(), activeWall.getY() - 25);
             }
         }
         else if (attackSide == 2) // Moving RIGHT to fill the left slice
         {
             if (activeWall.getX() < (wallThickness / 2)) {
-                activeWall.setLocation(activeWall.getX() + 20, activeWall.getY());
+                activeWall.setLocation(activeWall.getX() + 25, activeWall.getY());
             }
         }
         else if (attackSide == 3) // Moving LEFT to fill the right slice
         {
-            if (activeWall.getX() > 600 - (wallThickness / 2)) {
-                activeWall.setLocation(activeWall.getX() - 20, activeWall.getY());
+            if (activeWall.getX() > 800 - (wallThickness / 2)) {
+                activeWall.setLocation(activeWall.getX() - 25, activeWall.getY());
             }
         }
         
@@ -195,10 +196,10 @@ public class Kraken extends Actor
     private void handleRetractingState()
     {
         // Pull it back out of bounds backwards
-        if (attackSide == 0) activeWall.setLocation(activeWall.getX(), activeWall.getY() - 10);
-        else if (attackSide == 1) activeWall.setLocation(activeWall.getX(), activeWall.getY() + 10);
-        else if (attackSide == 2) activeWall.setLocation(activeWall.getX() - 10, activeWall.getY());
-        else if (attackSide == 3) activeWall.setLocation(activeWall.getX() + 10, activeWall.getY());
+        if (attackSide == 0) activeWall.setLocation(activeWall.getX(), activeWall.getY() - 15);
+        else if (attackSide == 1) activeWall.setLocation(activeWall.getX(), activeWall.getY() + 15);
+        else if (attackSide == 2) activeWall.setLocation(activeWall.getX() - 15, activeWall.getY());
+        else if (attackSide == 3) activeWall.setLocation(activeWall.getX() + 15, activeWall.getY());
         
         checkWallDamage();
         if (stateTimer == 1 && activeWall != null && activeWall.getWorld() != null)
@@ -212,29 +213,37 @@ public class Kraken extends Actor
     {
         checkLaserCollision();
     }
-    
-    
 
-public void takeDamage(int amount)
-{
-    krakenHp -= amount;
-    if (krakenBar != null) krakenBar.updateBar(krakenHp);
-    if (krakenHp <= 0) die();
-}
+    public void takeDamage(int amount)
+    {
+        krakenHp -= amount;
+        if (krakenBar != null) krakenBar.updateBar(krakenHp);
+        if (krakenHp <= 0) die();
+    }
 
-public boolean isVulnerable()
-{
-    return currentState == STATE_VULNERABLE;
-}
+    public boolean isVulnerable()
+    {
+        return currentState == STATE_VULNERABLE;
+    }
 
     private void checkWallDamage()
+{
+    if (activeWall != null && activeWall.getWorld() != null)
     {
-        if (activeWall != null && activeWall.getWorld() != null)
+        // Tick down the wall's internal damage block timer
+        if (activeWall.damageCooldown > 0) {
+            activeWall.damageCooldown--;
+        }
+
+        Hero h = activeWall.getTouchingHero();
+        // Only deal damage if the hero is touching it AND the wall's cooldown is 0
+        if (h != null && activeWall.damageCooldown == 0) 
         {
-            Hero h = activeWall.getTouchingHero();
-            if (h != null) h.takeDamage(4); // Taking a wall to the face deals double damage!
+            h.takeDamage(4); 
+            activeWall.damageCooldown = 100; // Lock this specific wall from dealing damage for 45 frames!
         }
     }
+}
 
     private void checkLaserCollision()
     {
@@ -245,7 +254,8 @@ public boolean isVulnerable()
             int dx = currentLaser.getX() - this.getX();
             int dy = currentLaser.getY() - this.getY();
             
-            if (Math.abs(dx) < 35 && Math.abs(dy) < 35)
+            // Hitbox threshold slightly increased to match expanded head scaling bounds (70 -> 90)
+            if (Math.abs(dx) < 45 && Math.abs(dy) < 45)
             {
                 getWorld().removeObject(currentLaser);
                 krakenHp--;
@@ -270,18 +280,18 @@ public boolean isVulnerable()
         }
         else if (currentState == STATE_AIMING)
         {
-            // Create a canvas covering the entire 600x400 viewable window frame
-            GreenfootImage canvas = new GreenfootImage(600, 400);
+            // Create a canvas covering the updated 800x600 viewable window frame
+            GreenfootImage canvas = new GreenfootImage(800, 600);
             canvas.setColor(new Color(255, 0, 0, 95)); // Soft semi-transparent crimson tell
             
             // Draw a thick block matching the upcoming attack side zone
-            if (attackSide == 0) canvas.fillRect(0, 0, 600, wallThickness); // Top slice
-            else if (attackSide == 1) canvas.fillRect(0, 400 - wallThickness, 600, wallThickness); // Bottom slice
-            else if (attackSide == 2) canvas.fillRect(0, 0, wallThickness, 400); // Left slice
-            else if (attackSide == 3) canvas.fillRect(600 - wallThickness, 0, wallThickness, 400); // Right slice
+            if (attackSide == 0) canvas.fillRect(0, 0, 800, wallThickness); // Top slice
+            else if (attackSide == 1) canvas.fillRect(0, 600 - wallThickness, 800, wallThickness); // Bottom slice
+            else if (attackSide == 2) canvas.fillRect(0, 0, wallThickness, 600); // Left slice
+            else if (attackSide == 3) canvas.fillRect(800 - wallThickness, 0, wallThickness, 600); // Right slice
             
             setImage(canvas);
-            setLocation(300, 200); // Anchor canvas dead center to center warning perfectly
+            setLocation(400, 300); // Anchor canvas dead center to layout warning perfectly over 800x600
         }
         else
         {
@@ -293,7 +303,13 @@ public boolean isVulnerable()
     /**
      * Inner class helper managing the independent massive collision block mask
      */
+    /**
+     * Inner class helper managing the independent massive collision block mask
+     */
     private class TentacleWall extends Actor {
+        // ADDED: Each wall spawned keeps track of its own unique damage cooldown frame state
+        public int damageCooldown = 0; 
+        
         public TentacleWall(GreenfootImage customImg) {
             setImage(customImg);
         }

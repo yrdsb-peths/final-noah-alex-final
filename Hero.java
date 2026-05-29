@@ -4,14 +4,15 @@ public class Hero extends Actor
 {
     private int laserCooldown = 0;
     private int hp = 10;
-    private int invincibilityTimer = 0; 
+    private int invincibilityTimer = 0;
+    private final int INVINCIBILITY_DURATION = 30; // About half a second of safety
     private HpBar healthBar;
     
     GreenfootSound bubble = new GreenfootSound("bubble.mp3");
     GreenfootSound trident = new GreenfootSound("trident.mp3");
-    //trident
+    
     private Trident activeTrident = null;
-private boolean hasTrident = false;
+    private boolean hasTrident = false;
     
     // --- Friend's Sprite Variables ---
     private GreenfootImage idleImage;
@@ -19,7 +20,7 @@ private boolean hasTrident = false;
     private GreenfootImage leftImage;
     private GreenfootImage rightImage;
     
-        private int dashCooldown = 0;      // Ticks down from 180 (3 seconds)
+    private int dashCooldown = 0;      // Ticks down from 180 (3 seconds)
     private int dashDuration = 0;      // Ticks down from 10 frames during active burst
     private int moveAngle = 0;         // Stores movement vector angle
     private DashIcon dashIcon;
@@ -52,7 +53,7 @@ private boolean hasTrident = false;
     
     public void act()
     {
-         if (laserCooldown > 0) laserCooldown--; 
+        // 1. Handle Invincibility Frame Visual Countdown
         if (invincibilityTimer > 0) 
         {
             invincibilityTimer--;
@@ -64,7 +65,12 @@ private boolean hasTrident = false;
             getImage().setTransparency(255); 
         }
         
-        // --- NEW: COOLDOWN CLOCK CONVERTER ---
+        // 2. Laser Cooldown Ticker
+        if (laserCooldown > 0) {
+            laserCooldown--; 
+        }
+        
+        // 3. Dash Cooldown Clock Updater
         if (dashCooldown > 0)
         {
             dashCooldown--;
@@ -75,14 +81,13 @@ private boolean hasTrident = false;
             }
         }
 
-        // 2. Dash Movement Execution Overrides Regular Controls
+        // 4. Dash Movement Execution Overrides Regular Controls
         if (dashDuration > 0)
         {
             dashDuration--;
             invincibilityTimer = 2; // Lock invulnerability completely while zooming
             
             // Move fast in whatever direction you were moving when you hit R
-            // 15 pixels per frame for 10 frames = 150 pixel total distance covered instantly
             int currentRotation = getRotation();
             setRotation(moveAngle); 
             move(15);               
@@ -97,11 +102,10 @@ private boolean hasTrident = false;
         
         // Track if a key is held down to manage idle states
         boolean keyIsPressed = false;
-        
         int dx1 = 0;
         int dy1 = 0;
 
-        // Movement & Sprite Swapping 
+        // 5. Normal Movement & Sprite Swapping 
         if (Greenfoot.isKeyDown("a"))
         {
             setLocation(getX() - 4, getY());
@@ -136,6 +140,7 @@ private boolean hasTrident = false;
             setImage(idleImage);
         }
         
+        // 6. Check for Dash Activation Input
         if (Greenfoot.isKeyDown("r") && dashCooldown == 0 && (dx1 != 0 || dy1 != 0))
         {
             dashDuration = 10;    // Active movement frame windows
@@ -147,97 +152,46 @@ private boolean hasTrident = false;
             if (dashIcon != null) dashIcon.updateIcon(3); // Start UI clock text immediately at 3
         }
         
-        // Toggle trident mode with E
-// Toggle trident mode with E
-// Show trident on hero's back when carrying it
-// Pick up stuck trident by walking to it
-// Pick up stuck trident by walking to it
-if (activeTrident != null && activeTrident.isStuck())
-{
-    int dx = Math.abs(activeTrident.getX() - getX());
-    int dy = Math.abs(activeTrident.getY() - getY());
-    if (dx < 25 && dy < 25)
-    {
-        activeTrident.setCarried(true);
-        hasTrident = true;
-    }
-}
-
-// E to throw trident - only when not already flying
-if (Greenfoot.isKeyDown("e") && hasTrident && activeTrident != null && !activeTrident.isFlying() && mouse != null)
-{
-    turnTowards(mouse.getX(), mouse.getY());
-    int angle = getRotation();
-    setRotation(0);
-    activeTrident.launch(angle);
-    trident.play();
-    hasTrident = false;
-}
-
-// Normal laser with mouse click, always available
-if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
-{
-    turnTowards(mouse.getX(), mouse.getY());
-    int angleToMouse = getRotation();
-    setRotation(0);
-    bubble.play();
-    Lazer laser = new Lazer();
-    getWorld().addObject(laser, getX(), getY());
-    laser.setRotation(angleToMouse);
-    laserCooldown = 20;
-}
-        
-        // If no keys are pressed, return to base idle sprite
-        if (!keyIsPressed) 
+        // 7. Trident Retrieval Mechanics
+        if (activeTrident != null && activeTrident.isStuck())
         {
-            setImage(idleImage);
+            int dx = Math.abs(activeTrident.getX() - getX());
+            int dy = Math.abs(activeTrident.getY() - getY());
+            if (dx < 25 && dy < 25)
+            {
+                activeTrident.setCarried(true);
+                hasTrident = true;
+            }
         }
-        
-        // 3. Laser Cooldown Ticker
-        if (laserCooldown > 0) {
-            laserCooldown--; 
+
+        // 8. Launch Trident Input Mechanics
+        if (Greenfoot.isKeyDown("e") && hasTrident && activeTrident != null && !activeTrident.isFlying() && mouse != null)
+        {
+            turnTowards(mouse.getX(), mouse.getY());
+            int angle = getRotation();
+            setRotation(0);
+            activeTrident.launch(angle);
+            trident.play();
+            hasTrident = false;
         }
-        
-        // 4. Friend's Mouse Click Shooting (with matching laser rotation fix)
+
+        // 9. Primary Laser Attack Actions
         if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
         {
             turnTowards(mouse.getX(), mouse.getY());
             int angleToMouse = getRotation();
-            setRotation(0); // or whatever default rotation you want
+            setRotation(0); 
             
+            bubble.play();
             Lazer laser = new Lazer();
             getWorld().addObject(laser, getX(), getY());
             laser.setRotation(angleToMouse);
-            laserCooldown = 20; 
+            laserCooldown = 20;
         }
         
-        // 5. Your Invincibility Frame Polish
-        if (invincibilityTimer > 0)
-        {
-            invincibilityTimer--;
-            if (invincibilityTimer % 4 == 0) {
-                getImage().setTransparency(100); 
-            } else {
-                getImage().setTransparency(255); 
-            }
-        }
-        else
-        {
-            if (getImage() != null) {
-                getImage().setTransparency(255); 
-            }
-        }
-        
+        // 10. Check Environmental Collisions
         checkEnemyContact();
     }
-    
-       private void handleInvincibilityFrames()
-    {
-        invincibilityTimer--;
-        if (invincibilityTimer % 4 == 0) getImage().setTransparency(100);
-        else getImage().setTransparency(255);
-    }
-    
     
     private void checkEnemyContact()
     {
@@ -252,7 +206,7 @@ if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
         if (invincibilityTimer == 0)
         {
             hp -= damageAmount;
-            invincibilityTimer = 30; // 0.5 seconds of i-frames
+            invincibilityTimer = INVINCIBILITY_DURATION; // 0.5 seconds of safe i-frames
             
             if (healthBar != null)
             {
@@ -282,8 +236,8 @@ if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
     }
     
     public void pickUpTrident(Trident t)
-{
-    hasTrident = true;
-    activeTrident = t;
-}
+    {
+        hasTrident = true;
+        activeTrident = t;
+    }
 }

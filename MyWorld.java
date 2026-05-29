@@ -12,16 +12,16 @@ public class MyWorld extends World {
     private int phase2EndScore = -1;
     private boolean krakenSpawned = false;
     public MyWorld() {
-        super(600, 400, 1);
+        super(800, 600, 1);
         GreenfootImage bg = new GreenfootImage("background.png");
-        bg.scale(600, 400); // match your world dimensions
+        bg.scale(800, 600); // match your world dimensions
         setBackground(bg);
         
         Hero al = new Hero();
         addObject(al, 300, 300);
 
         HpBar bar = new HpBar();
-        addObject(bar, 90, 370);
+        addObject(bar, 90, 570);
         al.setHpBar(bar);
         
         scoreLabel = new Label("Score: 0", 30);
@@ -33,7 +33,7 @@ public class MyWorld extends World {
         // --- NEW: ADD DASH ICON TO THE BOTTOM LEFT ---
         DashIcon dIcon = new DashIcon();
         // Positioned at X: 210, Y: 370 (cleanly sitting to the right of your health bar)
-        addObject(dIcon, 210, 370);
+        addObject(dIcon, 210, 570);
         al.setDashIcon(dIcon);
     }
 
@@ -212,7 +212,7 @@ public class MyWorld extends World {
         krakenBar.setLineColor(new Color(128, 0, 128)); 
         
         // 3. Put it at the top center
-        addObject(krakenBar, 300, 65); 
+        addObject(krakenBar, 400, 100); 
         
         Kraken boss = new Kraken();
         boss.setHpBar(krakenBar);
