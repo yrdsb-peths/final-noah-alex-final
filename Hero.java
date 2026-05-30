@@ -2,6 +2,14 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 
 public class Hero extends Actor
 {
+    private GreenfootImage[] idleFrames;
+private GreenfootImage[] upFrames;
+private GreenfootImage[] leftFrames;
+private GreenfootImage[] rightFrames;
+private int animFrame = 0;
+private int animTimer = 0;
+private final int ANIM_SPEED = 8; // lower = faster animation
+    
     private int laserCooldown = 0;
     private int hp = 10;
     private int invincibilityTimer = 0;
@@ -27,22 +35,31 @@ public class Hero extends Actor
 
     // --- Constructor (Loads and scales images once at the start) ---
     public Hero() 
+{
+    idleFrames = new GreenfootImage[4];
+    upFrames = new GreenfootImage[4];
+    leftFrames = new GreenfootImage[4];
+    rightFrames = new GreenfootImage[4];
+
+    for (int i = 0; i < 4; i++)
     {
-        idleImage = new GreenfootImage("baseguy.png");
-        idleImage.scale(50, 50);
+        String suffix = (i == 0) ? "" : Integer.toString(i + 1);
         
-        upImage = new GreenfootImage("baseguy-up.png");
-        upImage.scale(50, 50);
+        idleFrames[i] = new GreenfootImage("baseguy" + suffix + ".png");
+        idleFrames[i].scale(50, 50);
         
-        leftImage = new GreenfootImage("baseguy-left.png");
-        leftImage.scale(50, 50);
+        upFrames[i] = new GreenfootImage("baseguy-up" + suffix + ".png");
+        upFrames[i].scale(50, 50);
         
-        rightImage = new GreenfootImage("baseguy-right.png");
-        rightImage.scale(50, 50);
+        leftFrames[i] = new GreenfootImage("baseguy-left" + suffix + ".png");
+        leftFrames[i].scale(50, 50);
         
-        // Set the initial appearance
-        setImage(idleImage);
+        rightFrames[i] = new GreenfootImage("baseguy-right" + suffix + ".png");
+        rightFrames[i].scale(50, 50);
     }
+    
+    setImage(idleFrames[0]);
+}
     
     public void setHpBar(HpBar bar)
     {
@@ -100,45 +117,56 @@ public class Hero extends Actor
         // Mouse Tracking 
         MouseInfo mouse = Greenfoot.getMouseInfo();
         
-        // Track if a key is held down to manage idle states
         boolean keyIsPressed = false;
-        int dx1 = 0;
-        int dy1 = 0;
+int dx1 = 0;
+int dy1 = 0;
+GreenfootImage[] currentFrames = idleFrames;
 
-        // 5. Normal Movement & Sprite Swapping 
-        if (Greenfoot.isKeyDown("a"))
-        {
-            setLocation(getX() - 4, getY());
-            setImage(leftImage);
-            keyIsPressed = true;
-            dx1 = -1;
-        }
-        if (Greenfoot.isKeyDown("d"))
-        {
-            setLocation(getX() + 4, getY());
-            setImage(rightImage);
-            keyIsPressed = true;
-            dx1 = 1;
-        }
-        if (Greenfoot.isKeyDown("w"))
-        {
-            setLocation(getX(), getY() - 4);
-            setImage(upImage);
-            keyIsPressed = true;
-            dy1 = -1;
-        }
-        if (Greenfoot.isKeyDown("s"))
-        {
-            setLocation(getX(), getY() + 4);
-            setImage(idleImage); 
-            keyIsPressed = true;
-            dy1 = 1;
-        }
-        
-        if (!keyIsPressed) 
-        {
-            setImage(idleImage);
-        }
+if (Greenfoot.isKeyDown("a"))
+{
+    setLocation(getX() - 4, getY());
+    currentFrames = leftFrames;
+    keyIsPressed = true;
+    dx1 = -1;
+}
+if (Greenfoot.isKeyDown("d"))
+{
+    setLocation(getX() + 4, getY());
+    currentFrames = rightFrames;
+    keyIsPressed = true;
+    dx1 = 1;
+}
+if (Greenfoot.isKeyDown("w"))
+{
+    setLocation(getX(), getY() - 4);
+    currentFrames = upFrames;
+    keyIsPressed = true;
+    dy1 = -1;
+}
+if (Greenfoot.isKeyDown("s"))
+{
+    setLocation(getX(), getY() + 4);
+    currentFrames = idleFrames;
+    keyIsPressed = true;
+    dy1 = 1;
+}
+
+// Advance animation frame on a timer
+animTimer++;
+if (animTimer >= ANIM_SPEED)
+{
+    animTimer = 0;
+    if (keyIsPressed)
+    {
+        animFrame = (animFrame + 1) % 4; // cycle through frames while moving
+    }
+    else
+    {
+        animFrame = 0; // snap back to frame 1 when idle
+    }
+}
+
+setImage(currentFrames[animFrame]);
         
         // 6. Check for Dash Activation Input
         if (Greenfoot.isKeyDown("r") && dashCooldown == 0 && (dx1 != 0 || dy1 != 0))
