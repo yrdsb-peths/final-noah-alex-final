@@ -38,8 +38,8 @@ public class CutsceneWorld extends World
         addObject(textBox, 300, 335);
 
         // Initialize Character Avatars
-        heroSprite = new CutsceneActor("baseguy.png", 70, 70);
-        dagonSprite = new CutsceneActor("baseguy.png", 90, 90); // Replace with your dagon image filename if different
+        heroSprite = new CutsceneActor("hero-talk.png", 160, 240);
+        dagonSprite = new CutsceneActor("dagon-talk.png", 160, 240); // Replace with your dagon image filename if different
         
         addObject(heroSprite, 120, 200);
         addObject(dagonSprite, 480, 200);
