@@ -13,7 +13,7 @@ public class CutsceneWorld extends World
     };
 
     private int currentLine = 0;
-    private boolean spacePressedLastFrame = true; // Prevents instantly skipping through all dialogue
+    private boolean spacePressedLastFrame = true;
 
     // UI elements references
     private DialogueBox nameBox;
@@ -21,37 +21,32 @@ public class CutsceneWorld extends World
     private CutsceneActor heroSprite;
     private CutsceneActor dagonSprite;
 
-    // --- 1. CONSTRUCTOR (Runs ONLY once when the world is first loaded) ---
     public CutsceneWorld()
     {    
         super(800, 600, 1); 
         
-        // Setup initial water depth background
-        GreenfootImage bg = new GreenfootImage("background.png"); // Match your main game background file name
+        GreenfootImage bg = new GreenfootImage("background.png");
         bg.scale(800, 600);
         setBackground(bg);
 
-        // Initialize UI Boxes at the bottom
-        nameBox = new DialogueBox(140, 35);
-        textBox = new DialogueBox(560, 80);
-        addObject(nameBox, 90, 270);
-        addObject(textBox, 300, 335);
+        // Initialize UI Boxes at the bottom of the 800x600 world
+        nameBox = new DialogueBox(180, 40);
+        textBox = new DialogueBox(680, 90);
+        addObject(nameBox, 110, 490);
+        addObject(textBox, 420, 550);
 
-        // Initialize Character Avatars
+        // Initialize Character Avatars spaced across the wider world
         heroSprite = new CutsceneActor("hero-talk.png", 160, 240);
-        dagonSprite = new CutsceneActor("dagon-talk.png", 160, 240); // Replace with your dagon image filename if different
+        dagonSprite = new CutsceneActor("dagon-talk.png", 160, 240);
         
-        addObject(heroSprite, 120, 200);
-        addObject(dagonSprite, 480, 200);
+        addObject(heroSprite, 150, 300);
+        addObject(dagonSprite, 650, 300);
 
-        // Fire up the first dialogue line immediately
         displayLine(currentLine);
     }
 
-    // --- 2. THE ACT METHOD (Where your input handling code is supposed to live) ---
     public void act()
     {
-        // Continuous keyboard listener runs perfectly here every frame!
         if (Greenfoot.isKeyDown("space"))
         {
             if (!spacePressedLastFrame)
@@ -75,7 +70,6 @@ public class CutsceneWorld extends World
         }
         else
         {
-            // Transition immediately to the beach level after the domain chant concludes
             Greenfoot.setWorld(new BeachWorld());
         }
     }
@@ -86,36 +80,31 @@ public class CutsceneWorld extends World
         String text = dialogueData[index][1];
         String state = dialogueData[index][2];
 
-        // Update Text inside the UI overlays
         nameBox.drawText(speaker, 18, Color.YELLOW);
         textBox.drawText(text, 16, Color.WHITE);
 
-        // Manage Character Visibilities & Filter transformations
         if (state.equals("HIDDEN"))
         {
             heroSprite.getImage().setTransparency(255);
-            dagonSprite.applySilhouetteFilter(true); // Turn Dagon flat black (???)
+            dagonSprite.applySilhouetteFilter(true);
         }
         else if (state.equals("REVEALED"))
         {
             heroSprite.getImage().setTransparency(255);
-            dagonSprite.applySilhouetteFilter(false); // Reveal true identity colours
+            dagonSprite.applySilhouetteFilter(false);
             dagonSprite.getImage().setTransparency(255);
         }
         else if (state.equals("HANDSIGN"))
         {
-            // Clear out individual actor sprites completely
             heroSprite.getImage().setTransparency(0);
             dagonSprite.getImage().setTransparency(0);
             
-            // Swap global world background texture to the hand sign file image_d4c13f.jpg
             GreenfootImage handBg = new GreenfootImage("image_d4c13f.jpg");
-            handBg.scale(600, 400);
+            handBg.scale(800, 600);
             setBackground(handBg);
         }
         else if (state.equals("FINALE"))
         {
-            // Remove text framing configurations for Dagon's domain chant background climax
             nameBox.drawText("", 1, Color.BLACK);
             textBox.drawText("HORIZON OF THE CAPTIVATING SANDAI!!", 22, Color.RED);
         }
