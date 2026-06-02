@@ -20,7 +20,8 @@ public class CutsceneWorld extends World
     private DialogueBox textBox;
     private CutsceneActor heroSprite;
     private CutsceneActor dagonSprite;
-
+    private Label skipPromptLabel;
+    
     public CutsceneWorld()
     {    
         super(800, 600, 1); 
@@ -34,7 +35,13 @@ public class CutsceneWorld extends World
         textBox = new DialogueBox(680, 90);
         addObject(nameBox, 110, 490);
         addObject(textBox, 420, 550);
-
+        
+        // Creates a small font size 16 label saying "Space ->"
+        skipPromptLabel = new Label("[space]", 20);
+        skipPromptLabel.setLineColor(new Color(150, 150, 160)); // Clean secondary gray color
+        // Placed in the bottom-right corner inside the dialogue container frame
+        addObject(skipPromptLabel, 700, 580);
+        
         // Initialize Character Avatars spaced across the wider world
         heroSprite = new CutsceneActor("hero-talk.png", 160, 240);
         dagonSprite = new CutsceneActor("dagon-talk.png", 160, 240);
@@ -107,6 +114,9 @@ public class CutsceneWorld extends World
         {
             nameBox.drawText("", 1, Color.BLACK);
             textBox.drawText("HORIZON OF THE CAPTIVATING SANDAI!!", 22, Color.RED);
+            // --- NEW POLISH: Clear the skip label on the final chant frame ---
+            // This lets the ultimate final splash line look completely cinematic!
+            removeObject(skipPromptLabel);
         }
     }
 }

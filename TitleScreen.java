@@ -17,7 +17,10 @@ public class TitleScreen extends World
     {    
         // Create a new world with 600x400 cells with a cell size of 1x1 pixels.
         super(800, 600, 1); 
-
+        GreenfootImage beachBg = new GreenfootImage("background.jpg");
+        beachBg.scale(800, 600);
+        setBackground(beachBg);
+        
         addObject(titleLabel, getWidth()/2, 200);
         prepare();
     }
@@ -62,5 +65,31 @@ public class TitleScreen extends World
         label.setLocation(422,487);
         label2.setLocation(411,336);
         label.setLocation(440,422);
+        Label label3 = new Label("press r to DASH", 50);
+        addObject(label3,106,292);
+        label3.setLocation(410,300);
+        Label label4 = new Label("press 'e' to throw trident", 50);
+        addObject(label4,106,292);
+        label4.setLocation(100,300);
+        label3.setLocation(651,241);
+        label4.setLocation(495,255);
+        label4.setLocation(440,250);
+        label.setLocation(315,410);
+        label3.setLocation(531,291);
+        label3.setLocation(421,289);
+        label.setLocation(528,402);
+        label.setLocation(443,370);
+        label.setLocation(425,382);
+        label4.setLocation(458,488);
+        label3.setLocation(451,441);
+        label.setLocation(412,237);
+        label2.setLocation(438,333);
+        label2.setLocation(400,336);
+        label3.setLocation(408,354);
+        label3.setLocation(420,373);
+        label3.setLocation(410,382);
+        label3.setLocation(410,374);
+        label4.setLocation(428,425);
+        label4.setLocation(432,414);
     }
 }
