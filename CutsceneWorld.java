@@ -131,7 +131,7 @@ public class CutsceneWorld extends World
         else if (state.equals("FINALE"))
         {
             nameBox.drawText("", 1, Color.BLACK);
-            textBox.drawText("HORIZON OF THE CAPTIVATING SANDAI!!", 22, Color.RED);
+            textBox.drawText("HORIZON OF THE CAPTIVATING SKANDHA!!", 22, Color.RED);
             // --- NEW POLISH: Clear the skip label on the final chant frame ---
             // This lets the ultimate final splash line look completely cinematic!
             removeObject(skipPromptLabel);
