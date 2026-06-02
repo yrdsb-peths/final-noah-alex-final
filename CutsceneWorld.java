@@ -9,7 +9,7 @@ public class CutsceneWorld extends World
         { "Dagon", "I'm surprised you defeated the kraken...", "REVEALED" },
         { "Dagon", "but now your time ends *here.*", "REVEALED" },
         { "Dagon", "Domain expansion....", "HANDSIGN" },
-        { "Dagon", "HORIZON OF THE CAPTIVATING SANDAI!!", "FINALE" }
+        { "Dagon", "HORIZON OF THE CAPTIVATING SKANDHA!!", "FINALE" }
     };
 
     private int currentLine = 0;
@@ -102,14 +102,32 @@ public class CutsceneWorld extends World
             dagonSprite.getImage().setTransparency(255);
         }
         else if (state.equals("HANDSIGN"))
-        {
-            heroSprite.getImage().setTransparency(0);
-            dagonSprite.getImage().setTransparency(0);
-            
-            GreenfootImage handBg = new GreenfootImage("image_d4c13f.jpg");
-            handBg.scale(800, 600);
-            setBackground(handBg);
-        }
+{
+    heroSprite.getImage().setTransparency(0);
+    dagonSprite.getImage().setTransparency(0);
+    
+    // 1. Create a blank image the size of your world (e.g., 800x600)
+    GreenfootImage blackBg = new GreenfootImage(800, 600);
+    
+    // 2. Use Greenfoot's Color class to fill it with black
+    blackBg.setColor(greenfoot.Color.BLACK);
+    blackBg.fill();
+    
+    // 3. Load your handsign image
+    GreenfootImage handImg = new GreenfootImage("handsign.png");
+    
+    // 4. Scale it down a bit so the black background is visible around it
+    // (Adjust 500, 400 to whatever size looks best for your image)
+    handImg.scale(500, 400); 
+    
+    // 5. Calculate coordinates to draw the hand perfectly in the center
+    int x = (blackBg.getWidth() - handImg.getWidth()) / 2;
+    int y = (blackBg.getHeight() - handImg.getHeight()) / 2;
+    
+    // 6. Draw the hand onto the black canvas and set it
+    blackBg.drawImage(handImg, x, y);
+    setBackground(blackBg);
+}
         else if (state.equals("FINALE"))
         {
             nameBox.drawText("", 1, Color.BLACK);
