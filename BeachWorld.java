@@ -82,14 +82,21 @@ public void act()
     // Check if "p" is pressed and our delay is ready
     if (Greenfoot.isKeyDown("p") && spawnDelay <= 0)
     {
-        spawnTestFish();
+        spawnTestCrab();
+        spawnDelay = 20; // Wait 20 frames before allowing another spawn
+    }
+    
+    if (spawnDelay > 0) spawnDelay--;
+    if (Greenfoot.isKeyDown("t") && spawnDelay <= 0)
+    {
+        spawnTestTurtle();
         spawnDelay = 20; // Wait 20 frames before allowing another spawn
     }
     
     if (spawnDelay > 0) spawnDelay--;
 }
 
-private void spawnTestFish()
+private void spawnTestCrab()
 {
     // Spawns a fish at a random edge location
     int x = Greenfoot.getRandomNumber(getWidth());
@@ -97,6 +104,15 @@ private void spawnTestFish()
     
     // You can replace 'Fish' with 'Shark' or 'Crab' depending on your classes
     addObject(new Crab(), x, y); 
+}
+private void spawnTestTurtle()
+{
+    // Spawns a fish at a random edge location
+    int x = Greenfoot.getRandomNumber(getWidth());
+    int y = Greenfoot.getRandomNumber(getHeight());
+    
+    // You can replace 'Fish' with 'Shark' or 'Crab' depending on your classes
+    addObject(new Turtle(), x, y); 
 }
 
     // Default constructor for compatibility if called without technique

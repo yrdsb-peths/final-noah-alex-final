@@ -1,16 +1,16 @@
 import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 import java.util.List;
 
-public class Crab extends Actor
+public class Turtle extends Actor
 {
-    private int crabHp = 1; // Takes 3 hits to die!
+    private int crabHp = 6; // Takes 3 hits to die!
     private GreenfootImage baseCrabImage;
     
-    public Crab()
+    public Turtle()
     {
         // Uses the exact same fish asset and scaling as your fish class
-        baseCrabImage = new GreenfootImage("CRAB.jpg");
-        baseCrabImage.scale(30, 30);
+        baseCrabImage = new GreenfootImage("turtle.jpg");
+        baseCrabImage.scale(100, 100);
         
         // Dynamic drawing step to attach the full green health bar initially
         updateFishAppearance();
@@ -48,7 +48,7 @@ public class Crab extends Actor
         if (target != null)
         {
             turnTowards(target.getX(), target.getY());
-            move(4);
+            move(1);
         }
     }
     
@@ -86,7 +86,7 @@ public class Crab extends Actor
         canvas.setColor(Color.BLACK);
         canvas.fillRect(0, 0, spriteWidth, barHeight);
         
-        int healthBarWidth = (int)(((double)crabHp / 1) * (spriteWidth - 2));
+        int healthBarWidth = (int)(((double)crabHp / 6) * (spriteWidth - 2));
         if (healthBarWidth < 0) healthBarWidth = 0;
         
         if (crabHp > 1) {
