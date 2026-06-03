@@ -16,7 +16,6 @@ public class MakiCloud extends Actor
     // BOOMERANG
     private boolean returning = false;
     private int boomerangAngle;
-    private int arcOffset = 0;
 
     // CURVE
     private int curveAngle;
@@ -54,7 +53,6 @@ public class MakiCloud extends Actor
             handleCurve();
         }
 
-        // Safety check — don't call dealDamage if we just removed ourselves
         if (getWorld() != null)
         {
             dealDamage();
@@ -80,7 +78,7 @@ public class MakiCloud extends Actor
         if (orbitAngle >= 360)
         {
             getWorld().removeObject(this);
-            return; // stop here
+            return;
         }
     }
 
@@ -88,13 +86,9 @@ public class MakiCloud extends Actor
     {
         if (!returning)
         {
+            // SHOOT STRAIGHT: Extends straight along its exact targeted axis
             setRotation(boomerangAngle);
             move(10);
-
-            arcOffset++;
-            double perpRad = Math.toRadians(boomerangAngle + 90);
-            setLocation(getX() + (int)(Math.cos(perpRad) * (arcOffset * 0.3)),
-                        getY() + (int)(Math.sin(perpRad) * (arcOffset * 0.3)));
 
             if (timer > 30) { returning = true; hitActors.clear(); }
             if (isAtEdge()) { returning = true; hitActors.clear(); }
@@ -105,9 +99,10 @@ public class MakiCloud extends Actor
             if (makis.isEmpty())
             {
                 getWorld().removeObject(this);
-                return; // stop here
+                return;
             }
 
+            // RETURN STRAIGHT: Tracks straight backward directly to Maki's position
             Maki m = makis.get(0);
             turnTowards(m.getX(), m.getY());
             move(12);
@@ -117,7 +112,7 @@ public class MakiCloud extends Actor
             if (dx < 20 && dy < 20)
             {
                 getWorld().removeObject(this);
-                return; // stop here
+                return;
             }
         }
     }
@@ -131,20 +126,17 @@ public class MakiCloud extends Actor
         if (isAtEdge() || timer > 80)
         {
             getWorld().removeObject(this);
-            return; // stop here
+            return;
         }
     }
 
     private void dealDamage()
     {
-        // Safety catch: Do absolutely nothing if this cloud was removed from the world
         if (getWorld() == null) return;
 
-        // 🦀 NEW: Detect and damage Crab enemies in range!
         List<Crab> crabs = getObjectsInRange(18, Crab.class);
         for (Crab c : crabs)
         {
-            // Verify the crab is still in the world and hasn't already been struck by this specific cloud instance
             if (c.getWorld() != null && !hitActors.contains(c)) 
             { 
                 c.takeDamage(damage); 
@@ -152,7 +144,6 @@ public class MakiCloud extends Actor
             }
         }
 
-        // --- Keep your old enemy type scanning lists below so it remains backward-compatible ---
         List<Fish> fish = getObjectsInRange(18, Fish.class);
         for (Fish f : fish)
         {
