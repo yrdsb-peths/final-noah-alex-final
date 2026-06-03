@@ -3,13 +3,13 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 public class Hero extends Actor
 {
     private GreenfootImage[] idleFrames;
-private GreenfootImage[] upFrames;
-private GreenfootImage[] leftFrames;
-private GreenfootImage[] rightFrames;
-private int animFrame = 0;
-private int animTimer = 0;
-private final int ANIM_SPEED = 8; // lower = faster animation
-    
+    private GreenfootImage[] upFrames;
+    private GreenfootImage[] leftFrames;
+    private GreenfootImage[] rightFrames;
+    private int animFrame = 0;
+    private int animTimer = 0;
+    private final int ANIM_SPEED = 8; // lower = faster animation
+        
     private int laserCooldown = 0;
     private int hp = 10;
     private int invincibilityTimer = 0;
@@ -21,8 +21,6 @@ private final int ANIM_SPEED = 8; // lower = faster animation
     
     private Trident activeTrident = null;
     private boolean hasTrident = false;
-    
-    // --- Friend's Sprite Variables ---
     private GreenfootImage idleImage;
     private GreenfootImage upImage;
     private GreenfootImage leftImage;
@@ -33,33 +31,42 @@ private final int ANIM_SPEED = 8; // lower = faster animation
     private int moveAngle = 0;         // Stores movement vector angle
     private DashIcon dashIcon;
 
-    // --- Constructor (Loads and scales images once at the start) ---
-    public Hero() 
-{
-    idleFrames = new GreenfootImage[4];
-    upFrames = new GreenfootImage[4];
-    leftFrames = new GreenfootImage[4];
-    rightFrames = new GreenfootImage[4];
-
-    for (int i = 0; i < 4; i++)
-    {
-        String suffix = (i == 0) ? "" : Integer.toString(i + 1);
-        
-        idleFrames[i] = new GreenfootImage("baseguy" + suffix + ".png");
-        idleFrames[i].scale(50, 50);
-        
-        upFrames[i] = new GreenfootImage("baseguy-up" + suffix + ".png");
-        upFrames[i].scale(50, 50);
-        
-        leftFrames[i] = new GreenfootImage("baseguy-left" + suffix + ".png");
-        leftFrames[i].scale(50, 50);
-        
-        rightFrames[i] = new GreenfootImage("baseguy-right" + suffix + ".png");
-        rightFrames[i].scale(50, 50);
-    }
+    private int stunTimer = 0; 
     
-    setImage(idleFrames[0]);
-}
+    //CRAB CAN FREEZE THE HERO
+    public void getStunned(int frames)
+    {
+        this.stunTimer = frames;
+        //make the hero turn blue/gray when stunned
+        getImage().setColor(new Color(0, 150, 255)); 
+    }
+    // --- Constructor (Loads and scales images once at the start) ---
+        public Hero() 
+    {
+        idleFrames = new GreenfootImage[4];
+        upFrames = new GreenfootImage[4];
+        leftFrames = new GreenfootImage[4];
+        rightFrames = new GreenfootImage[4];
+    
+        for (int i = 0; i < 4; i++)
+        {
+            String suffix = (i == 0) ? "" : Integer.toString(i + 1);
+            
+            idleFrames[i] = new GreenfootImage("baseguy" + suffix + ".png");
+            idleFrames[i].scale(50, 50);
+            
+            upFrames[i] = new GreenfootImage("baseguy-up" + suffix + ".png");
+            upFrames[i].scale(50, 50);
+            
+            leftFrames[i] = new GreenfootImage("baseguy-left" + suffix + ".png");
+            leftFrames[i].scale(50, 50);
+            
+            rightFrames[i] = new GreenfootImage("baseguy-right" + suffix + ".png");
+            rightFrames[i].scale(50, 50);
+        }
+        
+        setImage(idleFrames[0]);
+    }
     
     public void setHpBar(HpBar bar)
     {
@@ -70,6 +77,20 @@ private final int ANIM_SPEED = 8; // lower = faster animation
     
     public void act()
     {
+        // 1. Tick down the stun lock
+        if (stunTimer > 0)
+        {
+            stunTimer--;
+            
+            // If stun just ended, restore normal look appearance
+            if (stunTimer == 0) {
+                setImage(idleImage); 
+            }
+            
+            // CRITICAL: Stop everything else! Skips movement, shooting, and WASD keys completely
+            return; 
+        }
+        
         // 1. Handle Invincibility Frame Visual Countdown
         if (invincibilityTimer > 0) 
         {
