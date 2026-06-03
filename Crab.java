@@ -3,14 +3,14 @@ import java.util.List;
 
 public class Crab extends Actor
 {
-    private int fishHp = 3; // Takes 3 hits to die!
-    private GreenfootImage baseFishImage;
+    private int crabHp = 6; // Takes 3 hits to die!
+    private GreenfootImage baseCrabImage;
     
     public Crab()
     {
         // Uses the exact same fish asset and scaling as your fish class
-        baseFishImage = new GreenfootImage("fish.png");
-        baseFishImage.scale(30, 30);
+        baseCrabImage = new GreenfootImage("CRAB.jpg");
+        baseCrabImage.scale(100, 100);
         
         // Dynamic drawing step to attach the full green health bar initially
         updateFishAppearance();
@@ -59,9 +59,9 @@ public class Crab extends Actor
         if (laser != null)
         {
             getWorld().removeObject(laser);
-            fishHp--;
+            crabHp--;
             
-            if (fishHp <= 0)
+            if (crabHp <= 0)
             {
                 handleDeath();
             }
@@ -74,22 +74,22 @@ public class Crab extends Actor
     
     private void updateFishAppearance()
     {
-        int spriteWidth = baseFishImage.getWidth();
-        int spriteHeight = baseFishImage.getHeight();
+        int spriteWidth = baseCrabImage.getWidth();
+        int spriteHeight = baseCrabImage.getHeight();
         
         int barHeight = 6;
         int spacing = 4;
         GreenfootImage canvas = new GreenfootImage(spriteWidth, spriteHeight + barHeight + spacing);
         
-        canvas.drawImage(baseFishImage, 0, barHeight + spacing);
+        canvas.drawImage(baseCrabImage, 0, barHeight + spacing);
         
         canvas.setColor(Color.BLACK);
         canvas.fillRect(0, 0, spriteWidth, barHeight);
         
-        int healthBarWidth = (int)(((double)fishHp / 3) * (spriteWidth - 2));
+        int healthBarWidth = (int)(((double)crabHp / 6) * (spriteWidth - 2));
         if (healthBarWidth < 0) healthBarWidth = 0;
         
-        if (fishHp > 1) {
+        if (crabHp > 1) {
             canvas.setColor(Color.GREEN);
         } else {
             canvas.setColor(Color.RED);
@@ -101,8 +101,8 @@ public class Crab extends Actor
     
     public void takeDamage(int amount)
     {
-        fishHp -= amount;
-        if (fishHp <= 0)
+        crabHp -= amount;
+        if (crabHp <= 0)
         {
             handleDeath();
         }
