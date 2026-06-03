@@ -9,8 +9,10 @@ public class Naobito extends Actor
     private GreenfootImage[] rightFrames;
     private int animFrame = 0;
     private int animTimer = 0;
-    private final int ANIM_SPEED = 8; // lower = faster animation
+    private final int ANIM_SPEED = 8; 
 
+    private GlassPanel playerGlassTrap = null;
+    
     private int hp = 10;
     private int laserCooldown = 0;
     private int invincibilityTimer = 0;
@@ -41,12 +43,12 @@ public class Naobito extends Actor
 
     private Actor frozenEnemy = null;
     private int frozenTimer = 0;
+    private GlassPanel activeGlassPanel = null;
+    private ProjectionCursor aimCursor = null;
 
-    private GreenfootImage normalBg = null;
     private boolean greyedOut = false;
 
-    // --- Constructor (Matches Hero's loop style exactly) ---
-    // --- Constructor (Cleans up the first frame for all directions) ---
+    // --- Constructor ---
     public Naobito()
     {
         idleFrames = new GreenfootImage[4];
@@ -56,7 +58,6 @@ public class Naobito extends Actor
 
         for (int i = 0; i < 4; i++)
         {
-            // If it's the first frame (i == 0), leave the name clean. Otherwise, append 2, 3, or 4.
             String suffix = (i == 0) ? "" : Integer.toString(i + 1);
             
             idleFrames[i] = new GreenfootImage("naobito" + suffix + ".png");
@@ -81,6 +82,9 @@ public class Naobito extends Actor
     public void act()
     {
         MouseInfo mouse = Greenfoot.getMouseInfo();
+        
+        // Handle target validation preview cursor placement
+        manageCursorVisuals(mouse);
 
         if (invincibilityTimer > 0)
         {
@@ -101,19 +105,21 @@ public class Naobito extends Actor
             }
         }
 
+        // Run the projection sorcery timeline calculations
         handleProjectionSorcery(mouse);
 
-        if (psState == PS_FROZEN || psState == PS_TRACING ||
-            psState == PS_CONFIRM || psState == PS_EXECUTING || psState == PS_LOCKED)
+        // ====================================================================
+        // FREEZE BRAKE: Stop all inputs if locked, tracing, or executing
+        // ====================================================================
+        if (psState == PS_FROZEN || psState == PS_TRACING || psState == PS_LOCKED || psState == PS_EXECUTING)
         {
-            if (psState == PS_LOCKED)
-            {
-                getImage().setTransparency(psTimer % 6 < 3 ? 60 : 255);
+            if (psState == PS_LOCKED) {
+                setImage(idleFrames[0]); // Keep him in his idle sprite inside the glass
             }
-            return;
+            return; // Eject completely from the act loop early!
         }
 
-        // Normal movement
+        // Normal movement (Only runs when psState == PS_NONE or PS_CONFIRM)
         boolean keyIsPressed = false;
         int dx1 = 0, dy1 = 0;
         GreenfootImage[] currentFrames = idleFrames;
@@ -161,6 +167,12 @@ public class Naobito extends Actor
 
     private void handleProjectionSorcery(MouseInfo mouse)
     {
+        BeachWorld currentWorld = null;
+        if (getWorld() instanceof BeachWorld) {
+            currentWorld = (BeachWorld) getWorld();
+        }
+
+        // --- PHASE 1: ACTIVATION (PRESSING Q) ---
         if (Greenfoot.isKeyDown("q") && psState == PS_NONE && laserCooldown == 0)
         {
             Actor target = getEnemyInAimLine(mouse);
@@ -169,12 +181,17 @@ public class Naobito extends Actor
             {
                 frozenEnemy = target;
                 frozenTimer = 180; 
-                setLocation(target.getX(), target.getY() - 40);
-                psState = PS_NONE; 
-                laserCooldown = 30;
+                
+                if (currentWorld != null) {
+                    currentWorld.setFrozenEnemy(target);
+                }
 
-                if (target.getImage() != null)
-                    target.getImage().setTransparency(150);
+                setLocation(target.getX(), target.getY() - 60);
+                psState = PS_NONE; 
+                laserCooldown = 45;
+
+                activeGlassPanel = new GlassPanel(frozenEnemy);
+                getWorld().addObject(activeGlassPanel, frozenEnemy.getX(), frozenEnemy.getY());
             }
             else
             {
@@ -184,27 +201,29 @@ public class Naobito extends Actor
                 firstMoveDir = -1;
                 tracedPath.add(new int[]{getX(), getY()});
                 applyGreyOut(true);
+
+                if (currentWorld != null) {
+                    currentWorld.setTimeFreeze(true);
+                }
             }
         }
 
-        if (frozenEnemy != null)
-        {
-            frozenTimer--;
-            if (frozenTimer <= 0 || frozenEnemy.getWorld() == null)
-            {
-                if (frozenEnemy.getWorld() != null)
-                    frozenEnemy.getImage().setTransparency(255);
-                frozenEnemy = null;
-            }
-            else if (Greenfoot.isKeyDown("space"))
-            {
-                killFrozenEnemy();
-            }
-        }
-
+        // --- PHASE 2: TIME FREEZE & PATH TRACING ---
         if (psState == PS_FROZEN || psState == PS_TRACING)
         {
             psTimer--;
+
+            // SUBTITLE & COUNTDOWN LOGIC
+            int secondsLeft = (psTimer / 60) + 1; 
+            
+            String directionPrompt = "";
+            if (firstMoveDir == 2) directionPrompt = "Keep moving Left! Hold [A] when zone ends!";
+            else if (firstMoveDir == 3) directionPrompt = "Keep moving Right! Hold [D] when zone ends!";
+            else if (firstMoveDir == 0) directionPrompt = "Keep moving Up! Hold [W] when zone ends!";
+            else if (firstMoveDir == 1) directionPrompt = "Keep moving Down! Hold [S] when zone ends!";
+            
+            String subtitleText = "TIME FREEZE: " + secondsLeft + "... | " + directionPrompt;
+            drawFreezeSubtitles(subtitleText);
 
             int tx = getX(), ty = getY();
             boolean moved = false;
@@ -224,16 +243,25 @@ public class Naobito extends Actor
                     tracedPath.add(new int[]{tx, ty});
             }
 
+            // WHEN COUNTDOWN EXPIRES -> MOVE TO THE 24-FPS CHOICE CHECK
             if (psTimer <= 0)
             {
                 psState = PS_CONFIRM;
-                psTimer = 90; 
+                psTimer = 90; // Frame window to match the user's initial trajectory vector
                 applyGreyOut(false);
+                
+                if (currentWorld != null) {
+                    currentWorld.setTimeFreeze(false);
+                }
+
+                drawFreezeSubtitles(""); 
+
                 if (tracedPath.size() > 0)
                     setLocation(tracedPath.get(0)[0], tracedPath.get(0)[1]);
             }
         }
 
+        // --- PHASE 3: VERIFY CONTINUOUS SPEED RULES (THE CHOSEN DIRECTION) ---
         if (psState == PS_CONFIRM)
         {
             psTimer--;
@@ -254,18 +282,27 @@ public class Naobito extends Actor
                 }
                 else
                 {
+                    // WRONG KEY: Trigger lock and spawn Glass Panel on Naobito!
                     psState = PS_LOCKED;
-                    psTimer = LOCKED_DURATION;
+                    psTimer = LOCKED_DURATION; 
+                    
+                    playerGlassTrap = new GlassPanel(this); // Passes Naobito as the target to encase
+                    getWorld().addObject(playerGlassTrap, getX(), getY());
                 }
             }
 
+            // If time window runs out and they didn't hold anything down -> Spawn glass!
             if (psTimer <= 0)
             {
                 psState = PS_LOCKED;
                 psTimer = LOCKED_DURATION;
+                
+                playerGlassTrap = new GlassPanel(this);
+                getWorld().addObject(playerGlassTrap, getX(), getY());
             }
         }
 
+        // --- PHASE 4: EXECUTION MODE ---
         if (psState == PS_EXECUTING)
         {
             if (pathIndex < tracedPath.size())
@@ -282,11 +319,168 @@ public class Naobito extends Actor
             }
         }
 
+        // --- PHASE 5: FREEZE PENALTY ACTIVE ---
         if (psState == PS_LOCKED)
         {
             psTimer--;
-            if (psTimer <= 0) psState = PS_NONE;
+            
+            // Keeps the glass tracking perfectly centered on Naobito while he is frozen
+            if (playerGlassTrap != null && playerGlassTrap.getWorld() != null) {
+                playerGlassTrap.setLocation(getX(), getY());
+            }
+
+            if (psTimer <= 0) 
+            {
+                psState = PS_NONE;
+                
+                // Smash / remove Naobito's glass trap when penalty ends
+                if (playerGlassTrap != null && playerGlassTrap.getWorld() != null) {
+                    getWorld().removeObject(playerGlassTrap);
+                }
+                playerGlassTrap = null; 
+            }
         }
+
+        // --- SINGLE GLASS PANEL BEHAVIOR TRACKER ---
+        if (frozenEnemy != null)
+        {
+            frozenTimer--;
+            immobilizeTarget(frozenEnemy);
+
+            if (frozenTimer <= 0 || frozenEnemy.getWorld() == null)
+            {
+                clearActiveGlassTrap();
+            }
+            else if (Greenfoot.isKeyDown("space") && mouse != null && activeGlassPanel != null)
+            {
+                int launchAngle = (int) Math.toDegrees(Math.atan2(mouse.getY() - getY(), mouse.getX() - getX()));
+                activeGlassPanel.launchFromActor(launchAngle, 12);
+                
+                activeGlassPanel = null;
+                frozenEnemy = null;
+                frozenTimer = 0;
+            }
+        }
+    }
+
+    private void manageCursorVisuals(MouseInfo mouse)
+    {
+        if (getWorld() == null) return;
+        
+        if (aimCursor == null)
+        {
+            aimCursor = new ProjectionCursor();
+            getWorld().addObject(aimCursor, getX(), getY());
+        }
+        
+        if (mouse != null)
+        {
+            aimCursor.setLocation(mouse.getX(), mouse.getY());
+            Actor potentialTarget = getEnemyInAimLine(mouse);
+            aimCursor.updateCursorStyle(potentialTarget != null);
+        }
+    }
+
+    private void immobilizeTarget(Actor enemy)
+    {
+        if (enemy == null || enemy.getWorld() == null) return;
+    }
+
+    private void freezeAllWorldEnemies(boolean shouldFreeze)
+    {
+        if (getWorld() == null) return;
+        
+        List<Actor> entities = getWorld().getObjects(Actor.class);
+        for (Actor a : entities)
+        {
+            if (a instanceof Fish || a instanceof Pufferfish || a instanceof Crab)
+            {
+                if (shouldFreeze) {
+                    // Custom implementation hooks if needed
+                }
+            }
+        }
+    }
+
+    private void clearActiveGlassTrap()
+    {
+        if (getWorld() instanceof BeachWorld)
+        {
+            ((BeachWorld) getWorld()).setFrozenEnemy(null);
+        }
+
+        if (activeGlassPanel != null && activeGlassPanel.getWorld() != null)
+        {
+            getWorld().removeObject(activeGlassPanel);
+        }
+        
+        if (frozenEnemy != null && frozenEnemy.getWorld() != null)
+        {
+            frozenEnemy.getImage().setTransparency(255);
+        }
+        
+        activeGlassPanel = null;
+        frozenEnemy = null;
+        frozenTimer = 0;
+    }
+    
+    private void drawFreezeSubtitles(String message)
+    {
+        World w = getWorld();
+        if (w == null) return;
+        
+        GreenfootImage bg = w.getBackground();
+        
+        // ====================================================================
+        // AREA SCRUBBER: Erase the previous subtitle banner area before drawing
+        // ====================================================================
+        int bannerHeight = 40;
+        int bannerY = w.getHeight() - 75; // The box vertical placement region
+        
+        // Create a pristine patch of beach background image
+        GreenfootImage cleanPatch = new GreenfootImage("beach.jpg");
+        cleanPatch.scale(w.getWidth(), w.getHeight());
+        
+        // Grab just the matching bottom slice of our clean beach image
+        GreenfootImage slice = new GreenfootImage(w.getWidth(), bannerHeight);
+        slice.drawImage(cleanPatch, 0, -bannerY);
+        
+        // If the world is currently greyed out, apply the freeze tint to our slice too!
+        if (greyedOut || psState == PS_FROZEN || psState == PS_TRACING) {
+            GreenfootImage tint = new GreenfootImage(w.getWidth(), bannerHeight);
+            tint.setColor(new Color(100, 100, 120, 160));
+            tint.fillRect(0, 0, w.getWidth(), bannerHeight);
+            slice.drawImage(tint, 0, 0);
+        }
+        
+        // Patch our clean slice onto the live background to completely delete old text frames
+        bg.drawImage(slice, 0, bannerY);
+        
+        // If the message string is empty (clearing subtitles), stop here!
+        if (message == null || message.isEmpty()) return;
+
+        // ====================================================================
+        // DRAW FRESH SUBTITLE LAYOUT
+        // ====================================================================
+        Font subtitleFont = new Font("Arial", true, false, 24);
+        bg.setFont(subtitleFont);
+        
+        int textWidth = message.length() * 12; // Estimate character width scale
+        
+        // Center text horizontally + custom 40 pixel shift right
+        int x = (w.getWidth() / 2) - (textWidth / 2) + 40; 
+        int y = w.getHeight() - 50;
+        
+        // Render Text Shadow Outlines for absolute legibility
+        bg.setColor(Color.BLACK);
+        bg.drawString(message, x + 2, y + 2);
+        bg.drawString(message, x - 2, y - 2);
+        bg.drawString(message, x + 2, y - 2);
+        bg.drawString(message, x - 2, y + 2);
+        
+        // Render main crisp Gold Subtitle fill over our fresh patch
+        bg.setColor(new Color(255, 215, 0));
+        bg.drawString(message, x, y);
     }
 
     private Actor getEnemyInAimLine(MouseInfo mouse)
@@ -298,70 +492,82 @@ public class Naobito extends Actor
         for (Fish f : fish)
         {
             double angleToEnemy = Math.atan2(f.getY() - getY(), f.getX() - getX());
-            double diff = Math.abs(aimRad - angleToEnemy);
-            if (diff < 0.15) return f; 
+            if (Math.abs(aimRad - angleToEnemy) < 0.15 && distanceTo(f) < 250) return f; 
         }
         List<Pufferfish> puffers = getWorld().getObjects(Pufferfish.class);
         for (Pufferfish p : puffers)
         {
             double angleToEnemy = Math.atan2(p.getY() - getY(), p.getX() - getX());
-            double diff = Math.abs(aimRad - angleToEnemy);
-            if (diff < 0.15) return p;
+            if (Math.abs(aimRad - angleToEnemy) < 0.15 && distanceTo(p) < 250) return p;
         }
         List<Crab> crabs = getWorld().getObjects(Crab.class);
         for (Crab c : crabs)
         {
             double angleToEnemy = Math.atan2(c.getY() - getY(), c.getX() - getX());
-            double diff = Math.abs(aimRad - angleToEnemy);
-            if (diff < 0.15) return c;
+            if (Math.abs(aimRad - angleToEnemy) < 0.15 && distanceTo(c) < 250) return c;
         }
         return null;
     }
 
-    private void killFrozenEnemy()
+    private double distanceTo(Actor target)
     {
-        if (frozenEnemy == null || frozenEnemy.getWorld() == null) return;
-        if (frozenEnemy instanceof Fish) ((Fish) frozenEnemy).takeDamage(99);
-        else if (frozenEnemy instanceof Pufferfish) ((Pufferfish) frozenEnemy).takeDamage(99);
-        else if (frozenEnemy instanceof Crab) ((Crab) frozenEnemy).takeDamage(99);
-        frozenEnemy = null;
+        return Math.hypot(target.getX() - getX(), target.getY() - getY());
     }
 
     private void applyGreyOut(boolean grey)
     {
-        greyedOut = grey;
         World w = getWorld();
         if (w == null) return;
+        
+        this.greyedOut = grey; // Tracks freeze state for dynamic rendering slices
+        
+        GreenfootImage bg = new GreenfootImage("beach.jpg");
+        bg.scale(w.getWidth(), w.getHeight());
+        
         if (grey)
         {
             GreenfootImage overlay = new GreenfootImage(w.getWidth(), w.getHeight());
             overlay.setColor(new Color(100, 100, 120, 160));
             overlay.fillRect(0, 0, w.getWidth(), w.getHeight());
-            GreenfootImage bg = w.getBackground();
-            if (bg != null) bg.drawImage(overlay, 0, 0);
+            bg.drawImage(overlay, 0, 0);
         }
-        else
-        {
-            GreenfootImage bg = new GreenfootImage("beach.jpg");
-            bg.scale(w.getWidth(), w.getHeight());
-            w.setBackground(bg);
-        }
+        
+        w.setBackground(bg);
     }
 
     private void checkEnemyContact()
     {
-        if (invincibilityTimer == 0)
+        if (invincibilityTimer == 0 && psState == PS_NONE)
         {
-            if (isTouching(Crab.class) || isTouching(Fish.class) || isTouching(Pufferfish.class))
-            {
+            Actor immuneEnemy = null;
+            if (getWorld() instanceof BeachWorld) {
+                immuneEnemy = ((BeachWorld) getWorld()).getFrozenEnemy();
+            }
+
+            // FIXED: Changed getOneIntersectingActor to getOneIntersectingObject and explicitly cast it
+            Actor hitCrab = (Actor) getOneIntersectingObject(Crab.class);
+            if (hitCrab != null && hitCrab != immuneEnemy) {
                 takeDamage(1);
+                return;
+            }
+
+            Actor hitFish = (Actor) getOneIntersectingObject(Fish.class);
+            if (hitFish != null && hitFish != immuneEnemy) {
+                takeDamage(1);
+                return;
+            }
+
+            Actor hitPuffer = (Actor) getOneIntersectingObject(Pufferfish.class);
+            if (hitPuffer != null && hitPuffer != immuneEnemy) {
+                takeDamage(1);
+                return;
             }
         }
     }
 
     public void takeDamage(int amount)
     {
-        if (invincibilityTimer == 0)
+        if (invincibilityTimer == 0 && psState == PS_NONE)
         {
             hp -= amount;
             invincibilityTimer = INVINCIBILITY_DURATION;

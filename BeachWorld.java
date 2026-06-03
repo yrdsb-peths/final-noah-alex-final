@@ -3,6 +3,28 @@ import greenfoot.*;
 public class BeachWorld extends World
 {
     private String technique;
+    
+    // --- Add these variables at the top of your BeachWorld class ---
+private boolean isTimeFrozen = false;
+private Actor frozenEnemyObject = null;
+
+
+
+public void setTimeFreeze(boolean freeze) {
+    this.isTimeFrozen = freeze;
+}
+
+public boolean isTimeFrozen() {
+    return this.isTimeFrozen;
+}
+
+public void setFrozenEnemy(Actor enemy) {
+    this.frozenEnemyObject = enemy;
+}
+
+public Actor getFrozenEnemy() {
+    return this.frozenEnemyObject;
+}
 
     public BeachWorld(String technique)
     {
@@ -88,6 +110,8 @@ public void act()
     
     if (spawnDelay > 0) spawnDelay--;
 }
+
+
 
 private void spawnTestFish()
 {

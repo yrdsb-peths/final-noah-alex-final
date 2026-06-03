@@ -16,16 +16,27 @@ public class Crab extends Actor
         updateFishAppearance();
     }
     
-    public void act()
+    public void act() 
     {
-        // EMERGENCY BRAKE: If deleted earlier in this frame loop, stop instantly
+        // Safety check to ensure the actor wasn't just deleted by takeDamage()
         if (getWorld() == null) return;
+
+        // --- GLOBAL STATE CHECK ---
+        if (getWorld() instanceof BeachWorld) {
+            BeachWorld world = (BeachWorld) getWorld();
+            
+            // Halt if Naobito is actively time-freezing with Q
+            if (world.isTimeFrozen()) return;
+            
+            // Halt if THIS specific entity is still locked inside the active glass panel
+            if (world.getFrozenEnemy() == this) return;
+        }
+
+        // --- RESUME RUNNING NATIVE ENGINE AI ---
+        // If the above conditions are false, this code runs automatically every single frame!
+        moveTowardsHero(); 
         
-        // 1. Move towards whatever hero is alive in the active world
-        moveTowardsHero();
         if (getWorld() == null) return;
-        
-        // 2. Check if hit by a laser
         checkLaserCollision();
     }
     
