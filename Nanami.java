@@ -3,6 +3,14 @@ import java.util.List;
 
 public class Nanami extends Actor
 {
+    private GreenfootImage[] idleFrames;
+    private GreenfootImage[] upFrames;
+    private GreenfootImage[] leftFrames;
+    private GreenfootImage[] rightFrames;
+    private int animFrame = 0;
+    private int animTimer = 0;
+    private final int ANIM_SPEED = 8; // lower = faster animation
+
     private int hp = 10;
     private int laserCooldown = 0;
     private int invincibilityTimer = 0;
@@ -19,34 +27,36 @@ public class Nanami extends Actor
     private Actor ratioTarget = null;
     private RatioBar ratioBar = null;
     private int ratioCooldown = 0;
-    
-    // 💥 FIX FIELD: Tracks if 'E' was pressed down in the previous frame
     private boolean eKeyHeldLastFrame = false; 
 
-    // Sprites
-    private GreenfootImage[] idleFrames, upFrames, leftFrames, rightFrames;
-    private int animFrame = 0, animTimer = 0;
-    private final int ANIM_SPEED = 8;
-
+    // --- Constructor (Matches Hero's loop style exactly) ---
+    // --- Constructor (Cleans up the first frame for all directions) ---
     public Nanami()
     {
-        idleFrames  = loadFrames("baseguy",       4);
-        upFrames    = loadFrames("baseguy-up",    4);
-        leftFrames  = loadFrames("baseguy-left",  4);
-        rightFrames = loadFrames("baseguy-right", 4);
-        setImage(idleFrames[0]);
-    }
+        idleFrames = new GreenfootImage[4];
+        upFrames = new GreenfootImage[4];
+        leftFrames = new GreenfootImage[4];
+        rightFrames = new GreenfootImage[4];
 
-    private GreenfootImage[] loadFrames(String base, int count)
-    {
-        GreenfootImage[] frames = new GreenfootImage[count];
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < 4; i++)
         {
+            // If it's the first frame (i == 0), leave the name clean. Otherwise, append 2, 3, or 4.
             String suffix = (i == 0) ? "" : Integer.toString(i + 1);
-            frames[i] = new GreenfootImage(base + suffix + ".png");
-            frames[i].scale(50, 50);
+            
+            idleFrames[i] = new GreenfootImage("nanami" + suffix + ".png");
+            idleFrames[i].scale(50, 60);
+            
+            upFrames[i] = new GreenfootImage("nanami-up" + suffix + ".png");
+            upFrames[i].scale(50, 60);
+            
+            leftFrames[i] = new GreenfootImage("nanami-left" + suffix + ".png");
+            leftFrames[i].scale(50, 60);
+            
+            rightFrames[i] = new GreenfootImage("nanami-right" + suffix + ".png");
+            rightFrames[i].scale(50, 60);
         }
-        return frames;
+        
+        setImage(idleFrames[0]);
     }
 
     public void setHpBar(HpBar bar) { this.healthBar = bar; }
@@ -59,28 +69,34 @@ public class Nanami extends Actor
         if (invincibilityTimer > 0)
         {
             invincibilityTimer--;
-            getImage().setTransparency(invincibilityTimer % 4 == 0 ? 100 : 255);
+            if (invincibilityTimer % 4 == 0) getImage().setTransparency(100);
+            else getImage().setTransparency(255);
         }
         else if (getImage() != null) getImage().setTransparency(255);
 
         if (laserCooldown > 0) laserCooldown--;
         if (ratioCooldown > 0) ratioCooldown--;
-        if (dashCooldown > 0) dashCooldown--;
+        
+        if (dashCooldown > 0)
+        {
+            dashCooldown--;
+            if (dashCooldown % 60 == 0 && dashIcon != null)
+            {
+                dashIcon.updateIcon((dashCooldown / 60) + (dashCooldown % 60 > 0 ? 1 : 0));
+            }
+        }
 
-        // Capture current 'E' key state
         boolean eIsDown = Greenfoot.isKeyDown("e");
-        // An 'E Click' means the key is down now, but WAS NOT down on the previous frame loop
         boolean eMouseClicked = eIsDown && !eKeyHeldLastFrame;
 
         // --- 7:3 RATIO MECHANIC ---
         if (ratioEngaged)
         {
             handleRatioEngaged(eMouseClicked);
-            eKeyHeldLastFrame = eIsDown; // Store keyboard history before exiting early
-            return; // No movement while timing
+            eKeyHeldLastFrame = eIsDown;
+            return; 
         }
 
-        // E Click to engage closest enemy
         if (eMouseClicked && ratioCooldown == 0)
         {
             Actor closest = findClosestEnemy();
@@ -90,7 +106,6 @@ public class Nanami extends Actor
                 ratioEngaged = true;
                 ratioCooldown = 120;
 
-                // Spawn the timing bar above the enemy
                 ratioBar = new RatioBar();
                 getWorld().addObject(ratioBar, closest.getX(), closest.getY() - 50);
             }
@@ -101,12 +116,12 @@ public class Nanami extends Actor
         {
             dashDuration--;
             invincibilityTimer = 2;
-            int cur = getRotation();
+            int currentRotation = getRotation();
             setRotation(moveAngle);
             move(15);
-            setRotation(cur);
+            setRotation(currentRotation);
             checkEnemyContact();
-            eKeyHeldLastFrame = eIsDown; // Store keyboard history
+            eKeyHeldLastFrame = eIsDown;
             return;
         }
 
@@ -121,7 +136,18 @@ public class Nanami extends Actor
         if (Greenfoot.isKeyDown("s")) { setLocation(getX(), getY() + 4); currentFrames = idleFrames;  keyIsPressed = true; dy1 =  1; }
 
         animTimer++;
-        if (animTimer >= ANIM_SPEED) { animTimer = 0; animFrame = keyIsPressed ? (animFrame + 1) % 4 : 0; }
+        if (animTimer >= ANIM_SPEED)
+        {
+            animTimer = 0;
+            if (keyIsPressed)
+            {
+                animFrame = (animFrame + 1) % 4;
+            }
+            else
+            {
+                animFrame = 0;
+            }
+        }
         setImage(currentFrames[animFrame]);
 
         if (Greenfoot.isKeyDown("r") && dashCooldown == 0 && (dx1 != 0 || dy1 != 0))
@@ -144,25 +170,20 @@ public class Nanami extends Actor
         }
 
         checkEnemyContact();
-        
-        // Save current frame state to compare with the next frame
         eKeyHeldLastFrame = eIsDown;
     }
 
     private void handleRatioEngaged(boolean eMouseClicked)
     {
-        // Target died or left world
         if (ratioTarget == null || ratioTarget.getWorld() == null)
         {
             cancelRatio();
             return;
         }
 
-        // Keep bar tracked right above target
         if (ratioBar != null && ratioBar.getWorld() != null)
             ratioBar.setLocation(ratioTarget.getX(), ratioTarget.getY() - 50);
 
-        // Player presses E a SECOND separate time to strike
         if (eMouseClicked)
         {
             if (ratioBar != null)
@@ -173,12 +194,10 @@ public class Nanami extends Actor
 
                 if (hitRedZone)
                 {
-                    // PERFECT — 7:3 hit, massive damage (deals 8 points)
                     dealRatioDamage(8, ratioTarget);
                 }
                 else
                 {
-                    // Missed the red zone, faint glancing blow (deals 2 points)
                     dealRatioDamage(2, ratioTarget);
                 }
             }
@@ -186,7 +205,6 @@ public class Nanami extends Actor
             ratioTarget = null;
         }
 
-        // Auto-cancel if bar times out
         if (ratioBar != null && ratioBar.isExpired())
         {
             cancelRatio();
