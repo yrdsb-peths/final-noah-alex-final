@@ -49,6 +49,8 @@ public class DashIcon extends Actor
         
         setImage(img);
     }
+    
+    
     public void act()
     {
         // Add your action code here.
