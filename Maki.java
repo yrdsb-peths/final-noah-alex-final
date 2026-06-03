@@ -135,7 +135,7 @@ public class Maki extends Actor
             if (dashIcon != null) dashIcon.updateIcon(3);
         }
 
-        // --- CLOUD WEAPON ---
+        // --- ATTACK SELECTION ---
         if (mouse != null)
         {
             boolean leftClick   = Greenfoot.mousePressed(null) && mouse.getButton() == 1;
@@ -152,7 +152,7 @@ public class Maki extends Actor
                 laserCooldown = 30;
             }
 
-            // Middle click: boomerang arc throw
+            // Middle click: Shoot straight out and return straight back
             if (middleClick && laserCooldown == 0)
             {
                 turnTowards(mouse.getX(), mouse.getY());
@@ -163,14 +163,16 @@ public class Maki extends Actor
                 laserCooldown = 40;
             }
 
-            // Right click: forward curve shot
+            // Right click: Locked quarter-circle arc swing with extended long range
             if (rightClick && laserCooldown == 0)
             {
                 turnTowards(mouse.getX(), mouse.getY());
                 int angle = getRotation();
                 setRotation(0);
-                MakiCloud curveShot = new MakiCloud("CURVE", getX(), getY(), angle);
-                getWorld().addObject(curveShot, getX(), getY());
+                
+                // Spawns the anchored swing tracked directly to Maki
+                MakiSwing VisualSwing = new MakiSwing(this, angle);
+                getWorld().addObject(VisualSwing, getX(), getY());
                 laserCooldown = 25;
             }
         }
