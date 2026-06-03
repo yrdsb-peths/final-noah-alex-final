@@ -30,7 +30,11 @@ public class Maki extends Actor
     private int animTimer = 0;
     private final int ANIM_SPEED = 8;
     private int stunTimer = 0; 
-        public void getStunned(int frames)
+    public int getInvincibilityTimer()
+    {
+        return this.invincibilityTimer;
+    }
+    public void getStunned(int frames)
     {
         this.stunTimer = frames;
         //make the hero turn blue/gray when stunned
@@ -66,14 +70,11 @@ public class Maki extends Actor
         if (stunTimer > 0)
         {
             stunTimer--;
-            
-            // If stun just ended, restore normal look appearance
             if (stunTimer == 0) {
-                //setImage(frames); 
+                // Clear out blue tint filter overlay when stun ends
+                getImage().setColor(new Color(255, 255, 255, 255));
             }
-            
-            // CRITICAL: Stop everything else! Skips movement, shooting, and WASD keys completely
-            return; 
+            return; // Stops all WASD movement and weapon skills while frozen!
         }
         MouseInfo mouse = Greenfoot.getMouseInfo();
 

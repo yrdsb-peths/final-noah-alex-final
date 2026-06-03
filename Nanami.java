@@ -27,7 +27,12 @@ public class Nanami extends Actor
     private int animFrame = 0;
     private int animTimer = 0;
     private final int ANIM_SPEED = 8;
-
+    private int stunTimer = 0;
+    public void getStunned(int frames)
+    {
+        this.stunTimer = frames;
+        getImage().setColor(new Color(0, 150, 255));
+    }
     public Nanami()
     {
         idleFrames = new GreenfootImage[4];
@@ -54,12 +59,21 @@ public class Nanami extends Actor
         
         setImage(idleFrames[0]);
     }
-
+    public int getInvincibilityTimer()
+    {
+        return this.invincibilityTimer;
+    }
     public void setHpBar(HpBar bar) { this.healthBar = bar; }
     public void setDashIcon(DashIcon icon) { this.dashIcon = icon; }
 
     public void act()
     {
+        if (stunTimer > 0)
+        {
+            stunTimer--;
+            if (stunTimer == 0) getImage().setColor(new Color(255, 255, 255, 255));
+            return; // Blocks the 7:3 ratio bar and blunt strikes
+        }
         // 1. Invincibility Countdown
         if (invincibilityTimer > 0) 
         {

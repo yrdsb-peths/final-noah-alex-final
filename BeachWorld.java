@@ -109,19 +109,36 @@ public void act()
     }
     
     if (spawnDelay > 0) spawnDelay--;
-}
-
-
-
-private void spawnTestFish()
-{
-    // Spawns a fish at a random edge location
-    int x = Greenfoot.getRandomNumber(getWidth());
-    int y = Greenfoot.getRandomNumber(getHeight());
+    // Check if "p" is pressed and our delay is ready
+    if (Greenfoot.isKeyDown("b") && spawnDelay <= 0)
+    {
+        spawnTestTurtle();
+        spawnDelay = 20; // Wait 20 frames before allowing another spawn
+    }
     
-    // You can replace 'Fish' with 'Shark' or 'Crab' depending on your classes
-    addObject(new Crab(), x, y); 
+    if (spawnDelay > 0) spawnDelay--;
 }
+
+
+    private void spawnTestFish()
+    {
+        // Spawns a fish at a random edge location
+        int x = Greenfoot.getRandomNumber(getWidth());
+        int y = Greenfoot.getRandomNumber(getHeight());
+        
+        // You can replace 'Fish' with 'Shark' or 'Crab' depending on your classes
+        addObject(new Crab(), x, y); 
+    }
+    
+    private void spawnTestTurtle()
+    {
+        // Spawns a fish at a random edge location
+        int x = Greenfoot.getRandomNumber(getWidth());
+        int y = Greenfoot.getRandomNumber(getHeight());
+        
+        // You can replace 'Fish' with 'Shark' or 'Crab' depending on your classes
+        addObject(new Turtle(), x, y); 
+    }
 
     // Default constructor for compatibility if called without technique
     public BeachWorld()

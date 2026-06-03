@@ -47,7 +47,13 @@ public class Naobito extends Actor
     private ProjectionCursor aimCursor = null;
 
     private boolean greyedOut = false;
-
+    private int stunTimer = 0;
+    
+    public void getStunned(int frames)
+    {
+        this.stunTimer = frames;
+        getImage().setColor(new Color(0, 150, 255)); // Blue freeze tint
+    }
     // --- Constructor ---
     public Naobito()
     {
@@ -75,12 +81,21 @@ public class Naobito extends Actor
         
         setImage(idleFrames[0]);
     }
-
+    public int getInvincibilityTimer()
+    {
+        return this.invincibilityTimer;
+    }
     public void setHpBar(HpBar bar) { this.healthBar = bar; }
     public void setDashIcon(DashIcon icon) { this.dashIcon = icon; }
 
     public void act()
     {
+        if (stunTimer > 0)
+        {
+            stunTimer--;
+            if (stunTimer == 0) getImage().setColor(new Color(255, 255, 255, 255));
+            return; // Freezes custom frame tracing inputs
+        }
         MouseInfo mouse = Greenfoot.getMouseInfo();
         
         manageCursorVisuals(mouse);

@@ -57,22 +57,35 @@ public class Crab extends Actor
     {
         Actor target = getActiveHero();
         
-        // Check if we are physically touching our active tracked target
         if (target != null && isTouching(target.getClass()))
         {
-            // Cast down to individual classes to safely apply the stun method
             if (target instanceof Hero) {
-                ((Hero)target).getStunned(60); // 60 frames = 1 second freeze lock
-                ((Hero)target).takeDamage(1);   // Optional: still hits for 1 damage point
+                // Legacy support
+                Hero h = (Hero) target;
+                h.getStunned(60);
+                h.takeDamage(1);
             }
             else if (target instanceof Maki) {
-                // ((Maki)target).getStunned(60); // Uncomment these when you build out the JJK classes!
+                Maki m = (Maki) target;
+                // Only stun/damage if her invincibility timer is completely done!
+                if (m.getInvincibilityTimer() == 0) {
+                    m.getStunned(60); 
+                    m.takeDamage(1);   
+                }
             }
             else if (target instanceof Naobito) {
-                // ((Naobito)target).getStunned(60);
+                Naobito n = (Naobito) target;
+                if (n.getInvincibilityTimer() == 0) {
+                    n.getStunned(60);
+                    n.takeDamage(1); 
+                }
             }
             else if (target instanceof Nanami) {
-                // ((Nanami)target).getStunned(60);
+                Nanami n = (Nanami) target;
+                if (n.getInvincibilityTimer() == 0) {
+                    n.getStunned(60);
+                    n.takeDamage(1); 
+                }
             }
         }
     }

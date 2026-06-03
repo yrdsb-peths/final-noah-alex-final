@@ -27,6 +27,48 @@ public class Turtle extends Actor
         
         // 2. Check if hit by a laser
         checkLaserCollision();
+        
+        checkHeroContact();
+        if (getWorld() == null) return;
+        
+        checkLaserCollision();
+    }
+    
+    private void checkHeroContact()
+    {
+        if (getWorld() == null) return;
+        
+        Actor target = null;
+        if (!getWorld().getObjects(Maki.class).isEmpty()) target = getWorld().getObjects(Maki.class).get(0);
+        else if (!getWorld().getObjects(Naobito.class).isEmpty()) target = getWorld().getObjects(Naobito.class).get(0);
+        else if (!getWorld().getObjects(Nanami.class).isEmpty()) target = getWorld().getObjects(Nanami.class).get(0);
+        else if (!getWorld().getObjects(Hero.class).isEmpty()) target = getWorld().getObjects(Hero.class).get(0);
+        
+        if (target != null && isTouching(target.getClass()))
+        {
+            if (target instanceof Hero) { ((Hero)target).getStunned(90); ((Hero)target).takeDamage(2); }
+            else if (target instanceof Maki) {
+                Maki m = (Maki) target;
+                if (m.getInvincibilityTimer() == 0) {
+                    m.getStunned(90);
+                    m.takeDamage(2);
+                }
+            }
+            else if (target instanceof Naobito) {
+                Naobito n = (Naobito) target;
+                if (n.getInvincibilityTimer() == 0) {
+                    n.getStunned(90);
+                    n.takeDamage(2);
+                }
+            }
+            else if (target instanceof Nanami) {
+                Nanami n = (Nanami) target;
+                if (n.getInvincibilityTimer() == 0) {
+                    n.getStunned(90);
+                    n.takeDamage(2);
+                }
+            }
+        }
     }
     
     private void moveTowardsHero()
