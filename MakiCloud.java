@@ -24,17 +24,33 @@ public class MakiCloud extends Actor
     private java.util.ArrayList<Actor> hitActors = new java.util.ArrayList<>();
 
     public MakiCloud(String mode, int startX, int startY, int angle)
-    {
-        this.mode = mode;
-        this.ownerX = startX;
-        this.ownerY = startY;
-        this.boomerangAngle = angle;
-        this.curveAngle = angle;
+{
+    this.mode = mode;
+    this.ownerX = startX;
+    this.ownerY = startY;
+    this.boomerangAngle = angle;
+    this.curveAngle = angle;
 
-        GreenfootImage img = new GreenfootImage("poison-cloud.png");
+    // Each mode gets its own sprite
+    if (mode.equals("ORBIT"))
+    {
+        GreenfootImage img = new GreenfootImage("cloudswing.png");
         img.scale(35, 35);
         setImage(img);
     }
+    else if (mode.equals("BOOMERANG"))
+    {
+        GreenfootImage img = new GreenfootImage("cloudstrike.png");
+        img.scale(40, 5);
+        setImage(img);
+    }
+    else if (mode.equals("CURVE"))
+    {
+        GreenfootImage img = new GreenfootImage("cloudarc.png");
+        img.scale(35, 35);
+        setImage(img);
+    }
+}
 
     public void act()
     {

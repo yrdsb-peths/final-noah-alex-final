@@ -10,56 +10,61 @@ public class Maki extends Actor
     private final int INVINCIBILITY_DURATION = 30;
     private HpBar healthBar;
 
-    // Dash (longer than Hero's)
+    // Dash
     private int dashCooldown = 0;
     private int dashDuration = 0;
     private int moveAngle = 0;
     private DashIcon dashIcon;
 
     // Cloud weapon state
-    private MakiCloud orbitCloud = null;   // left click cloud
+    private MakiCloud orbitCloud = null;   
     private boolean rightHeldLastFrame = false;
     private boolean middleHeldLastFrame = false;
 
-    // Sprites (reuse hero sprites - swap if you have Maki sprites)
-    private GreenfootImage[] idleFrames;
+    // Full 4-Directional Animation Arrays
+    private GreenfootImage[] downFrames;
     private GreenfootImage[] upFrames;
-    private GreenfootImage[] leftFrames;
     private GreenfootImage[] rightFrames;
+    private GreenfootImage[] leftFrames;
+    
     private int animFrame = 0;
     private int animTimer = 0;
     private final int ANIM_SPEED = 8;
-    private int stunTimer = 0; 
-    public int getInvincibilityTimer()
-    {
-        return this.invincibilityTimer;
-    }
-    public void getStunned(int frames)
-    {
-        this.stunTimer = frames;
-        //make the hero turn blue/gray when stunned
-        getImage().setColor(new Color(0, 150, 255)); 
-    }
-    
+
     public Maki()
     {
-        idleFrames  = loadFrames("baseguy",       4);
-        upFrames    = loadFrames("baseguy-up",    4);
-        leftFrames  = loadFrames("baseguy-left",  4);
-        rightFrames = loadFrames("baseguy-right", 4);
-        setImage(idleFrames[0]);
-    }
+        downFrames  = new GreenfootImage[4];
+        upFrames    = new GreenfootImage[4];
+        rightFrames = new GreenfootImage[4];
+        leftFrames  = new GreenfootImage[4];
 
-    private GreenfootImage[] loadFrames(String base, int count)
-    {
-        GreenfootImage[] frames = new GreenfootImage[count];
-        for (int i = 0; i < count; i++)
+        // Explicit asset assignments using your exact file naming conventions
+        String[] downFiles  = {"maki.png", "maki2.png", "maki3.png", "maki4.png"};
+        String[] upFiles    = {"maki-up.png", "maki-up2.png", "maki-up3.png", "maki-up4.png"};
+        String[] rightFiles = {"maki-right.png", "maki-right2.png", "maki-right3.png", "maki-right4.png"};
+        String[] leftFiles  = {"maki-left.png", "maki-left2.png", "maki-left3.png", "maki-left4.png"};
+
+        for (int i = 0; i < 4; i++)
         {
-            String suffix = (i == 0) ? "" : Integer.toString(i + 1);
-            frames[i] = new GreenfootImage(base + suffix + ".png");
-            frames[i].scale(50, 50);
+            // 1. Down/Idle Facing
+            downFrames[i] = new GreenfootImage(downFiles[i]);
+            downFrames[i].scale(50, 50);
+
+            // 2. Up Facing
+            upFrames[i] = new GreenfootImage(upFiles[i]);
+            upFrames[i].scale(50, 50);
+
+            // 3. Right Facing
+            rightFrames[i] = new GreenfootImage(rightFiles[i]);
+            rightFrames[i].scale(50, 50);
+
+            // 4. Left Facing (Loading your custom left sprites directly)
+            leftFrames[i] = new GreenfootImage(leftFiles[i]);
+            leftFrames[i].scale(50, 50);
         }
-        return frames;
+
+        // Default layout posture
+        setImage(downFrames[0]);
     }
 
     public void setHpBar(HpBar bar) { this.healthBar = bar; }
@@ -67,15 +72,6 @@ public class Maki extends Actor
 
     public void act()
     {
-        if (stunTimer > 0)
-        {
-            stunTimer--;
-            if (stunTimer == 0) {
-                // Clear out blue tint filter overlay when stun ends
-                getImage().setColor(new Color(255, 255, 255, 255));
-            }
-            return; // Stops all WASD movement and weapon skills while frozen!
-        }
         MouseInfo mouse = Greenfoot.getMouseInfo();
 
         // Timers
@@ -95,30 +91,31 @@ public class Maki extends Actor
                 dashIcon.updateIcon(dashCooldown / 60);
         }
 
-        // Dash execution (longer than Hero - 16 frames instead of 10)
+        // Dash handling
         if (dashDuration > 0)
         {
             dashDuration--;
             invincibilityTimer = 2;
             int cur = getRotation();
             setRotation(moveAngle);
-            move(18); // slightly faster dash speed too
+            move(18); 
             setRotation(cur);
             checkEnemyContact();
             return;
         }
 
-        // Movement
+        // Directional state resolution 
         boolean keyIsPressed = false;
         int dx1 = 0, dy1 = 0;
-        GreenfootImage[] currentFrames = idleFrames;
+        GreenfootImage[] currentFrames = downFrames; // Default baseline state
 
         if (Greenfoot.isKeyDown("a")) { setLocation(getX() - 6, getY()); currentFrames = leftFrames;  keyIsPressed = true; dx1 = -1; }
-        if (Greenfoot.isKeyDown("d")) { setLocation(getX() + 6, getY()); currentFrames = rightFrames; keyIsPressed = true; dx1 =  1; }
+        else if (Greenfoot.isKeyDown("d")) { setLocation(getX() + 6, getY()); currentFrames = rightFrames; keyIsPressed = true; dx1 =  1; }
+        
         if (Greenfoot.isKeyDown("w")) { setLocation(getX(), getY() - 6); currentFrames = upFrames;    keyIsPressed = true; dy1 = -1; }
-        if (Greenfoot.isKeyDown("s")) { setLocation(getX(), getY() + 6); currentFrames = idleFrames;  keyIsPressed = true; dy1 =  1; }
+        else if (Greenfoot.isKeyDown("s")) { setLocation(getX(), getY() + 6); currentFrames = downFrames;  keyIsPressed = true; dy1 =  1; }
 
-        // Animation
+        // Dynamic State Processing
         animTimer++;
         if (animTimer >= ANIM_SPEED)
         {
@@ -127,7 +124,7 @@ public class Maki extends Actor
         }
         setImage(currentFrames[animFrame]);
 
-        // Dash activation (longer: 16 frames)
+        // Dash processing activation
         if (Greenfoot.isKeyDown("r") && dashCooldown == 0 && (dx1 != 0 || dy1 != 0))
         {
             dashDuration = 16;
@@ -136,14 +133,13 @@ public class Maki extends Actor
             if (dashIcon != null) dashIcon.updateIcon(3);
         }
 
-        // --- ATTACK SELECTION ---
+        // Combat Engine Input Maps
         if (mouse != null)
         {
             boolean leftClick   = Greenfoot.mousePressed(null) && mouse.getButton() == 1;
             boolean middleClick = mouse.getButton() == 2 && Greenfoot.mousePressed(null);
             boolean rightClick  = mouse.getButton() == 3 && Greenfoot.mousePressed(null);
 
-            // Left click: spawn orbiting cloud (one at a time)
             if (leftClick && laserCooldown == 0)
             {
                 if (orbitCloud != null && orbitCloud.getWorld() != null)
@@ -153,7 +149,6 @@ public class Maki extends Actor
                 laserCooldown = 30;
             }
 
-            // Middle click: Shoot straight out and return straight back
             if (middleClick && laserCooldown == 0)
             {
                 turnTowards(mouse.getX(), mouse.getY());
@@ -164,14 +159,12 @@ public class Maki extends Actor
                 laserCooldown = 40;
             }
 
-            // Right click: Locked quarter-circle arc swing with extended long range
             if (rightClick && laserCooldown == 0)
             {
                 turnTowards(mouse.getX(), mouse.getY());
                 int angle = getRotation();
                 setRotation(0);
                 
-                // Spawns the anchored swing tracked directly to Maki
                 MakiSwing VisualSwing = new MakiSwing(this, angle);
                 getWorld().addObject(VisualSwing, getX(), getY());
                 laserCooldown = 25;

@@ -3,34 +3,30 @@ import java.util.List;
 
 public class Turtle extends Actor
 {
-    private int crabHp = 6; // Takes 3 hits to die!
+    private int crabHp = 6; // Takes multiple hits to die!
     private GreenfootImage baseCrabImage;
     
     public Turtle()
     {
-        // Uses the exact same fish asset and scaling as your fish class
         baseCrabImage = new GreenfootImage("turtle.jpg");
         baseCrabImage.scale(100, 100);
         
-        // Dynamic drawing step to attach the full green health bar initially
         updateFishAppearance();
     }
     
     public void act()
     {
-        // EMERGENCY BRAKE: If deleted earlier in this frame loop, stop instantly
         if (getWorld() == null) return;
         
-        // 1. Move towards whatever hero is alive in the active world
+        // 1. Move towards whatever hero is alive
         moveTowardsHero();
         if (getWorld() == null) return;
         
-        // 2. Check if hit by a laser
-        checkLaserCollision();
-        
+        // 2. Check if we managed to deliver a bite attack!
         checkHeroContact();
         if (getWorld() == null) return;
         
+        // 3. Check if hit by a laser
         checkLaserCollision();
     }
     
@@ -44,38 +40,32 @@ public class Turtle extends Actor
         else if (!getWorld().getObjects(Nanami.class).isEmpty()) target = getWorld().getObjects(Nanami.class).get(0);
         else if (!getWorld().getObjects(Hero.class).isEmpty()) target = getWorld().getObjects(Hero.class).get(0);
         
-        if (target != null && isTouching(target.getClass()))
+        // Check if we are directly intersecting our active target actor
+        if (target != null && intersects(target))
         {
-            if (target instanceof Hero) { ((Hero)target).getStunned(90); ((Hero)target).takeDamage(2); }
+            if (target instanceof Hero) { 
+                ((Hero)target).takeDamage(2); 
+            }
             else if (target instanceof Maki) {
                 Maki m = (Maki) target;
-                if (m.getInvincibilityTimer() == 0) {
-                    m.getStunned(90);
-                    m.takeDamage(2);
-                }
+                m.takeDamage(2);
             }
             else if (target instanceof Naobito) {
                 Naobito n = (Naobito) target;
-                if (n.getInvincibilityTimer() == 0) {
-                    n.getStunned(90);
-                    n.takeDamage(2);
-                }
+                n.takeDamage(2);
             }
             else if (target instanceof Nanami) {
                 Nanami n = (Nanami) target;
-                if (n.getInvincibilityTimer() == 0) {
-                    n.getStunned(90);
-                    n.takeDamage(2);
-                }
+                n.takeDamage(2);
             }
         }
     }
     
     private void moveTowardsHero()
     {
+        if (getWorld() == null) return;
         Actor target = null;
         
-        // Universal tracking: Check for JJK heroes or your original legacy Hero class
         if (!getWorld().getObjects(Maki.class).isEmpty()) {
             target = getWorld().getObjects(Maki.class).get(0);
         } else if (!getWorld().getObjects(Naobito.class).isEmpty()) {
@@ -86,7 +76,6 @@ public class Turtle extends Actor
             target = getWorld().getObjects(Hero.class).get(0);
         }
         
-        // If an active target is found, turn towards them and step forward
         if (target != null)
         {
             turnTowards(target.getX(), target.getY());
@@ -154,27 +143,20 @@ public class Turtle extends Actor
         }
     }
 
-    /**
-     * Handles points allocation dynamically without crashing BeachWorld
-     */
     private void handleDeath()
     {
         World genericWorld = getWorld();
         if (genericWorld == null) return;
 
-        // If we are playing inside the original test world, update its unique score systems
         if (genericWorld instanceof MyWorld)
         {
             MyWorld world = (MyWorld) genericWorld;
             world.increaseScore(); 
             world.notifyNemoKilled();
         }
-        // If inside BeachWorld, it won't force cast to MyWorld anymore! 
         else if (genericWorld instanceof BeachWorld)
         {
             BeachWorld world = (BeachWorld) genericWorld;
-            // If you add a scoring system to BeachWorld later, you can add it here safely:
-            // world.increaseScore();
         }
 
         genericWorld.removeObject(this);

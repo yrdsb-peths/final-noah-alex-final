@@ -21,11 +21,9 @@ public class MakiSwing extends Actor
         
         setRotation(baseAngle + currentOffsetAngle);
         
-        // CONSISTENT SPRITE: Loading the exact same sprite as left and middle clicks
-        GreenfootImage img = new GreenfootImage("poison-cloud.png");
-        // EXTRA LONG RANGE: Scaled significantly larger (75x75) than normal clouds (35x35)
-        img.scale(75, 75); 
-        setImage(img);
+        GreenfootImage img = new GreenfootImage("cloudarc.png");
+img.scale(75, 75);
+setImage(img);
     }
 
     public void act()
