@@ -2,6 +2,7 @@ import greenfoot.*;
 
 public class CutsceneWorld extends World
 {
+    private int savedScore; // Variable to keep the score safe
     private String[][] dialogueData = {
         { "???", "oh... a stupid human has shown up in this realm...", "HIDDEN" },
         { "Hero", "...", "HIDDEN" },
@@ -18,11 +19,11 @@ public class CutsceneWorld extends World
     private DialogueBox textBox;
     private CutsceneActor heroSprite;
     private CutsceneActor dagonSprite;
-
-    public CutsceneWorld()
-    {
-        super(800, 600, 1);
-
+    
+    public CutsceneWorld(int scoreFromPreviousWorld)
+    {    
+        super(800, 600, 1); 
+        this.savedScore = scoreFromPreviousWorld; // Save it!
         GreenfootImage bg = new GreenfootImage("background.png");
         bg.scale(800, 600);
         setBackground(bg);
@@ -39,8 +40,13 @@ public class CutsceneWorld extends World
         addObject(dagonSprite, 650, 300);
 
         displayLine(currentLine);
+        // ... Keep all your existing dialogue boxes, background, and character image code exactly the same ...
     }
 
+    public CutsceneWorld() {
+        this(0);
+    }
+    
     public void act()
     {
         if (Greenfoot.isKeyDown("space"))
@@ -61,9 +67,14 @@ public class CutsceneWorld extends World
     {
         currentLine++;
         if (currentLine < dialogueData.length)
+        {
             displayLine(currentLine);
+        }
         else
-            Greenfoot.setWorld(new TechniqueSelectWorld());
+        {
+            // PASS THE SAVED SCORE TO BEACHWORLD!
+            Greenfoot.setWorld(new BeachWorld("MAKI", savedScore)); 
+        }
     }
 
     private void displayLine(int index)

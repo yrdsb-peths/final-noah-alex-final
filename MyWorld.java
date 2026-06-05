@@ -210,4 +210,8 @@ public class MyWorld extends World {
         boss.setHpBar(krakenBar);
         addObject(boss, 500, 300);
     }
+    public int getScore()
+    {
+        return this.score;
+    }
 }
