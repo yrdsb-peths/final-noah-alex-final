@@ -18,8 +18,6 @@ public class Maki extends Actor
 
     // Cloud weapon state
     private MakiCloud orbitCloud = null;   
-    private boolean rightHeldLastFrame = false;
-    private boolean middleHeldLastFrame = false;
 
     // Full 4-Directional Animation Arrays
     private GreenfootImage[] downFrames;
@@ -30,6 +28,9 @@ public class Maki extends Actor
     private int animFrame = 0;
     private int animTimer = 0;
     private final int ANIM_SPEED = 8;
+    
+    // Stun Mechanics (FIXED: Added missing states to handle Turtle impacts)
+    private int stunTimer = 0;
 
     public Maki()
     {
@@ -38,7 +39,6 @@ public class Maki extends Actor
         rightFrames = new GreenfootImage[4];
         leftFrames  = new GreenfootImage[4];
 
-        // Explicit asset assignments using your exact file naming conventions
         String[] downFiles  = {"maki.png", "maki2.png", "maki3.png", "maki4.png"};
         String[] upFiles    = {"maki-up.png", "maki-up2.png", "maki-up3.png", "maki-up4.png"};
         String[] rightFiles = {"maki-right.png", "maki-right2.png", "maki-right3.png", "maki-right4.png"};
@@ -46,32 +46,47 @@ public class Maki extends Actor
 
         for (int i = 0; i < 4; i++)
         {
-            // 1. Down/Idle Facing
             downFrames[i] = new GreenfootImage(downFiles[i]);
             downFrames[i].scale(50, 50);
 
-            // 2. Up Facing
             upFrames[i] = new GreenfootImage(upFiles[i]);
             upFrames[i].scale(50, 50);
 
-            // 3. Right Facing
             rightFrames[i] = new GreenfootImage(rightFiles[i]);
             rightFrames[i].scale(50, 50);
 
-            // 4. Left Facing (Loading your custom left sprites directly)
             leftFrames[i] = new GreenfootImage(leftFiles[i]);
             leftFrames[i].scale(50, 50);
         }
 
-        // Default layout posture
         setImage(downFrames[0]);
+    }
+
+    // FIXED: Added missing getStunned method called by Turtle
+    public void getStunned(int frames)
+    {
+        this.stunTimer = frames;
+        if (getImage() != null) {
+            getImage().setColor(new Color(0, 150, 255)); // Blue tint for stun status
+        }
     }
 
     public void setHpBar(HpBar bar) { this.healthBar = bar; }
     public void setDashIcon(DashIcon icon) { this.dashIcon = icon; }
+    public int getInvincibilityTimer() { return invincibilityTimer; }
 
     public void act()
     {
+        // FIXED: Handle stun countdown and block inputs while stunned
+        if (stunTimer > 0)
+        {
+            stunTimer--;
+            if (stunTimer == 0 && getImage() != null) {
+                getImage().setColor(new Color(255, 255, 255, 255)); // Clear blue tint
+            }
+            return; // Exit early so no movement or combat can happen
+        }
+
         MouseInfo mouse = Greenfoot.getMouseInfo();
 
         // Timers
@@ -107,7 +122,7 @@ public class Maki extends Actor
         // Directional state resolution 
         boolean keyIsPressed = false;
         int dx1 = 0, dy1 = 0;
-        GreenfootImage[] currentFrames = downFrames; // Default baseline state
+        GreenfootImage[] currentFrames = downFrames;
 
         if (Greenfoot.isKeyDown("a")) { setLocation(getX() - 6, getY()); currentFrames = leftFrames;  keyIsPressed = true; dx1 = -1; }
         else if (Greenfoot.isKeyDown("d")) { setLocation(getX() + 6, getY()); currentFrames = rightFrames; keyIsPressed = true; dx1 =  1; }
@@ -136,11 +151,9 @@ public class Maki extends Actor
         // Combat Engine Input Maps
         if (mouse != null)
         {
-            boolean leftClick   = Greenfoot.mousePressed(null) && mouse.getButton() == 1;
-            boolean middleClick = mouse.getButton() == 2 && Greenfoot.mousePressed(null);
-            boolean rightClick  = mouse.getButton() == 3 && Greenfoot.mousePressed(null);
+            boolean mousePressed = Greenfoot.mousePressed(null);
 
-            if (leftClick && laserCooldown == 0)
+            if (mousePressed && mouse.getButton() == 1 && laserCooldown == 0)
             {
                 if (orbitCloud != null && orbitCloud.getWorld() != null)
                     getWorld().removeObject(orbitCloud);
@@ -149,25 +162,26 @@ public class Maki extends Actor
                 laserCooldown = 30;
             }
 
-            if (middleClick && laserCooldown == 0)
-            {
-                turnTowards(mouse.getX(), mouse.getY());
-                int angle = getRotation();
-                setRotation(0);
-                MakiCloud boomerang = new MakiCloud("BOOMERANG", getX(), getY(), angle);
-                getWorld().addObject(boomerang, getX(), getY());
-                laserCooldown = 40;
-            }
-
-            if (rightClick && laserCooldown == 0)
+            if (mousePressed && mouse.getButton() == 2 && laserCooldown == 0)
             {
                 turnTowards(mouse.getX(), mouse.getY());
                 int angle = getRotation();
                 setRotation(0);
                 
-                MakiSwing VisualSwing = new MakiSwing(this, angle);
-                getWorld().addObject(VisualSwing, getX(), getY());
+                MakiSwing visualSwing = new MakiSwing(this, angle);
+                getWorld().addObject(visualSwing, getX(), getY());
                 laserCooldown = 25;
+            }
+
+            if (mousePressed && mouse.getButton() == 3 && laserCooldown == 0)
+            {
+                turnTowards(mouse.getX(), mouse.getY());
+                int angle = getRotation();
+                setRotation(0);
+                
+                MakiCloud boomerang = new MakiCloud("BOOMERANG", getX(), getY(), angle);
+                getWorld().addObject(boomerang, getX(), getY());
+                laserCooldown = 40;
             }
         }
 
@@ -176,31 +190,31 @@ public class Maki extends Actor
 
     private void checkEnemyContact()
     {
-        if (isTouching(Fish.class) && invincibilityTimer == 0)
+        if (invincibilityTimer == 0 && (isTouching(Fish.class) || isTouching(Turtle.class)))
+        {
             takeDamage(1);
+        }
     }
 
     public void takeDamage(int amount)
-{
-    if (invincibilityTimer == 0)
     {
-        hp -= amount;
-        invincibilityTimer = INVINCIBILITY_DURATION;
-        if (healthBar != null) healthBar.updateBar(hp);
-        
-        if (hp <= 0) 
+        if (invincibilityTimer == 0)
         {
-            // Check if we are currently fighting in BeachWorld
-            boolean isBeach = (getWorld() instanceof BeachWorld);
-            Greenfoot.setWorld(new GameOver(isBeach));
+            hp -= amount;
+            invincibilityTimer = INVINCIBILITY_DURATION;
+            if (healthBar != null) healthBar.updateBar(hp);
+            
+            if (hp <= 0) 
+            {
+                boolean isBeach = (getWorld() instanceof BeachWorld);
+                Greenfoot.setWorld(new GameOver(isBeach));
+            }
         }
     }
-}
 
     public void heal(int amount)
     {
         hp = Math.min(10, hp + amount);
         if (healthBar != null) healthBar.updateBar(hp);
     }
-
 }
