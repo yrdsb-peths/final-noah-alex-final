@@ -13,6 +13,7 @@ public class Nanami extends Actor
     private DashIcon dashIcon;
     private int hp = 10;
     private int invincibilityTimer = 0;
+    private final int INVINCIBILITY_DURATION = 30; // <-- FIXED: Added missing constant for safety i-frames!
 
     // Dash Variables (Perfectly matched to Hero's logic)
     private int dashCooldown = 0;      // Ticks down from 180 (3 seconds)
@@ -28,11 +29,13 @@ public class Nanami extends Actor
     private int animTimer = 0;
     private final int ANIM_SPEED = 8;
     private int stunTimer = 0;
+
     public void getStunned(int frames)
     {
         this.stunTimer = frames;
         getImage().setColor(new Color(0, 150, 255));
     }
+
     public Nanami()
     {
         idleFrames = new GreenfootImage[4];
@@ -59,10 +62,12 @@ public class Nanami extends Actor
         
         setImage(idleFrames[0]);
     }
+
     public int getInvincibilityTimer()
     {
         return this.invincibilityTimer;
     }
+
     public void setHpBar(HpBar bar) { this.healthBar = bar; }
     public void setDashIcon(DashIcon icon) { this.dashIcon = icon; }
 
@@ -144,42 +149,42 @@ public class Nanami extends Actor
             ratioBar.setLocation(getX(), getY() - 50);
         }
 
-        // 4. KEYBOARD MOVEMENT & DASH HANDLING
-        if (!ratioActive)
+        // 4. KEYBOARD MOVEMENT & DASH HANDLING (Now unrestricted by ratioActive!)
+        int dx1 = 0;
+        int dy1 = 0;
+        boolean keyIsPressed = false;
+        GreenfootImage[] currentFrames = idleFrames;
+
+        if (Greenfoot.isKeyDown("a")) { setLocation(getX() - 4, getY()); currentFrames = leftFrames;  keyIsPressed = true; dx1 = -1; }
+        if (Greenfoot.isKeyDown("d")) { setLocation(getX() + 4, getY()); currentFrames = rightFrames; keyIsPressed = true; dx1 = 1;  }
+        if (Greenfoot.isKeyDown("w")) { setLocation(getX(), getY() - 4); currentFrames = upFrames;    keyIsPressed = true; dy1 = -1; }
+        if (Greenfoot.isKeyDown("s")) { setLocation(getX(), getY() + 4); currentFrames = idleFrames;  keyIsPressed = true; dy1 = 1;  }
+
+        // Check for Dash Activation Input (Hero Logic)
+        if (Greenfoot.isKeyDown("r") && dashCooldown == 0 && (dx1 != 0 || dy1 != 0))
         {
-            int dx1 = 0;
-            int dy1 = 0;
-            boolean keyIsPressed = false;
-            GreenfootImage[] currentFrames = idleFrames;
-
-            if (Greenfoot.isKeyDown("a")) { setLocation(getX() - 4, getY()); currentFrames = leftFrames;  keyIsPressed = true; dx1 = -1; }
-            if (Greenfoot.isKeyDown("d")) { setLocation(getX() + 4, getY()); currentFrames = rightFrames; keyIsPressed = true; dx1 = 1;  }
-            if (Greenfoot.isKeyDown("w")) { setLocation(getX(), getY() - 4); currentFrames = upFrames;    keyIsPressed = true; dy1 = -1; }
-            if (Greenfoot.isKeyDown("s")) { setLocation(getX(), getY() + 4); currentFrames = idleFrames;  keyIsPressed = true; dy1 = 1;  }
-
-            // Check for Dash Activation Input (Hero Logic)
-            if (Greenfoot.isKeyDown("r") && dashCooldown == 0 && (dx1 != 0 || dy1 != 0))
-            {
-                dashDuration = 10;    // Active movement frame windows
-                dashCooldown = 180;   // 3 seconds total reset clock
-                
-                // Convert current WASD directions to an operational angle
-                moveAngle = (int) Math.toDegrees(Math.atan2(dy1, dx1)); 
-                
-                if (dashIcon != null) dashIcon.updateIcon(3); // Start UI clock text immediately at 3
-            }
-
-            animTimer++;
-            if (animTimer >= ANIM_SPEED)
-            {
-                animTimer = 0;
-                if (keyIsPressed) animFrame = (animFrame + 1) % 4;
-                else animFrame = 0;
-            }
-            setImage(currentFrames[animFrame]);
+            dashDuration = 10;    // Active movement frame windows
+            dashCooldown = 180;   // 3 seconds total reset clock
+            
+            // Convert current WASD directions to an operational angle
+            moveAngle = (int) Math.toDegrees(Math.atan2(dy1, dx1)); 
+            
+            if (dashIcon != null) dashIcon.updateIcon(3); // Start UI clock text immediately at 3
         }
-        else
+
+        // Handle sprite cycling
+        animTimer++;
+        if (animTimer >= ANIM_SPEED)
         {
+            animTimer = 0;
+            if (keyIsPressed) animFrame = (animFrame + 1) % 4;
+            else animFrame = 0;
+        }
+        
+        // Update his graphic dynamically depending on movement state
+        if (keyIsPressed) {
+            setImage(currentFrames[animFrame]);
+        } else {
             setImage(idleFrames[0]);
         }
 
@@ -235,9 +240,15 @@ public class Nanami extends Actor
         if (invincibilityTimer == 0)
         {
             hp -= amount;
-            invincibilityTimer = 30;
+            invincibilityTimer = INVINCIBILITY_DURATION;
             if (healthBar != null) healthBar.updateBar(hp);
-            if (hp <= 0) Greenfoot.setWorld(new GameOver());
+            
+            if (hp <= 0) 
+            {
+                // Check if we are currently fighting in BeachWorld
+                boolean isBeach = (getWorld() instanceof BeachWorld);
+                Greenfoot.setWorld(new GameOver(isBeach));
+            }
         }
     }
 }

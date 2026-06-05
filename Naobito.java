@@ -582,15 +582,21 @@ public class Naobito extends Actor
     }
 
     public void takeDamage(int amount)
+{
+    if (invincibilityTimer == 0)
     {
-        if (invincibilityTimer == 0 && psState == PS_NONE)
+        hp -= amount;
+        invincibilityTimer = INVINCIBILITY_DURATION;
+        if (healthBar != null) healthBar.updateBar(hp);
+        
+        if (hp <= 0) 
         {
-            hp -= amount;
-            invincibilityTimer = INVINCIBILITY_DURATION;
-            if (healthBar != null) healthBar.updateBar(hp);
-            if (hp <= 0) Greenfoot.setWorld(new GameOver());
+            // Check if we are currently fighting in BeachWorld
+            boolean isBeach = (getWorld() instanceof BeachWorld);
+            Greenfoot.setWorld(new GameOver(isBeach));
         }
     }
+}
 
     public void heal(int amount)
     {
