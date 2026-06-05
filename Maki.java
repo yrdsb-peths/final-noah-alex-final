@@ -203,4 +203,5 @@ public class Maki extends Actor
         hp = Math.min(10, hp + amount);
         if (healthBar != null) healthBar.updateBar(hp);
     }
+
 }

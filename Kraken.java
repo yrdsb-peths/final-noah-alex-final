@@ -268,9 +268,30 @@ public class Kraken extends Actor
     
     private void die()
     {
-        if (activeWall != null && activeWall.getWorld() != null) getWorld().removeObject(activeWall);
-        getWorld().removeObject(this);
-        Greenfoot.setWorld(new CutsceneWorld());
+        // 1. Clean up the physical threat wall if it's still floating around
+        if (activeWall != null && activeWall.getWorld() != null) 
+        {
+            getWorld().removeObject(activeWall);
+        }
+        
+        // 2. Save a safe reference to the world BEFORE removing this object
+        World currentWorld = getWorld();
+        int finalScore = 0;
+        
+        // 3. Extract the score value safely from MyWorld
+        if (currentWorld instanceof MyWorld)
+        {
+            finalScore = ((MyWorld) currentWorld).getScore();
+        }
+        
+        // 4. Load the cutscene world and pass the score baton down the line!
+        Greenfoot.setWorld(new CutsceneWorld(finalScore));
+        
+        // 5. Finally, remove the Kraken actor safely
+        if (currentWorld != null)
+        {
+            currentWorld.removeObject(this);
+        }
     }
 
     private void updateKrakenAppearance()

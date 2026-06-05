@@ -162,19 +162,18 @@ public class Turtle extends Actor
         World genericWorld = getWorld();
         if (genericWorld == null) return;
 
-        // If we are playing inside the original test world, update its unique score systems
+        // If we are playing inside the original test world
         if (genericWorld instanceof MyWorld)
         {
             MyWorld world = (MyWorld) genericWorld;
             world.increaseScore(); 
             world.notifyNemoKilled();
         }
-        // If inside BeachWorld, it won't force cast to MyWorld anymore! 
-        else if (genericWorld instanceof BeachWorld)
+        // --- FIX: Ensure the cast matches the exact public class name ---
+        else if (genericWorld.getClass().getSimpleName().equals("BeachWorld") || genericWorld instanceof BeachWorld)
         {
             BeachWorld world = (BeachWorld) genericWorld;
-            // If you add a scoring system to BeachWorld later, you can add it here safely:
-            // world.increaseScore();
+            world.increaseScore(); // Calls the score and wave logic!
         }
 
         genericWorld.removeObject(this);

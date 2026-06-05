@@ -62,28 +62,28 @@ public class Crab extends Actor
             if (target instanceof Hero) {
                 // Legacy support
                 Hero h = (Hero) target;
-                h.getStunned(60);
+                h.getStunned(30);
                 h.takeDamage(1);
             }
             else if (target instanceof Maki) {
                 Maki m = (Maki) target;
                 // Only stun/damage if her invincibility timer is completely done!
                 if (m.getInvincibilityTimer() == 0) {
-                    m.getStunned(60); 
+                    m.getStunned(30); 
                     m.takeDamage(1);   
                 }
             }
             else if (target instanceof Naobito) {
                 Naobito n = (Naobito) target;
                 if (n.getInvincibilityTimer() == 0) {
-                    n.getStunned(60);
+                    n.getStunned(30);
                     n.takeDamage(1); 
                 }
             }
             else if (target instanceof Nanami) {
                 Nanami n = (Nanami) target;
                 if (n.getInvincibilityTimer() == 0) {
-                    n.getStunned(60);
+                    n.getStunned(30);
                     n.takeDamage(1); 
                 }
             }
@@ -170,7 +170,7 @@ public class Crab extends Actor
         {
             BeachWorld world = (BeachWorld) genericWorld;
             // If you add a scoring system to BeachWorld later, you can add it here safely:
-            // world.increaseScore();
+            world.increaseScore();
         }
 
         genericWorld.removeObject(this);
