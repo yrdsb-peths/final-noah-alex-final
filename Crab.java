@@ -8,6 +8,7 @@ public class Crab extends Actor
     
     public Crab()
     {
+        // Uses the exact same fish asset and scaling as your fish class
         baseCrabImage = new GreenfootImage("CRAB.jpg");
         baseCrabImage.scale(30, 30);
         
@@ -22,7 +23,7 @@ public class Crab extends Actor
         moveTowardsHero();
         if (getWorld() == null) return;
         
-        // 2. Check if we managed to deliver a claw attack!
+        // 2. NEW: Check if we managed to deliver a claw attack!
         checkHeroContact();
         if (getWorld() == null) return;
         
@@ -56,25 +57,35 @@ public class Crab extends Actor
     {
         Actor target = getActiveHero();
         
-        // Check if we are directly intersecting our active target actor
-        if (target != null && intersects(target))
+        if (target != null && isTouching(target.getClass()))
         {
             if (target instanceof Hero) {
+                // Legacy support
                 Hero h = (Hero) target;
-                // Hero legacy support usually handles its own hit states or damage
+                h.getStunned(30);
                 h.takeDamage(1);
             }
             else if (target instanceof Maki) {
                 Maki m = (Maki) target;
-                m.takeDamage(1);   
+                // Only stun/damage if her invincibility timer is completely done!
+                if (m.getInvincibilityTimer() == 0) {
+                    m.getStunned(30); 
+                    m.takeDamage(1);   
+                }
             }
             else if (target instanceof Naobito) {
                 Naobito n = (Naobito) target;
-                n.takeDamage(1); 
+                if (n.getInvincibilityTimer() == 0) {
+                    n.getStunned(30);
+                    n.takeDamage(1); 
+                }
             }
             else if (target instanceof Nanami) {
                 Nanami n = (Nanami) target;
-                n.takeDamage(1); 
+                if (n.getInvincibilityTimer() == 0) {
+                    n.getStunned(30);
+                    n.takeDamage(1); 
+                }
             }
         }
     }
@@ -139,20 +150,27 @@ public class Crab extends Actor
         }
     }
 
+    /**
+     * Handles points allocation dynamically without crashing BeachWorld
+     */
     private void handleDeath()
     {
         World genericWorld = getWorld();
         if (genericWorld == null) return;
 
+        // If we are playing inside the original test world, update its unique score systems
         if (genericWorld instanceof MyWorld)
         {
             MyWorld world = (MyWorld) genericWorld;
             world.increaseScore(); 
             world.notifyNemoKilled();
         }
+        // If inside BeachWorld, it won't force cast to MyWorld anymore! 
         else if (genericWorld instanceof BeachWorld)
         {
             BeachWorld world = (BeachWorld) genericWorld;
+            // If you add a scoring system to BeachWorld later, you can add it here safely:
+            world.increaseScore();
         }
 
         genericWorld.removeObject(this);
