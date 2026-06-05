@@ -37,20 +37,24 @@ public class TechniqueSelectWorld extends World
 
     public void act()
     {
-        // Update hover glow on all buttons each frame
+        // 1. Hover updates must happen every frame before checking key clicks!
         MouseInfo mouse = Greenfoot.getMouseInfo();
         makiBtn.update(mouse);
         naoBtn.update(mouse);
         nanamiBtn.update(mouse);
 
+        // 2. Check confirmation
         if (Greenfoot.isKeyDown("space"))
         {
-            if (makiBtn.isSelected())
-                Greenfoot.setWorld(new BeachWorld("MAKI"));
-            else if (naoBtn.isSelected())
-                Greenfoot.setWorld(new BeachWorld("NAOBITO"));
-            else if (nanamiBtn.isSelected())
-                Greenfoot.setWorld(new BeachWorld("NANAMI"));
+            String selected = "";
+            if (makiBtn.isSelected()) selected = "MAKI";
+            else if (naoBtn.isSelected()) selected = "NAOBITO";
+            else if (nanamiBtn.isSelected()) selected = "NANAMI";
+            
+            if (!selected.equals(""))
+            {
+                Greenfoot.setWorld(new ControlsScreen(selected));
+            }
         }
     }
 }
