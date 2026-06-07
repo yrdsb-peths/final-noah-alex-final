@@ -8,10 +8,8 @@ public class Crab extends Actor
     
     public Crab()
     {
-        // Uses the exact same fish asset and scaling as your fish class
         baseCrabImage = new GreenfootImage("CRAB.jpg");
         baseCrabImage.scale(30, 30);
-        
         updateFishAppearance();
     }
     
@@ -19,11 +17,20 @@ public class Crab extends Actor
     {
         if (getWorld() == null) return;
         
+        // --- PROJECTION SORCERY FREEZE ENGINE ---
+        if (getWorld() instanceof BeachWorld) {
+            BeachWorld bw = (BeachWorld) getWorld();
+            // Freeze if general time freeze is active OR if this specific crab is trapped in a glass panel
+            if (bw.isTimeFrozen() || bw.getFrozenEnemy() == this) {
+                return; // Stop acting instantly! No movement, no damage processing.
+            }
+        }
+        
         // 1. Move towards whatever hero is alive
         moveTowardsHero();
         if (getWorld() == null) return;
         
-        // 2. NEW: Check if we managed to deliver a claw attack!
+        // 2. Check if we managed to deliver a claw attack!
         checkHeroContact();
         if (getWorld() == null) return;
         
@@ -34,11 +41,10 @@ public class Crab extends Actor
     private void moveTowardsHero()
     {
         Actor target = getActiveHero();
-        
         if (target != null)
         {
             turnTowards(target.getX(), target.getY());
-            move(4); // Nice and fast movement speed!
+            move(4); 
         }
     }
     
@@ -49,64 +55,28 @@ public class Crab extends Actor
         if (!getWorld().getObjects(Naobito.class).isEmpty()) return getWorld().getObjects(Naobito.class).get(0);
         if (!getWorld().getObjects(Nanami.class).isEmpty()) return getWorld().getObjects(Nanami.class).get(0);
         if (!getWorld().getObjects(Hero.class).isEmpty()) return getWorld().getObjects(Hero.class).get(0);
-        
         return null;
     }
-    
+
     private void checkHeroContact()
     {
         Actor target = getActiveHero();
-        
         if (target != null && isTouching(target.getClass()))
         {
-            if (target instanceof Hero) {
-                // Legacy support
-                Hero h = (Hero) target;
-                h.getStunned(30);
-                h.takeDamage(1);
-            }
-            else if (target instanceof Maki) {
-                Maki m = (Maki) target;
-                // Only stun/damage if her invincibility timer is completely done!
-                if (m.getInvincibilityTimer() == 0) {
-                    m.getStunned(30); 
-                    m.takeDamage(1);   
-                }
-            }
-            else if (target instanceof Naobito) {
-                Naobito n = (Naobito) target;
-                if (n.getInvincibilityTimer() == 0) {
-                    n.getStunned(30);
-                    n.takeDamage(1); 
-                }
-            }
-            else if (target instanceof Nanami) {
-                Nanami n = (Nanami) target;
-                if (n.getInvincibilityTimer() == 0) {
-                    n.getStunned(30);
-                    n.takeDamage(1); 
-                }
-            }
+            if (target instanceof Hero) { ((Hero)target).takeDamage(1); }
+            else if (target instanceof Maki) { ((Maki)target).takeDamage(1); }
+            else if (target instanceof Naobito) { ((Naobito)target).takeDamage(1); }
+            else if (target instanceof Nanami) { ((Nanami)target).takeDamage(1); }
         }
     }
     
     private void checkLaserCollision()
     {
         Actor laser = getOneIntersectingObject(Lazer.class);
-        
         if (laser != null)
         {
             getWorld().removeObject(laser);
-            crabHp--;
-            
-            if (crabHp <= 0)
-            {
-                handleDeath();
-            }
-            else
-            {
-                updateFishAppearance();
-            }
+            takeDamage(1);
         }
     }
     
@@ -114,11 +84,10 @@ public class Crab extends Actor
     {
         int spriteWidth = baseCrabImage.getWidth();
         int spriteHeight = baseCrabImage.getHeight();
+        int barHeight = 4;
+        int spacing = 2;
         
-        int barHeight = 6;
-        int spacing = 4;
         GreenfootImage canvas = new GreenfootImage(spriteWidth, spriteHeight + barHeight + spacing);
-        
         canvas.drawImage(baseCrabImage, 0, barHeight + spacing);
         
         canvas.setColor(Color.BLACK);
@@ -127,12 +96,7 @@ public class Crab extends Actor
         int healthBarWidth = (int)(((double)crabHp / 1) * (spriteWidth - 2));
         if (healthBarWidth < 0) healthBarWidth = 0;
         
-        if (crabHp > 1) {
-            canvas.setColor(Color.GREEN);
-        } else {
-            canvas.setColor(Color.RED);
-        }
-        
+        canvas.setColor(crabHp > 1 ? Color.GREEN : Color.RED);
         canvas.fillRect(1, 1, healthBarWidth, barHeight - 2);
         setImage(canvas);
     }
@@ -140,39 +104,26 @@ public class Crab extends Actor
     public void takeDamage(int amount)
     {
         crabHp -= amount;
-        if (crabHp <= 0)
-        {
-            handleDeath();
-        }
-        else
-        {
-            updateFishAppearance();
-        }
+        if (crabHp <= 0) handleDeath();
+        else updateFishAppearance();
     }
 
-    /**
-     * Handles points allocation dynamically without crashing BeachWorld
-     */
     private void handleDeath()
     {
         World genericWorld = getWorld();
         if (genericWorld == null) return;
 
-        // If we are playing inside the original test world, update its unique score systems
         if (genericWorld instanceof MyWorld)
         {
             MyWorld world = (MyWorld) genericWorld;
             world.increaseScore(); 
             world.notifyNemoKilled();
         }
-        // If inside BeachWorld, it won't force cast to MyWorld anymore! 
         else if (genericWorld instanceof BeachWorld)
         {
             BeachWorld world = (BeachWorld) genericWorld;
-            // If you add a scoring system to BeachWorld later, you can add it here safely:
             world.increaseScore();
         }
-
         genericWorld.removeObject(this);
     }
 }
