@@ -1,14 +1,15 @@
 import greenfoot.*;
+import java.util.List;
 
 public class SwingVisual extends Actor
 {
-    private int lifetime = 6;            // Total frames the swing lasts
-    private final int TOTAL_ARC = 90;     // The quarter-circle swing arc (in degrees)
-    private int degreesPerFrame;          // How much it rotates each frame
-    private int currentOffsetAngle;       // Current relative angle of the swing
-    private int baseAngle;                // The initial angle towards the mouse pointer
+    private int lifetime = 6;            
+    private final int TOTAL_ARC = 90;     
+    private int degreesPerFrame;          
+    private int currentOffsetAngle;       
+    private int baseAngle;                
     private boolean isCritical;
-    private Nanami owner;                 // Reference to Nanami to lock onto his position
+    private Nanami owner;                 
 
     public SwingVisual(Nanami owner, int angle, boolean isCritical)
     {
@@ -16,53 +17,46 @@ public class SwingVisual extends Actor
         this.baseAngle = angle;
         this.isCritical = isCritical;
         
-        // Start the swing 45 degrees to one side, so it sweeps past the cursor perfectly
         this.currentOffsetAngle = -45; 
-        this.degreesPerFrame = TOTAL_ARC / lifetime; // Smoothly cover 90 degrees over its lifetime
+        this.degreesPerFrame = TOTAL_ARC / lifetime; 
         
-        // Set initial facing direction
         setRotation(baseAngle + currentOffsetAngle);
         
-        // LONGER RANGE: Increased visual dimensions from (80, 40) to (110, 55) for a massive blade size
         GreenfootImage img = new GreenfootImage(110, 55);
         
         if (isCritical) {
-            // CURSED ENERGY BLUE: Deep blue outer flame with a bright cyan core
-            img.setColor(new Color(0, 50, 255, 240)); 
-            img.fillOval(0, 0, 110, 55);
-            img.setColor(new Color(0, 240, 255, 255));
-            img.fillOval(25, 0, 85, 55); 
+            img.setColor(new Color(0, 100, 255, 200));
+            img.fillOval(0, 5, 110, 45);
+            img.setColor(new Color(150, 240, 255, 245));
+            img.fillOval(15, 12, 80, 30);
         } else {
-            img.setColor(new Color(220, 220, 220, 190));
-            img.fillOval(0, 0, 100, 45);
-            img.setColor(new Color(0, 0, 0, 0)); // Masks the back to form a crescent blade
-            img.fillOval(25, 0, 75, 45); 
+            img.setColor(new Color(230, 210, 150, 220));
+            img.fillOval(10, 10, 90, 35);
+            img.setColor(new Color(255, 255, 255, 255));
+            img.drawOval(10, 10, 89, 34);
         }
-        
         setImage(img);
     }
 
     public void act()
     {
-        // Safety check: if Nanami or the world is missing, vanish immediately
-        if (getWorld() == null || owner == null || owner.getWorld() == null) {
-            if (getWorld() != null) getWorld().removeObject(this);
+        if (owner == null || owner.getWorld() == null) {
+            getWorld().removeObject(this);
             return;
         }
-        
-        // PIVOT LOCK: Constantly snap the corner of the swing directly to Nanami's center point
-        setLocation(owner.getX(), owner.getY());
-        
-        // Sweep the angle forward across the quarter-circle arc
+
         currentOffsetAngle += degreesPerFrame;
         setRotation(baseAngle + currentOffsetAngle);
         
-        // LONGER RANGE OFFSET: Increased radiusOffset from 35 to 55 to push the swing arc further out from Nanami's body
+        // Follows Nanami's coordinates smoothly in real-time
         double rad = Math.toRadians(getRotation());
         int radiusOffset = 55; 
-        setLocation(getX() + (int)(Math.cos(rad) * radiusOffset), getY() + (int)(Math.sin(rad) * radiusOffset));
         
-        // Detect cuts throughout the entire sweeping path
+        int targetX = owner.getX() + (int)(Math.cos(rad) * radiusOffset);
+        int targetY = owner.getY() + (int)(Math.sin(rad) * radiusOffset);
+        setLocation(targetX, targetY);
+        
+        // Scan for hits throughout the sweep
         checkMeleeHit();
         
         if (getWorld() == null) return;
@@ -77,21 +71,34 @@ public class SwingVisual extends Actor
     {
         if (getWorld() == null) return;
         
-        Actor enemy = getOneIntersectingObject(Actor.class);
-        if (enemy != null && !(enemy instanceof Nanami) && !(enemy instanceof RatioBar))
+        // FIX: Get all intersecting targets in the sweep area instead of just one random object
+        List<Actor> targets = getIntersectingObjects(Actor.class);
+        
+        for (Actor enemy : targets)
         {
-            if (enemy.getWorld() != null)
+            // Ignore self, UI components, or other swings
+            if (enemy != owner && !(enemy instanceof RatioBar) && !(enemy instanceof SwingVisual))
             {
-                int damageDealt = isCritical ? 3 : 1;
-                
-                if (enemy instanceof Fish) {
-                    ((Fish) enemy).takeDamage(damageDealt);
-                }
-                else if (enemy instanceof Pufferfish) {
-                    ((Pufferfish) enemy).takeDamage(damageDealt);
-                }
-                else if (enemy instanceof Crab) {
-                    ((Crab) enemy).takeDamage(damageDealt);
+                if (enemy.getWorld() != null)
+                {
+                    int damageDealt = isCritical ? 3 : 1;
+                    String enemyClassName = enemy.getClass().getSimpleName();
+                    
+                    // Route damage safely to any enemy types
+                    if (enemyClassName.equals("Fish")) {
+                        try {
+                            enemy.getClass().getMethod("takeDamage", int.class).invoke(enemy, damageDealt);
+                        } catch(Exception e) {}
+                    }
+                    else if (enemy instanceof Pufferfish) {
+                        ((Pufferfish) enemy).takeDamage(damageDealt);
+                    }
+                    else if (enemy instanceof Crab) {
+                        ((Crab) enemy).takeDamage(damageDealt);
+                    }
+                    else if (enemy instanceof Turtle) {
+                        ((Turtle) enemy).takeDamage(damageDealt);
+                    }
                 }
             }
         }

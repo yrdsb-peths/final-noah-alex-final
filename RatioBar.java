@@ -22,6 +22,18 @@ public class RatioBar extends Actor
         redraw();
     }
 
+    // FIX: This method must exist for Nanami.java to call it upon Left-Click!
+    public boolean checkRatioTiming()
+    {
+        double lowerBound = RED_ZONE_CENTER - RED_ZONE_HALF;
+        double upperBound = RED_ZONE_CENTER + RED_ZONE_HALF;
+        return (circlePos >= lowerBound && circlePos <= upperBound);
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
     public void act()
     {
         lifetime--;
@@ -66,22 +78,10 @@ public class RatioBar extends Actor
         img.drawString("7:3", 2 + redStart - 2, BAR_H - 1);
 
         // Sliding white circle marker
-        int circleX = 2 + (int)(circlePos * BAR_W) - 5;
+        int circleX = (int)(circlePos * BAR_W);
         img.setColor(Color.WHITE);
-        img.fillOval(circleX, 1, 10, BAR_H + 2);
-
-        // Outer border
-        img.setColor(Color.WHITE);
-        img.drawRect(2, 2, BAR_W, BAR_H);
+        img.fillOval(2 + circleX - 4, 2 + (BAR_H / 2) - 4, 8, 8);
 
         setImage(img);
     }
-
-    public boolean isInRedZone()
-    {
-        return circlePos >= (RED_ZONE_CENTER - RED_ZONE_HALF) &&
-               circlePos <= (RED_ZONE_CENTER + RED_ZONE_HALF);
-    }
-
-    public boolean isExpired() { return expired; }
 }

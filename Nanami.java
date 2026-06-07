@@ -13,12 +13,12 @@ public class Nanami extends Actor
     private DashIcon dashIcon;
     private int hp = 10;
     private int invincibilityTimer = 0;
-    private final int INVINCIBILITY_DURATION = 30; // <-- FIXED: Added missing constant for safety i-frames!
+    private final int INVINCIBILITY_DURATION = 30;
 
-    // Dash Variables (Perfectly matched to Hero's logic)
-    private int dashCooldown = 0;      // Ticks down from 180 (3 seconds)
-    private int dashDuration = 0;      // Ticks down from 10 frames during active burst
-    private int moveAngle = 0;         // Stores movement vector angle
+    // Dash Variables
+    private int dashCooldown = 0;      
+    private int dashDuration = 0;      
+    private int moveAngle = 0;         
 
     // Movement & Animation Variables
     private GreenfootImage[] idleFrames;
@@ -33,192 +33,159 @@ public class Nanami extends Actor
     public void getStunned(int frames)
     {
         this.stunTimer = frames;
-        getImage().setColor(new Color(0, 150, 255));
-    }
-
-    public Nanami()
-    {
-        idleFrames = new GreenfootImage[4];
-        upFrames = new GreenfootImage[4];
-        leftFrames = new GreenfootImage[4];
-        rightFrames = new GreenfootImage[4];
-
-        for (int i = 0; i < 4; i++)
-        {
-            String suffix = (i == 0) ? "" : Integer.toString(i + 1);
-            
-            idleFrames[i] = new GreenfootImage("nanami" + suffix + ".png");
-            idleFrames[i].scale(50, 60);
-            
-            upFrames[i] = new GreenfootImage("nanami-up" + suffix + ".png");
-            upFrames[i].scale(50, 60);
-            
-            leftFrames[i] = new GreenfootImage("nanami-left" + suffix + ".png");
-            leftFrames[i].scale(50, 60);
-            
-            rightFrames[i] = new GreenfootImage("nanami-right" + suffix + ".png");
-            rightFrames[i].scale(50, 60);
+        if (getImage() != null) {
+            getImage().setColor(new Color(0, 150, 255));
         }
-        
-        setImage(idleFrames[0]);
-    }
-
-    public int getInvincibilityTimer()
-    {
-        return this.invincibilityTimer;
     }
 
     public void setHpBar(HpBar bar) { this.healthBar = bar; }
     public void setDashIcon(DashIcon icon) { this.dashIcon = icon; }
+    public int getInvincibilityTimer() { return invincibilityTimer; }
+
+    public Nanami()
+    {
+        idleFrames  = new GreenfootImage[4];
+        upFrames    = new GreenfootImage[4];
+        leftFrames  = new GreenfootImage[4];
+        rightFrames = new GreenfootImage[4];
+
+        // Your exact preferred sprite filename layouts
+        String[] downFiles  = {"nanami.png", "nanami2.png", "nanami3.png", "nanami4.png"};
+        String[] upFiles    = {"nanami-up.png", "nanami-up2.png", "nanami-up3.png", "nanami-up4.png"};
+        String[] leftFiles  = {"nanami-left.png", "nanami-left2.png", "nanami-left3.png", "nanami-left4.png"};
+        String[] rightFiles = {"nanami-right.png", "nanami-right2.png", "nanami-right3.png", "nanami-right4.png"};
+
+        for (int i = 0; i < 4; i++)
+        {
+            idleFrames[i]  = new GreenfootImage(downFiles[i]);  idleFrames[i].scale(50, 50);
+            upFrames[i]    = new GreenfootImage(upFiles[i]);    upFrames[i].scale(50, 50);
+            leftFrames[i]  = new GreenfootImage(leftFiles[i]);  leftFrames[i].scale(50, 50);
+            rightFrames[i] = new GreenfootImage(rightFiles[i]); rightFrames[i].scale(50, 50);
+        }
+
+        setImage(idleFrames[0]);
+    }
 
     public void act()
     {
+        if (getWorld() == null) return;
+
+        // Follow Nanami dynamically if the bar is active while moving
+        if (ratioActive && ratioBar != null)
+        {
+            if (ratioBar.isExpired())
+            {
+                getWorld().removeObject(ratioBar);
+                ratioBar = null;
+                ratioActive = false;
+            }
+            else
+            {
+                ratioBar.setLocation(getX(), getY() - 45);
+            }
+        }
+
+        // Handle stun mechanics
         if (stunTimer > 0)
         {
             stunTimer--;
-            if (stunTimer == 0) getImage().setColor(new Color(255, 255, 255, 255));
-            return; // Blocks the 7:3 ratio bar and blunt strikes
+            if (stunTimer == 0 && getImage() != null) {
+                getImage().setColor(new Color(255, 255, 255, 255));
+            }
+            return;
         }
-        // 1. Invincibility Countdown
-        if (invincibilityTimer > 0) 
+
+        // Run general counters
+        if (invincibilityTimer > 0)
         {
             invincibilityTimer--;
+            if (getImage() != null) getImage().setTransparency(invincibilityTimer % 4 == 0 ? 100 : 255);
         }
+        else if (getImage() != null) getImage().setTransparency(255);
 
-        MouseInfo mouse = Greenfoot.getMouseInfo();
         if (attackCooldown > 0) attackCooldown--;
-
-        // 2. Dash Cooldown Clock Updater (Hero Logic)
         if (dashCooldown > 0)
         {
             dashCooldown--;
-            // Every 60 frames (1 second), update the visual number on the icon
             if (dashCooldown % 60 == 0 && dashIcon != null)
-            {
-                dashIcon.updateIcon((dashCooldown / 60) + (dashCooldown % 60 > 0 ? 1 : 0));
-            }
+                dashIcon.updateIcon(dashCooldown / 60);
         }
 
-        // 3. Dash Movement Execution Overrides Regular Controls (Hero Logic)
+        // Dash core execution
         if (dashDuration > 0)
         {
             dashDuration--;
-            invincibilityTimer = 2; // Lock invulnerability completely while zooming
-            
-            int currentRotation = getRotation();
-            setRotation(moveAngle); 
-            move(15);               
-            setRotation(currentRotation); // Restore original look direction
-            return; // Skip standard inputs while dashing
+            invincibilityTimer = 2;
+            int prevRotation = getRotation();
+            setRotation(moveAngle);
+            move(16);
+            setRotation(prevRotation);
+            return;
         }
 
-        // Auto-cancel if the player waits too long and the indicator expires
-        if (ratioActive && ratioBar != null && ratioBar.isExpired())
-        {
-            getWorld().removeObject(ratioBar);
-            ratioBar = null;
-            ratioActive = false;
-            
-            BeachWorld currentWorld = null;
-            if (getWorld() instanceof BeachWorld) {
-                currentWorld = (BeachWorld) getWorld();
-            }
-            if (currentWorld != null) {
-                currentWorld.setTimeFreeze(false);
-            }
-        }
+        // Process attacks and inputs
+        handleCombatInputs();
 
-        // PRIME TECHNIQUE: Pressing E spawns the RatioBar
-        if (Greenfoot.isKeyDown("e") && !ratioActive && attackCooldown == 0)
-        {
-            ratioActive = true;
-            ratioBar = new RatioBar();
-            getWorld().addObject(ratioBar, getX(), getY() - 50);
-            
-            BeachWorld currentWorld = null;
-            if (getWorld() instanceof BeachWorld) {
-                currentWorld = (BeachWorld) getWorld();
-            }
-            if (currentWorld != null) {
-                currentWorld.setTimeFreeze(true);
-            }
-        }
-
-        if (ratioActive && ratioBar != null && ratioBar.getWorld() != null)
-        {
-            ratioBar.setLocation(getX(), getY() - 50);
-        }
-
-        // 4. KEYBOARD MOVEMENT & DASH HANDLING (Now unrestricted by ratioActive!)
-        int dx1 = 0;
-        int dy1 = 0;
-        boolean keyIsPressed = false;
+        // FIXED: Removed the return block so Nanami can run around while handling 'e' triggers!
+        boolean moving = false;
+        int dx = 0, dy = 0;
         GreenfootImage[] currentFrames = idleFrames;
 
-        if (Greenfoot.isKeyDown("a")) { setLocation(getX() - 4, getY()); currentFrames = leftFrames;  keyIsPressed = true; dx1 = -1; }
-        if (Greenfoot.isKeyDown("d")) { setLocation(getX() + 4, getY()); currentFrames = rightFrames; keyIsPressed = true; dx1 = 1;  }
-        if (Greenfoot.isKeyDown("w")) { setLocation(getX(), getY() - 4); currentFrames = upFrames;    keyIsPressed = true; dy1 = -1; }
-        if (Greenfoot.isKeyDown("s")) { setLocation(getX(), getY() + 4); currentFrames = idleFrames;  keyIsPressed = true; dy1 = 1;  }
+        if (Greenfoot.isKeyDown("a")) { setLocation(getX() - 5, getY()); currentFrames = leftFrames;  moving = true; dx = -1; }
+        else if (Greenfoot.isKeyDown("d")) { setLocation(getX() + 5, getY()); currentFrames = rightFrames; moving = true; dx =  1; }
+        
+        if (Greenfoot.isKeyDown("w")) { setLocation(getX(), getY() - 5); currentFrames = upFrames;    moving = true; dy = -1; }
+        else if (Greenfoot.isKeyDown("s")) { setLocation(getX(), getY() + 5); currentFrames = idleFrames;  moving = true; dy =  1; }
 
-        // Check for Dash Activation Input (Hero Logic)
-        if (Greenfoot.isKeyDown("r") && dashCooldown == 0 && (dx1 != 0 || dy1 != 0))
-        {
-            dashDuration = 10;    // Active movement frame windows
-            dashCooldown = 180;   // 3 seconds total reset clock
-            
-            // Convert current WASD directions to an operational angle
-            moveAngle = (int) Math.toDegrees(Math.atan2(dy1, dx1)); 
-            
-            if (dashIcon != null) dashIcon.updateIcon(3); // Start UI clock text immediately at 3
-        }
-
-        // Handle sprite cycling
         animTimer++;
         if (animTimer >= ANIM_SPEED)
         {
             animTimer = 0;
-            if (keyIsPressed) animFrame = (animFrame + 1) % 4;
-            else animFrame = 0;
+            animFrame = moving ? (animFrame + 1) % 4 : 0;
         }
+        setImage(currentFrames[animFrame]);
+
+        // Dash trigger
+        if (Greenfoot.isKeyDown("r") && dashCooldown == 0 && (dx != 0 || dy != 0))
+        {
+            dashDuration = 10;
+            dashCooldown = 180;
+            moveAngle = (int) Math.toDegrees(Math.atan2(dy, dx));
+            if (dashIcon != null) dashIcon.updateIcon(3);
+        }
+    }
+
+    private void handleCombatInputs()
+    {
+        MouseInfo mouse = Greenfoot.getMouseInfo();
         
-        // Update his graphic dynamically depending on movement state
-        if (keyIsPressed) {
-            setImage(currentFrames[animFrame]);
-        } else {
-            setImage(idleFrames[0]);
+        // 1. Press 'e' to load the bar safely in real time without stopping
+        if (Greenfoot.isKeyDown("e") && attackCooldown == 0 && !ratioActive)
+        {
+            ratioActive = true;
+            ratioBar = new RatioBar();
+            getWorld().addObject(ratioBar, getX(), getY() - 45); 
         }
 
-        // 5. MOUSE CLICK: Attack directionally or strike the timing bar
-        if (Greenfoot.mousePressed(null) && attackCooldown == 0 && mouse != null)
+        // 2. Left click strikes
+        if (mouse != null && Greenfoot.mousePressed(null) && mouse.getButton() == 1 && attackCooldown == 0)
         {
-            double angleRad = Math.atan2(mouse.getY() - getY(), mouse.getX() - getX());
+            double dx = mouse.getX() - getX();
+            double dy = mouse.getY() - getY();
+            double angleRad = Math.atan2(dy, dx);
             int angleDeg = (int) Math.toDegrees(angleRad);
-            
+
             if (ratioActive && ratioBar != null)
             {
-                boolean hitSweetSpot = ratioBar.isInRedZone();
+                boolean isCritical = ratioBar.checkRatioTiming();
+                executeBluntStrike(angleDeg, angleRad, isCritical);
                 
-                if (hitSweetSpot) {
-                    executeBluntStrike(angleDeg, angleRad, true);
-                    attackCooldown = 40;
-                } else {
-                    executeBluntStrike(angleDeg, angleRad, false);
-                    attackCooldown = 20;
-                }
-                
+                attackCooldown = 40; 
                 getWorld().removeObject(ratioBar);
                 ratioBar = null;
                 ratioActive = false;
-                
-                BeachWorld currentWorld = null;
-                if (getWorld() instanceof BeachWorld) {
-                    currentWorld = (BeachWorld) getWorld();
-                }
-                if (currentWorld != null) {
-                    currentWorld.setTimeFreeze(false);
-                }
             }
-            else
+            else if (!ratioActive)
             {
                 executeBluntStrike(angleDeg, angleRad, false);
                 attackCooldown = 15;
@@ -229,8 +196,6 @@ public class Nanami extends Actor
     private void executeBluntStrike(int angleDeg, double angleRad, boolean isCritical)
     {
         if (getWorld() == null) return;
-        
-        // Spawns right on Nanami's body center point because the swing class handles its own locked tracking now!
         SwingVisual slash = new SwingVisual(this, angleDeg, isCritical);
         getWorld().addObject(slash, getX(), getY());
     }
@@ -245,7 +210,6 @@ public class Nanami extends Actor
             
             if (hp <= 0) 
             {
-                // Check if we are currently fighting in BeachWorld
                 boolean isBeach = (getWorld() instanceof BeachWorld);
                 Greenfoot.setWorld(new GameOver(isBeach));
             }
