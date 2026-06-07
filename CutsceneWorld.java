@@ -8,8 +8,8 @@ public class CutsceneWorld extends World
         { "Hero", "...", "HIDDEN" },
         { "Dagon", "I'm surprised you defeated the kraken...", "REVEALED" },
         { "Dagon", "but now your time ends *here.*", "REVEALED" },
-        { "Dagon", "Domain expansion....", "HANDSIGN" },
-        { "Dagon", "HORIZON OF THE CAPTIVATING SANDAI!!", "FINALE" }
+        { "Dagon", "Domain expansion....", "HANDSIGN" }, // ---> Triggers the close-up cut
+        { "Dagon", "HORIZON OF THE CAPTIVATING SKANDHA!!", "FINALE" } // ---> Fixed spelling
     };
 
     private int currentLine = 0;
@@ -20,6 +20,9 @@ public class CutsceneWorld extends World
     private CutsceneActor heroSprite;
     private CutsceneActor dagonSprite;
     
+    // --- AUDIO HANDLING ENGINE ---
+    private GreenfootSound cutsceneBgm = new GreenfootSound("shrine.mp3");
+    
     public CutsceneWorld(int scoreFromPreviousWorld)
     {    
         super(800, 600, 1); 
@@ -27,6 +30,18 @@ public class CutsceneWorld extends World
         GreenfootImage bg = new GreenfootImage("background.png");
         bg.scale(800, 600);
         setBackground(bg);
+
+        // --- SILENCE THE KRAKEN AND MYWORLD SOUNDS IMMEDIATELY ---
+        if (MyWorld.regularBgm != null && MyWorld.regularBgm.isPlaying()) {
+            MyWorld.regularBgm.stop();
+        }
+        if (MyWorld.krakenBgm != null && MyWorld.krakenBgm.isPlaying()) {
+            MyWorld.krakenBgm.stop();
+        }
+
+        // --- START CUTSCENE BGM (Comfortable 40% Volume) ---
+        cutsceneBgm.setVolume(40);
+        cutsceneBgm.playLoop();
 
         nameBox = new DialogueBox(180, 40);
         textBox = new DialogueBox(680, 90);
@@ -40,11 +55,22 @@ public class CutsceneWorld extends World
         addObject(dagonSprite, 650, 300);
 
         displayLine(currentLine);
-        // ... Keep all your existing dialogue boxes, background, and character image code exactly the same ...
     }
 
     public CutsceneWorld() {
         this(0);
+    }
+
+    @Override
+    public void started()
+    {
+        cutsceneBgm.playLoop();
+    }
+
+    @Override
+    public void stopped()
+    {
+        cutsceneBgm.pause();
     }
     
     public void act()
@@ -72,8 +98,8 @@ public class CutsceneWorld extends World
         }
         else
         {
-            // PASS THE SAVED SCORE TO BEACHWORLD!
-            Greenfoot.setWorld(new BeachWorld("MAKI", savedScore)); 
+            cutsceneBgm.stop(); 
+            Greenfoot.setWorld(new TechniqueSelectWorld()); 
         }
     }
 
@@ -99,16 +125,27 @@ public class CutsceneWorld extends World
         }
         else if (state.equals("HANDSIGN"))
         {
+            // --- 1. CUT TO BLACK BACKGROUND ---
+            GreenfootImage darkBg = new GreenfootImage(800, 600);
+            darkBg.setColor(Color.BLACK);
+            darkBg.fillRect(0, 0, 800, 600);
+            setBackground(darkBg);
+
+            // --- 2. VANISH THE HERO ---
             heroSprite.getImage().setTransparency(0);
-            dagonSprite.getImage().setTransparency(0);
-            GreenfootImage handBg = new GreenfootImage("image_d4c13f.jpg");
-            handBg.scale(800, 600);
-            setBackground(handBg);
+
+            // --- 3. SHOW DAGON CLOSE-UP USING HANDSIGN.PNG ---
+            // Swap to handsign sprite sheet image, make it large, and center him up
+            GreenfootImage handImg = new GreenfootImage("handsign.png");
+            handImg.scale(400, 400); // Massive close-up dimensions
+            dagonSprite.setImage(handImg);
+            dagonSprite.setLocation(400, 250); // Move him to absolute center stage
+            dagonSprite.getImage().setTransparency(255);
         }
         else if (state.equals("FINALE"))
         {
             nameBox.drawText("", 1, Color.BLACK);
-            textBox.drawText("HORIZON OF THE CAPTIVATING SANDAI!!", 22, Color.RED);
+            textBox.drawText("HORIZON OF THE CAPTIVATING SKANDHA!!", 24, Color.RED);
         }
     }
 }

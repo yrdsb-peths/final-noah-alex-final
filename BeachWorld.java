@@ -13,6 +13,9 @@ public class BeachWorld extends World
     private Label scoreLabel;
     private int spawnDelay = 0; 
 
+    // --- CHANGED TO PUBLIC STATIC: ALLOWS OTHER WORLDS TO SHUT IT DOWN ---
+    public static GreenfootSound beachBgm = new GreenfootSound("delirious.mp3");
+
     public void setTimeFreeze(boolean freeze) {
         this.isTimeFrozen = freeze;
     }
@@ -29,17 +32,34 @@ public class BeachWorld extends World
         return this.frozenEnemyObject;
     }
 
+    // --- GREENFOOT LIFECYCLE HOOKS FOR AUDIO MANAGEMENT ---
+    @Override
+    public void started()
+    {
+        beachBgm.playLoop();
+    }
+
+    @Override
+    public void stopped()
+    {
+        beachBgm.pause();
+    }
+
     public BeachWorld(String technique, int startingScore)
     {
         super(800, 600, 1);
         this.technique = technique;
         this.score = startingScore;
     
+        // --- FIXED BGM SETTINGS (Comfortable 40% Volume) ---
+        beachBgm.setVolume(40); 
+        beachBgm.playLoop();   
+
         GreenfootImage beachBg = new GreenfootImage("beach.png");
         beachBg.scale(800, 600);
         setBackground(beachBg);
 
-        // --- FIXED: SCORE LABEL INITIALIZED FIRST & MOVED TO TOP LEFT (80, 30) ---
+        // Score Label Setup
         scoreLabel = new Label("Score: 0", 30);
         scoreLabel.setLineColor(Color.WHITE);
         addObject(scoreLabel, 80, 30);
@@ -59,7 +79,7 @@ public class BeachWorld extends World
 
             Label techLabel = new Label("NO TECHNIQUE  |  Maki Zenin", 20);
             techLabel.setLineColor(new Color(200, 80, 80));
-            addObject(techLabel, 250, 75); // Dropped slightly below score layout
+            addObject(techLabel, 250, 75); 
         }
         else if (technique.equals("NAOBITO"))
         {
@@ -102,7 +122,7 @@ public class BeachWorld extends World
 
     public BeachWorld(String technique)
     {
-        this(technique, 0); // Redirects to main constructor with a score of 0 if tested standalone
+        this(technique, 0); 
     }
     
     public void act()
@@ -128,7 +148,6 @@ public class BeachWorld extends World
         if (spawnDelay > 0) spawnDelay--;
     }
 
-    // --- ADDED METHOD: ACCEPTS SCORE UPDATES FROM CRABS AND TURTLES ---
     public void increaseScore()
     {
         score++;
@@ -137,7 +156,6 @@ public class BeachWorld extends World
             scoreLabel.setValue("Score: " + score);
         }
         
-        // Phase escalation rules: Every +3 score adds +1 crab, every +7 adds a turtle
         if (score > 0 && score % 7 == 0)
         {
             spawnMultipleTurtles(1);

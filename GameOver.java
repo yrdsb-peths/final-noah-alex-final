@@ -8,12 +8,15 @@ public class GameOver extends World
 {
     private boolean cameFromBeach;
 
+    // --- AUDIO HANDLING ENGINE ---
+    private GreenfootSound gameOverBgm = new GreenfootSound("gameover.mp3");
+
     /**
-     * Default constructor (defaults to normal MyWorld legacy restart)
+     * Default constructor
      */
     public GameOver()
     {    
-        this(false); // Call the main constructor with false
+        this(false); 
     }
 
     /**
@@ -21,9 +24,27 @@ public class GameOver extends World
      */
     public GameOver(boolean cameFromBeach)
     {    
-        // 1. Scaled up to 800x600 to perfectly match the rest of the game worlds!
         super(800, 600, 1); 
         this.cameFromBeach = cameFromBeach;
+
+        // --- 1. SHUT DOWN BEACHWORLD MUSIC (IF PLAYING) ---
+        if (BeachWorld.beachBgm != null && BeachWorld.beachBgm.isPlaying()) {
+            BeachWorld.beachBgm.stop();
+        }
+
+        // --- 2. SHUT DOWN MYWORLD REGULAR MUSIC (IF PLAYING) ---
+        if (MyWorld.regularBgm != null && MyWorld.regularBgm.isPlaying()) {
+            MyWorld.regularBgm.stop();
+        }
+
+        // --- 3. SHUT DOWN MYWORLD KRAKEN BATTLE MUSIC (IF PLAYING) ---
+        if (MyWorld.krakenBgm != null && MyWorld.krakenBgm.isPlaying()) {
+            MyWorld.krakenBgm.stop();
+        }
+
+        // --- START GAME OVER BGM (Comfortable 40% Volume) ---
+        gameOverBgm.setVolume(40);
+        gameOverBgm.playLoop();
 
         // Darkened background layout
         GreenfootImage bg = new GreenfootImage(800, 600);
@@ -41,19 +62,30 @@ public class GameOver extends World
         addObject(restartLabel, getWidth() / 2, 340);
     }
     
+    @Override
+    public void started()
+    {
+        gameOverBgm.playLoop();
+    }
+
+    @Override
+    public void stopped()
+    {
+        gameOverBgm.pause();
+    }
+    
     public void act()
     {
-        // If the player presses space, check where they came from
         if (Greenfoot.isKeyDown("space"))
         {
+            gameOverBgm.stop();
+
             if (cameFromBeach)
             {
-                // Send them directly back to pick a technique!
                 Greenfoot.setWorld(new TechniqueSelectWorld());
             }
             else
             {
-                // Legacy default fallback
                 Greenfoot.setWorld(new MyWorld());
             }
         }

@@ -1,6 +1,13 @@
 import greenfoot.*;
+
 public class MyWorld extends World {
-    GreenfootSound kraken = new GreenfootSound("kraken_spawn.mp3");
+    // --- CHANGED TO PUBLIC STATIC: Allows GameOver to find and kill them instantly ---
+    public static GreenfootSound regularBgm = new GreenfootSound("spongebob.mp3");
+    public static GreenfootSound krakenBgm = new GreenfootSound("spongebobbattle.mp3");
+    
+    // Non-static sound effect (only plays once, doesn't need global tracking)
+    GreenfootSound krakenSpawnSFX = new GreenfootSound("kraken_spawn.mp3");
+
     private int score = 0;
     private boolean bossSpawned = false;
     private boolean bossDefeated = false;
@@ -11,11 +18,19 @@ public class MyWorld extends World {
     private Label scoreLabel;
     private int phase2EndScore = -1;
     private boolean krakenSpawned = false;
+
     public MyWorld() {
         super(800, 600, 1);
         GreenfootImage bg = new GreenfootImage("background.png");
         bg.scale(800, 600); // match your world dimensions
         setBackground(bg);
+        
+        // --- FIXED BGM SETTINGS (Comfortable 40% Volume) ---
+        regularBgm.setVolume(40);
+        krakenBgm.setVolume(40);
+        
+        // Start playing the standard background music on loop immediately when the world loads
+        regularBgm.playLoop();
         
         Hero al = new Hero();
         addObject(al, 300, 300);
@@ -37,6 +52,26 @@ public class MyWorld extends World {
         al.setDashIcon(dIcon);
     }
 
+    // --- GREENFOOT LIFECYCLE HOOKS FOR AUDIO MANAGEMENT ---
+    @Override
+    public void started()
+    {
+        // Safe check to resume whichever background theme was active when paused
+        if (krakenSpawned) {
+            krakenBgm.playLoop();
+        } else {
+            regularBgm.playLoop();
+        }
+    }
+
+    @Override
+    public void stopped()
+    {
+        // Pause both sound slots immediately on runtime pause
+        regularBgm.pause();
+        krakenBgm.pause();
+    }
+
     public void act()
     {
         int fishCount = getObjects(Fish.class).size();
@@ -52,7 +87,7 @@ public class MyWorld extends World {
         }
         int swordfishCount = getObjects(SwordfishBoss.class).size();
 
-        // Phase 2: After boss dies, spawn 4 nemos in intervals + 1 pufferfish
+        // Phase 2: After boss dies, spawn 10 nemos in intervals + 1 pufferfish
         if (bossDefeated && !pufferWaveSpawned)
         {
             spawnTimer++;
@@ -75,40 +110,50 @@ public class MyWorld extends World {
             }
         }
         
+        // Phase 3: Transition into the Kraken Boss
         if (pufferWaveSpawned && !krakenSpawned)
         {
             if (fishCount == 0 && pufferCount == 0)
             {
                 krakenSpawned = true; // Flips safety gate
+                
+                // Stop the regular background music before starting the battle music
+                regularBgm.stop();
+                
+                krakenSpawnSFX.play();  // Unleash the kraken spawn roar sound effect!
+                krakenBgm.playLoop();   // Spin up the intense SpongeBob battle loop!
+                
                 spawnKrakenBoss();
-                kraken.play();// Unleash the kraken!
             }
         }
         if (Greenfoot.isKeyDown("p"))
         {
-            // Set the flag to true just in case other mechanics depend on it
             bossSpawned = true; 
             spawnBoss();
-            
-            // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
             Greenfoot.delay(10); 
         }
         if (Greenfoot.isKeyDown("k"))
         {
-            // Set the flag to true just in case other mechanics depend on it
+            // Debug key override: Ensure regular music stops and battle track triggers smoothly
+            if (!krakenSpawned) {
+                regularBgm.stop();
+                krakenBgm.playLoop();
+                krakenSpawned = true;
+            }
             spawnKrakenBoss();
-            
-            // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
             Greenfoot.delay(10); 
         }
         if (Greenfoot.isKeyDown("t"))
         {
-            // Set the flag to true just in case other mechanics depend on it
             spawnTridentPickup();
-            
-            // Small built-in delay so one quick tap doesn't spawn 50 bosses at once
             Greenfoot.delay(10); 
         }
+    }
+
+    public void stopMusic()
+    {
+        if (regularBgm.isPlaying()) regularBgm.stop();
+        if (krakenBgm.isPlaying()) krakenBgm.stop();
     }
 
     public void increaseScore()
@@ -130,23 +175,20 @@ public class MyWorld extends World {
         }
     }
 
-    // Called by SwordfishBoss when it dies
     public void notifyBossDefeated()
     {
         bossDefeated = true;
     }
 
-    // Called by Fish when killed during post-boss phase
     public void notifyNemoKilled()
     {
-        if (bossDefeated && !pufferWaveSpawned) return; // still spawning, don't count yet
+        if (bossDefeated && !pufferWaveSpawned) return; 
         if (bossDefeated)
         {
             nemoKillsAfterBoss++;
         }
     }
 
-    // Called by Pufferfish when it dies
     public void notifyPufferKilled()
     {
         spawnTridentPickup();
@@ -155,9 +197,8 @@ public class MyWorld extends World {
     private void spawnTridentPickup()
     {
         TridentPickup pickup = new TridentPickup();
-        // Spawns off the left edge, slides right, sticks to right wall
         addObject(pickup, -10, 100 + Greenfoot.getRandomNumber(200));
-        pickup.setRotation(0); // slides rightward
+        pickup.setRotation(0); 
     }
 
     private void spawnFish()
@@ -186,7 +227,6 @@ public class MyWorld extends World {
     private void spawnHealthPack()
     {
         HealthPack pack = new HealthPack();
-        // Spawns with a safety padding inside the world edges
         int randomX = 40 + Greenfoot.getRandomNumber(getWidth() - 80);
         int randomY = 40 + Greenfoot.getRandomNumber(getHeight() - 110);
         addObject(pack, randomX, randomY);
@@ -195,21 +235,16 @@ public class MyWorld extends World {
     private void spawnKrakenBoss()
     {
         HpBar krakenBar = new HpBar();
-    
-        // 1. Make the boss bar massive (Width: 350, Height: 25)
         krakenBar.setBarDimensions(500, 15); 
-        
-        // 2. Set its stats and purple color
         krakenBar.setMaxHp(35); 
         krakenBar.setLineColor(new Color(128, 0, 128)); 
-        
-        // 3. Put it at the top center
         addObject(krakenBar, 400, 100); 
         
         Kraken boss = new Kraken();
         boss.setHpBar(krakenBar);
         addObject(boss, 500, 300);
     }
+    
     public int getScore()
     {
         return this.score;

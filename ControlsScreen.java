@@ -5,12 +5,18 @@ public class ControlsScreen extends World
     private String technique;
     private int inputSafetyDelay = 20; 
     
+    // Audio declarations
     GreenfootSound enter = new GreenfootSound("enter.mp3");
+    GreenfootSound bgm = new GreenfootSound("smash.mp3"); // Dedicated background music track
 
     public ControlsScreen(String technique)
     {    
         super(800, 600, 1); 
         this.technique = technique;
+
+        // --- AUDIO MANAGEMENT FIXED: Lowers background music loudness ---
+        bgm.setVolume(40); // Sets volume to 40% so it doesn't overpower your game sounds
+        bgm.playLoop();
 
         // Dark clean background
         GreenfootImage bg = new GreenfootImage(800, 600);
@@ -57,10 +63,10 @@ public class ControlsScreen extends World
             
             weaponDesc.setValue("Left Click: Normal directional strike\n" +
                                 "Press Q: Activates Projection Sorcery Frame Trap\n\n" +
-                                "• IF CURSOR IS YELLOW: Target is too far away!\n" +
+  "• IF CURSOR IS YELLOW: Target is too far away!\n" +
                                 "  You cannot teleport or freeze the enemy from this distance.\n\n" +
                                 "• IF CURSOR IS RED: Target is in range!\n" +
-                                "  Press Q to teleport and freeze them solid. Walk up and press SPACE to throw them into a wall.");
+  "  Press Q to teleport and freeze them solid. Walk up and press SPACE to throw them into a wall.");
             
             addObject(charTitle, 400, 220);
             weaponDesc.setLineColor(Color.WHITE);
@@ -113,8 +119,9 @@ public class ControlsScreen extends World
 
         if (Greenfoot.isKeyDown("space"))
         {
-            Greenfoot.setWorld(new BeachWorld(technique));
+            bgm.stop();
             enter.play();
+            Greenfoot.setWorld(new BeachWorld(technique, 0));
         }
     }
 }

@@ -2,17 +2,19 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 
 /**
  * Write a description of class TitleScreen here.
- * 
- * @author (your name) 
+ * * @author (your name) 
  * @version (a version number or a date)
  */
 public class TitleScreen extends World
 {
     Label titleLabel = new Label("fish shooter", 60);
+    
+    // Declaring the background music instance with smash.mp3
+    private GreenfootSound bgm = new GreenfootSound("smash.mp3");
+
     /**
      * Constructor for objects of class TitleScreen.
-     * 
-     */
+     * */
     public TitleScreen()
     {    
         // Create a new world with 600x400 cells with a cell size of 1x1 pixels.
@@ -23,12 +25,19 @@ public class TitleScreen extends World
         
         addObject(titleLabel, getWidth()/2, 200);
         prepare();
+        
+        // Lower the background music volume (e.g., 40%) and start the loop
+        bgm.setVolume(40);
+        bgm.playLoop();
     }
 
     public void act()
     {
         if(Greenfoot.isKeyDown("space"))
         {
+            // STOP the title screen music so it doesn't overlap with the next world's music
+            bgm.stop();
+            
             MyWorld gameWorld = new MyWorld();
             Greenfoot.setWorld(gameWorld);
         }
