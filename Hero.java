@@ -16,15 +16,12 @@ public class Hero extends Actor
     private final int INVINCIBILITY_DURATION = 30; // About half a second of safety
     private HpBar healthBar;
     
-    GreenfootSound bubble = new GreenfootSound("bubble.mp3");
+    // --- AUDIO ---
+    // Removed bubble instance to use static playSound for overlapping/low latency
     GreenfootSound trident = new GreenfootSound("trident.mp3");
     
     private Trident activeTrident = null;
     private boolean hasTrident = false;
-    private GreenfootImage idleImage;
-    private GreenfootImage upImage;
-    private GreenfootImage leftImage;
-    private GreenfootImage rightImage;
     
     private int dashCooldown = 0;      // Ticks down from 180 (3 seconds)
     private int dashDuration = 0;      // Ticks down from 10 frames during active burst
@@ -33,15 +30,16 @@ public class Hero extends Actor
 
     private int stunTimer = 0; 
     
-    //CRAB CAN FREEZE THE HERO
+    // CRAB CAN FREEZE THE HERO
     public void getStunned(int frames)
     {
         this.stunTimer = frames;
-        //make the hero turn blue/gray when stunned
+        // Turn the hero blue/gray when stunned
         getImage().setColor(new Color(0, 150, 255)); 
     }
-    // --- Constructor (Loads and scales images once at the start) ---
-        public Hero() 
+
+    // --- Constructor ---
+    public Hero() 
     {
         idleFrames = new GreenfootImage[4];
         upFrames = new GreenfootImage[4];
@@ -68,11 +66,7 @@ public class Hero extends Actor
         setImage(idleFrames[0]);
     }
     
-    public void setHpBar(HpBar bar)
-    {
-        this.healthBar = bar;
-    }
-
+    public void setHpBar(HpBar bar) { this.healthBar = bar; }
     public void setDashIcon(DashIcon icon) { this.dashIcon = icon; }
     
     public void act()
@@ -84,10 +78,10 @@ public class Hero extends Actor
             
             // If stun just ended, restore normal look appearance
             if (stunTimer == 0) {
-                setImage(idleImage); 
+                // Fixed: used idleFrames[0] instead of unassigned idleImage
+                setImage(idleFrames[0]); 
+                getImage().setColor(new Color(255, 255, 255, 255)); // Reset color
             }
-            
-            // CRITICAL: Stop everything else! Skips movement, shooting, and WASD keys completely
             return; 
         }
         
@@ -112,96 +106,83 @@ public class Hero extends Actor
         if (dashCooldown > 0)
         {
             dashCooldown--;
-            // Every 60 frames (1 second), update the visual number on the icon
             if (dashCooldown % 60 == 0 && dashIcon != null)
             {
                 dashIcon.updateIcon((dashCooldown / 60) + (dashCooldown % 60 > 0 ? 1 : 0));
             }
         }
 
-        // 4. Dash Movement Execution Overrides Regular Controls
+        // 4. Dash Movement Execution
         if (dashDuration > 0)
         {
             dashDuration--;
-            invincibilityTimer = 2; // Lock invulnerability completely while zooming
+            invincibilityTimer = 2; 
             
-            // Move fast in whatever direction you were moving when you hit R
             int currentRotation = getRotation();
             setRotation(moveAngle); 
             move(15);               
-            setRotation(currentRotation); // Restore original mouse targeting look direction
+            setRotation(currentRotation); 
             
             checkEnemyContact();
-            return; // Skip normal WASD input scripts while slicing ahead
+            return; 
         }
         
-        // Mouse Tracking 
         MouseInfo mouse = Greenfoot.getMouseInfo();
         
         boolean keyIsPressed = false;
-int dx1 = 0;
-int dy1 = 0;
-GreenfootImage[] currentFrames = idleFrames;
+        int dx1 = 0;
+        int dy1 = 0;
+        GreenfootImage[] currentFrames = idleFrames;
 
-if (Greenfoot.isKeyDown("a"))
-{
-    setLocation(getX() - 4, getY());
-    currentFrames = leftFrames;
-    keyIsPressed = true;
-    dx1 = -1;
-}
-if (Greenfoot.isKeyDown("d"))
-{
-    setLocation(getX() + 4, getY());
-    currentFrames = rightFrames;
-    keyIsPressed = true;
-    dx1 = 1;
-}
-if (Greenfoot.isKeyDown("w"))
-{
-    setLocation(getX(), getY() - 4);
-    currentFrames = upFrames;
-    keyIsPressed = true;
-    dy1 = -1;
-}
-if (Greenfoot.isKeyDown("s"))
-{
-    setLocation(getX(), getY() + 4);
-    currentFrames = idleFrames;
-    keyIsPressed = true;
-    dy1 = 1;
-}
+        if (Greenfoot.isKeyDown("a"))
+        {
+            setLocation(getX() - 4, getY());
+            currentFrames = leftFrames;
+            keyIsPressed = true;
+            dx1 = -1;
+        }
+        if (Greenfoot.isKeyDown("d"))
+        {
+            setLocation(getX() + 4, getY());
+            currentFrames = rightFrames;
+            keyIsPressed = true;
+            dx1 = 1;
+        }
+        if (Greenfoot.isKeyDown("w"))
+        {
+            setLocation(getX(), getY() - 4);
+            currentFrames = upFrames;
+            keyIsPressed = true;
+            dy1 = -1;
+        }
+        if (Greenfoot.isKeyDown("s"))
+        {
+            setLocation(getX(), getY() + 4);
+            currentFrames = idleFrames;
+            keyIsPressed = true;
+            dy1 = 1;
+        }
 
-// Advance animation frame on a timer
-animTimer++;
-if (animTimer >= ANIM_SPEED)
-{
-    animTimer = 0;
-    if (keyIsPressed)
-    {
-        animFrame = (animFrame + 1) % 4; // cycle through frames while moving
-    }
-    else
-    {
-        animFrame = 0; // snap back to frame 1 when idle
-    }
-}
+        animTimer++;
+        if (animTimer >= ANIM_SPEED)
+        {
+            animTimer = 0;
+            if (keyIsPressed) animFrame = (animFrame + 1) % 4;
+            else animFrame = 0;
+        }
 
-setImage(currentFrames[animFrame]);
+        setImage(currentFrames[animFrame]);
         
-        // 6. Check for Dash Activation Input
+        // 6. Dash Activation Input
         if (Greenfoot.isKeyDown("r") && dashCooldown == 0 && (dx1 != 0 || dy1 != 0))
         {
-            dashDuration = 10;    // Active movement frame windows
-            dashCooldown = 180;   // 3 seconds total reset clock
-            
-            // Convert current WASD directions to an operational angle
+            dashDuration = 10;
+            dashCooldown = 180;
             moveAngle = (int) Math.toDegrees(Math.atan2(dy1, dx1)); 
-            
-            if (dashIcon != null) dashIcon.updateIcon(3); // Start UI clock text immediately at 3
+            if (dashIcon != null) dashIcon.updateIcon(3); 
         }
         
-        // 7. Trident Retrieval Mechanics
+        // 7. Trident Retrieval
         if (activeTrident != null && activeTrident.isStuck())
         {
             int dx = Math.abs(activeTrident.getX() - getX());
@@ -213,7 +194,7 @@ setImage(currentFrames[animFrame]);
             }
         }
 
-        // 8. Launch Trident Input Mechanics
+        // 8. Launch Trident
         if (Greenfoot.isKeyDown("e") && hasTrident && activeTrident != null && !activeTrident.isFlying() && mouse != null)
         {
             turnTowards(mouse.getX(), mouse.getY());
@@ -224,21 +205,22 @@ setImage(currentFrames[animFrame]);
             hasTrident = false;
         }
 
-        // 9. Primary Laser Attack Actions
+        // 9. Primary Laser (Bubble) Attack
         if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
         {
             turnTowards(mouse.getX(), mouse.getY());
             int angleToMouse = getRotation();
             setRotation(0); 
             
-            bubble.play();
+            // OPTIMIZATION: Used static playSound for the bubble effect
+            Greenfoot.playSound("bubble.mp3");
+            
             Lazer laser = new Lazer();
             getWorld().addObject(laser, getX(), getY());
             laser.setRotation(angleToMouse);
             laserCooldown = 20;
         }
         
-        // 10. Check Environmental Collisions
         checkEnemyContact();
     }
     
@@ -246,7 +228,7 @@ setImage(currentFrames[animFrame]);
     {
         if (isTouching(Fish.class) && invincibilityTimer == 0)
         {
-            takeDamage(1); // Normal fish does 1 damage
+            takeDamage(1); 
         }
     }
     
@@ -255,33 +237,17 @@ setImage(currentFrames[animFrame]);
         if (invincibilityTimer == 0)
         {
             hp -= damageAmount;
-            invincibilityTimer = INVINCIBILITY_DURATION; // 0.5 seconds of safe i-frames
+            invincibilityTimer = INVINCIBILITY_DURATION;
             
-            if (healthBar != null)
-            {
-                healthBar.updateBar(hp);
-            }
-            
-            if (hp <= 0)
-            {
-                Greenfoot.setWorld(new GameOver());
-            }
+            if (healthBar != null) healthBar.updateBar(hp);
+            if (hp <= 0) Greenfoot.setWorld(new GameOver());
         }
     }
     
     public void heal(int amount)
     {
-        hp += amount;
-        if (hp > 10) 
-        {
-            hp = 10; // Prevent healing past maximum health
-        }
-        
-        // Update the visual health bar layout
-        if (healthBar != null)
-        {
-            healthBar.updateBar(hp);
-        }
+        hp = Math.min(10, hp + amount);
+        if (healthBar != null) healthBar.updateBar(hp);
     }
     
     public void pickUpTrident(Trident t)
