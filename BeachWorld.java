@@ -35,7 +35,7 @@ public class BeachWorld extends World
         this.technique = technique;
         this.score = startingScore;
     
-        GreenfootImage beachBg = new GreenfootImage("beach.jpg");
+        GreenfootImage beachBg = new GreenfootImage("beach.png");
         beachBg.scale(800, 600);
         setBackground(beachBg);
 

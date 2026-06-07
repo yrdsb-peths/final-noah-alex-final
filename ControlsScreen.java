@@ -4,6 +4,8 @@ public class ControlsScreen extends World
 {
     private String technique;
     private int inputSafetyDelay = 20; 
+    
+    GreenfootSound enter = new GreenfootSound("enter.mp3");
 
     public ControlsScreen(String technique)
     {    
@@ -112,6 +114,7 @@ public class ControlsScreen extends World
         if (Greenfoot.isKeyDown("space"))
         {
             Greenfoot.setWorld(new BeachWorld(technique));
+            enter.play();
         }
     }
 }

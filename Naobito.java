@@ -49,8 +49,15 @@ public class Naobito extends Actor
     private boolean greyedOut = false;
     private int stunTimer = 0;
     
+    GreenfootSound punch = new GreenfootSound("punch.mp3");
+    GreenfootSound camera = new GreenfootSound("camera.mp3");
+    GreenfootSound glass = new GreenfootSound("glass.mp3");
+    GreenfootSound glassbreak = new GreenfootSound("glassbreak.mp3");
+    GreenfootSound speed = new GreenfootSound("speed.mp3");
+    
     public void getStunned(int frames)
     {
+        glass.play();
         this.stunTimer = frames;
         getImage().setColor(new Color(0, 150, 255)); // Blue freeze tint
     }
@@ -181,6 +188,7 @@ public class Naobito extends Actor
     {
         if (mouse == null || getWorld() == null) return;
 
+        punch.play();
         // Calculate the angle towards the cursor
         double angleRad = Math.atan2(mouse.getY() - getY(), mouse.getX() - getX());
         int angleDeg = (int) Math.toDegrees(angleRad);
@@ -218,6 +226,7 @@ public class Naobito extends Actor
 
             if (target != null)
             {
+                glass.play();
                 frozenEnemy = target;
                 frozenTimer = 180; 
                 
@@ -234,6 +243,7 @@ public class Naobito extends Actor
             }
             else
             {
+                camera.play();
                 psState = PS_FROZEN;
                 psTimer = FREEZE_DURATION;
                 tracedPath.clear();
@@ -339,6 +349,7 @@ public class Naobito extends Actor
         // --- PHASE 4: EXECUTION MODE ---
         if (psState == PS_EXECUTING)
         {
+            speed.play();
             if (pathIndex < tracedPath.size())
             {
                 int[] point = tracedPath.get(pathIndex);
@@ -356,6 +367,7 @@ public class Naobito extends Actor
         // --- PHASE 5: FREEZE PENALTY ACTIVE ---
         if (psState == PS_LOCKED)
         {
+            glass.play();
             psTimer--;
             
             if (playerGlassTrap != null && playerGlassTrap.getWorld() != null) {
@@ -391,6 +403,7 @@ public class Naobito extends Actor
                 activeGlassPanel = null;
                 frozenEnemy = null;
                 frozenTimer = 0;
+                glassbreak.play();
             }
         }
     }
@@ -466,7 +479,7 @@ public class Naobito extends Actor
         int bannerHeight = 40;
         int bannerY = w.getHeight() - 75; 
         
-        GreenfootImage cleanPatch = new GreenfootImage("beach.jpg");
+        GreenfootImage cleanPatch = new GreenfootImage("beach.png");
         cleanPatch.scale(w.getWidth(), w.getHeight());
         
         GreenfootImage slice = new GreenfootImage(w.getWidth(), bannerHeight);
@@ -538,7 +551,7 @@ public class Naobito extends Actor
         
         this.greyedOut = grey; 
         
-        GreenfootImage bg = new GreenfootImage("beach.jpg");
+        GreenfootImage bg = new GreenfootImage("beach.png");
         bg.scale(w.getWidth(), w.getHeight());
         
         if (grey)

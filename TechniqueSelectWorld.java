@@ -6,6 +6,8 @@ public class TechniqueSelectWorld extends World
     private TechniqueButton naoBtn;
     private TechniqueButton nanamiBtn;
 
+    GreenfootSound ratio = new GreenfootSound("ratio.mp3");
+    
     public TechniqueSelectWorld()
     {
         super(800, 600, 1);
@@ -33,6 +35,9 @@ public class TechniqueSelectWorld extends World
         addObject(makiBtn,   160, 350);
         addObject(naoBtn,    400, 350);
         addObject(nanamiBtn, 640, 350);
+        
+        
+        
     }
 
     public void act()
@@ -53,6 +58,7 @@ public class TechniqueSelectWorld extends World
             
             if (!selected.equals(""))
             {
+                ratio.play();
                 Greenfoot.setWorld(new ControlsScreen(selected));
             }
         }

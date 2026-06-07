@@ -30,6 +30,11 @@ public class Nanami extends Actor
     private final int ANIM_SPEED = 8;
     private int stunTimer = 0;
 
+    GreenfootSound swing = new GreenfootSound("swing.mp3");
+    GreenfootSound ratio = new GreenfootSound("ratio.mp3");
+    GreenfootSound hit = new GreenfootSound("ratiohit.mp3");
+    
+    
     public void getStunned(int frames)
     {
         this.stunTimer = frames;
@@ -162,6 +167,7 @@ public class Nanami extends Actor
         // 1. Press 'e' to load the bar safely in real time without stopping
         if (Greenfoot.isKeyDown("e") && attackCooldown == 0 && !ratioActive)
         {
+            ratio.play();
             ratioActive = true;
             ratioBar = new RatioBar();
             getWorld().addObject(ratioBar, getX(), getY() - 45); 
@@ -170,6 +176,7 @@ public class Nanami extends Actor
         // 2. Left click strikes
         if (mouse != null && Greenfoot.mousePressed(null) && mouse.getButton() == 1 && attackCooldown == 0)
         {
+            swing.play();
             double dx = mouse.getX() - getX();
             double dy = mouse.getY() - getY();
             double angleRad = Math.atan2(dy, dx);
@@ -179,6 +186,7 @@ public class Nanami extends Actor
             {
                 boolean isCritical = ratioBar.checkRatioTiming();
                 executeBluntStrike(angleDeg, angleRad, isCritical);
+                swing.play();
                 
                 attackCooldown = 40; 
                 getWorld().removeObject(ratioBar);
@@ -197,6 +205,7 @@ public class Nanami extends Actor
     {
         if (getWorld() == null) return;
         SwingVisual slash = new SwingVisual(this, angleDeg, isCritical);
+        if (isCritical == true) hit.play();
         getWorld().addObject(slash, getX(), getY());
     }
 

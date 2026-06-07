@@ -32,6 +32,10 @@ public class Maki extends Actor
     // Stun Mechanics (FIXED: Added missing states to handle Turtle impacts)
     private int stunTimer = 0;
 
+    GreenfootSound swing = new GreenfootSound("makiswing.mp3");
+    GreenfootSound arc = new GreenfootSound("makiarc.mp3");
+    GreenfootSound strike = new GreenfootSound("makistrike.mp3");
+    
     public Maki()
     {
         downFrames  = new GreenfootImage[4];
@@ -155,6 +159,7 @@ public class Maki extends Actor
 
             if (mousePressed && mouse.getButton() == 1 && laserCooldown == 0)
             {
+                arc.play();
                 if (orbitCloud != null && orbitCloud.getWorld() != null)
                     getWorld().removeObject(orbitCloud);
                 orbitCloud = new MakiCloud("ORBIT", getX(), getY(), 0);
@@ -164,6 +169,7 @@ public class Maki extends Actor
 
             if (mousePressed && mouse.getButton() == 2 && laserCooldown == 0)
             {
+                swing.play();
                 turnTowards(mouse.getX(), mouse.getY());
                 int angle = getRotation();
                 setRotation(0);
@@ -175,6 +181,7 @@ public class Maki extends Actor
 
             if (mousePressed && mouse.getButton() == 3 && laserCooldown == 0)
             {
+                strike.play();
                 turnTowards(mouse.getX(), mouse.getY());
                 int angle = getRotation();
                 setRotation(0);
