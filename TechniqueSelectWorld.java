@@ -5,12 +5,19 @@ public class TechniqueSelectWorld extends World
     private TechniqueButton makiBtn;
     private TechniqueButton naoBtn;
     private TechniqueButton nanamiBtn;
+    
+    // --- TRACKING SCORE ACROSS TRANSITIONS ---
+    private int preservedScore = 0;
 
     GreenfootSound ratio = new GreenfootSound("ratio.mp3");
     
-    public TechniqueSelectWorld()
+    /**
+     * Primary constructor carrying score forward from previous maps
+     */
+    public TechniqueSelectWorld(int scoreCarryOver)
     {
         super(800, 600, 1);
+        this.preservedScore = scoreCarryOver;
 
         // Dark background
         GreenfootImage bg = new GreenfootImage(800, 600);
@@ -35,9 +42,14 @@ public class TechniqueSelectWorld extends World
         addObject(makiBtn,   160, 350);
         addObject(naoBtn,    400, 350);
         addObject(nanamiBtn, 640, 350);
-        
-        
-        
+    }
+
+    /**
+     * Legacy default constructor compatibility
+     */
+    public TechniqueSelectWorld()
+    {
+        this(0);
     }
 
     public void act()
@@ -59,6 +71,10 @@ public class TechniqueSelectWorld extends World
             if (!selected.equals(""))
             {
                 ratio.play();
+                
+                // If your ControlsScreen takes the score parameter, pass it here:
+                // Greenfoot.setWorld(new ControlsScreen(selected, preservedScore));
+                // Otherwise, standard call:
                 Greenfoot.setWorld(new ControlsScreen(selected));
             }
         }
