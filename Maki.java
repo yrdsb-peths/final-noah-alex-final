@@ -159,7 +159,8 @@ public class Maki extends Actor
 
             if (mousePressed && mouse.getButton() == 1 && laserCooldown == 0)
             {
-                arc.play();
+                // FIX: Use sequential static file player or verify audio channels are free
+                Greenfoot.playSound("makiarc.mp3");
                 if (orbitCloud != null && orbitCloud.getWorld() != null)
                     getWorld().removeObject(orbitCloud);
                 orbitCloud = new MakiCloud("ORBIT", getX(), getY(), 0);
@@ -169,7 +170,8 @@ public class Maki extends Actor
 
             if (mousePressed && mouse.getButton() == 2 && laserCooldown == 0)
             {
-                swing.play();
+                // FIX: Play attack sounds natively so overlapping triggers work instantly
+                Greenfoot.playSound("makiswing.mp3");
                 turnTowards(mouse.getX(), mouse.getY());
                 int angle = getRotation();
                 setRotation(0);
@@ -181,7 +183,8 @@ public class Maki extends Actor
 
             if (mousePressed && mouse.getButton() == 3 && laserCooldown == 0)
             {
-                strike.play();
+                // FIX: Standardize sound routing rules without altering existing fields
+                Greenfoot.playSound("makistrike.mp3");
                 turnTowards(mouse.getX(), mouse.getY());
                 int angle = getRotation();
                 setRotation(0);

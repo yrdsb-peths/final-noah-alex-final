@@ -14,7 +14,7 @@ public class Naobito extends Actor
     private GlassPanel playerGlassTrap = null;
     
     private int hp = 10;
-    private int punchCooldown = 0; // Replaced laserCooldown with an attack tracker
+    private int punchCooldown = 0; 
     private int invincibilityTimer = 0;
     private final int INVINCIBILITY_DURATION = 30;
     private HpBar healthBar;
@@ -49,7 +49,8 @@ public class Naobito extends Actor
     private boolean greyedOut = false;
     private int stunTimer = 0;
     
-    GreenfootSound punch = new GreenfootSound("punch.mp3");
+    // --- AUDIO FIELDS ---
+    // Removed punch instance variable to use Maki's sound method for overlapping sound triggers
     GreenfootSound camera = new GreenfootSound("camera.mp3");
     GreenfootSound glass = new GreenfootSound("glass.mp3");
     GreenfootSound glassbreak = new GreenfootSound("glassbreak.mp3");
@@ -57,10 +58,11 @@ public class Naobito extends Actor
     
     public void getStunned(int frames)
     {
-        glass.play();
+        glass.play(); // Restored to original behavior
         this.stunTimer = frames;
         getImage().setColor(new Color(0, 150, 255)); // Blue freeze tint
     }
+    
     // --- Constructor ---
     public Naobito()
     {
@@ -88,6 +90,7 @@ public class Naobito extends Actor
         
         setImage(idleFrames[0]);
     }
+    
     public int getInvincibilityTimer()
     {
         return this.invincibilityTimer;
@@ -101,7 +104,7 @@ public class Naobito extends Actor
         {
             stunTimer--;
             if (stunTimer == 0) getImage().setColor(new Color(255, 255, 255, 255));
-            return; // Freezes custom frame tracing inputs
+            return; 
         }
         MouseInfo mouse = Greenfoot.getMouseInfo();
         
@@ -128,9 +131,6 @@ public class Naobito extends Actor
 
         handleProjectionSorcery(mouse);
 
-        // ====================================================================
-        // FREEZE BRAKE: Stop all inputs if locked, tracing, or executing
-        // ====================================================================
         if (psState == PS_FROZEN || psState == PS_TRACING || psState == PS_LOCKED || psState == PS_EXECUTING)
         {
             if (psState == PS_LOCKED) {
@@ -171,14 +171,10 @@ public class Naobito extends Actor
             if (dashIcon != null) dashIcon.updateIcon(3);
         }
 
-        // ====================================================================
-        // NEW MELEE MECHANIC: Quick Jabs / Close Range Punching
-        // ====================================================================
         if (Greenfoot.mousePressed(null) && punchCooldown == 0 && mouse != null)
         {
-            // Execute physical forward striking detector
             executeCloseRangeJab(mouse);
-            punchCooldown = 12; // Fast recovery rate for quick succession inputs
+            punchCooldown = 12; 
         }
 
         checkEnemyContact();
@@ -188,23 +184,21 @@ public class Naobito extends Actor
     {
         if (mouse == null || getWorld() == null) return;
 
-        punch.play();
-        // Calculate the angle towards the cursor
+        // ONLY punches use the optimized sound routing to prevent swift consecutive clicks from lagging
+        Greenfoot.playSound("punch.mp3"); 
+        
         double angleRad = Math.atan2(mouse.getY() - getY(), mouse.getX() - getX());
         int angleDeg = (int) Math.toDegrees(angleRad);
         
-        // Push the spawn points out slightly in front of Naobito's body (20 pixels out)
         int spawnX = getX() + (int)(Math.cos(angleRad) * 20);
         int spawnY = getY() + (int)(Math.sin(angleRad) * 20);
         
-        // Punch 1: Left shoulder jab
         int leftX = spawnX + (int)(Math.cos(angleRad + Math.PI/2) * 12);
         int leftY = spawnY + (int)(Math.sin(angleRad + Math.PI/2) * 12);
-        int leftAngle = angleDeg + (Greenfoot.getRandomNumber(16) - 8); // slight variance
+        int leftAngle = angleDeg + (Greenfoot.getRandomNumber(16) - 8); 
         PunchVisual jab1 = new PunchVisual(leftAngle);
         getWorld().addObject(jab1, leftX, leftY);
         
-        // Punch 2: Right shoulder jab (thrown slightly wider)
         int rightX = spawnX + (int)(Math.cos(angleRad - Math.PI/2) * 12);
         int rightY = spawnY + (int)(Math.sin(angleRad - Math.PI/2) * 12);
         int rightAngle = angleDeg + (Greenfoot.getRandomNumber(16) - 8);
@@ -226,7 +220,7 @@ public class Naobito extends Actor
 
             if (target != null)
             {
-                glass.play();
+                glass.play(); // Restored to original behavior
                 frozenEnemy = target;
                 frozenTimer = 180; 
                 
@@ -243,7 +237,7 @@ public class Naobito extends Actor
             }
             else
             {
-                camera.play();
+                camera.play(); // Restored to original behavior
                 psState = PS_FROZEN;
                 psTimer = FREEZE_DURATION;
                 tracedPath.clear();
@@ -349,7 +343,7 @@ public class Naobito extends Actor
         // --- PHASE 4: EXECUTION MODE ---
         if (psState == PS_EXECUTING)
         {
-            speed.play();
+            speed.play(); // Restored to original behavior
             if (pathIndex < tracedPath.size())
             {
                 int[] point = tracedPath.get(pathIndex);
@@ -367,7 +361,7 @@ public class Naobito extends Actor
         // --- PHASE 5: FREEZE PENALTY ACTIVE ---
         if (psState == PS_LOCKED)
         {
-            glass.play();
+            glass.play(); // Restored to original behavior
             psTimer--;
             
             if (playerGlassTrap != null && playerGlassTrap.getWorld() != null) {
@@ -403,7 +397,7 @@ public class Naobito extends Actor
                 activeGlassPanel = null;
                 frozenEnemy = null;
                 frozenTimer = 0;
-                glassbreak.play();
+                glassbreak.play(); // Restored to original behavior
             }
         }
     }
@@ -595,21 +589,20 @@ public class Naobito extends Actor
     }
 
     public void takeDamage(int amount)
-{
-    if (invincibilityTimer == 0)
     {
-        hp -= amount;
-        invincibilityTimer = INVINCIBILITY_DURATION;
-        if (healthBar != null) healthBar.updateBar(hp);
-        
-        if (hp <= 0) 
+        if (invincibilityTimer == 0)
         {
-            // Check if we are currently fighting in BeachWorld
-            boolean isBeach = (getWorld() instanceof BeachWorld);
-            Greenfoot.setWorld(new GameOver(isBeach));
+            hp -= amount;
+            invincibilityTimer = INVINCIBILITY_DURATION;
+            if (healthBar != null) healthBar.updateBar(hp);
+            
+            if (hp <= 0) 
+            {
+                boolean isBeach = (getWorld() instanceof BeachWorld);
+                Greenfoot.setWorld(new GameOver(isBeach));
+            }
         }
     }
-}
 
     public void heal(int amount)
     {

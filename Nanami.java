@@ -30,10 +30,16 @@ public class Nanami extends Actor
     private final int ANIM_SPEED = 8;
     private int stunTimer = 0;
 
-    GreenfootSound swing = new GreenfootSound("swing.mp3");
-    GreenfootSound ratio = new GreenfootSound("ratio.mp3");
-    GreenfootSound hit = new GreenfootSound("ratiohit.mp3");
-    
+    // SOUND POOLS FOR RAPID AUDIO OVERLAPPING
+    private GreenfootSound[] swingPool;
+    private int swingIndex = 0;
+    private final int SWING_POOL_SIZE = 4;
+
+    private GreenfootSound[] hitPool;
+    private int hitIndex = 0;
+    private final int HIT_POOL_SIZE = 4;
+
+    private GreenfootSound ratioSound = new GreenfootSound("ratio.mp3"); // Menu focus sound
     
     public void getStunned(int frames)
     {
@@ -54,7 +60,6 @@ public class Nanami extends Actor
         leftFrames  = new GreenfootImage[4];
         rightFrames = new GreenfootImage[4];
 
-        // Your exact preferred sprite filename layouts
         String[] downFiles  = {"nanami.png", "nanami2.png", "nanami3.png", "nanami4.png"};
         String[] upFiles    = {"nanami-up.png", "nanami-up2.png", "nanami-up3.png", "nanami-up4.png"};
         String[] leftFiles  = {"nanami-left.png", "nanami-left2.png", "nanami-left3.png", "nanami-left4.png"};
@@ -68,6 +73,17 @@ public class Nanami extends Actor
             rightFrames[i] = new GreenfootImage(rightFiles[i]); rightFrames[i].scale(50, 50);
         }
 
+        // Initialize Audio Instance Pools
+        swingPool = new GreenfootSound[SWING_POOL_SIZE];
+        for (int i = 0; i < SWING_POOL_SIZE; i++) {
+            swingPool[i] = new GreenfootSound("swing.mp3");
+        }
+
+        hitPool = new GreenfootSound[HIT_POOL_SIZE];
+        for (int i = 0; i < HIT_POOL_SIZE; i++) {
+            hitPool[i] = new GreenfootSound("ratiohit.mp3");
+        }
+
         setImage(idleFrames[0]);
     }
 
@@ -75,7 +91,6 @@ public class Nanami extends Actor
     {
         if (getWorld() == null) return;
 
-        // Follow Nanami dynamically if the bar is active while moving
         if (ratioActive && ratioBar != null)
         {
             if (ratioBar.isExpired())
@@ -90,7 +105,6 @@ public class Nanami extends Actor
             }
         }
 
-        // Handle stun mechanics
         if (stunTimer > 0)
         {
             stunTimer--;
@@ -100,7 +114,6 @@ public class Nanami extends Actor
             return;
         }
 
-        // Run general counters
         if (invincibilityTimer > 0)
         {
             invincibilityTimer--;
@@ -116,7 +129,6 @@ public class Nanami extends Actor
                 dashIcon.updateIcon(dashCooldown / 60);
         }
 
-        // Dash core execution
         if (dashDuration > 0)
         {
             dashDuration--;
@@ -128,10 +140,8 @@ public class Nanami extends Actor
             return;
         }
 
-        // Process attacks and inputs
         handleCombatInputs();
 
-        // FIXED: Removed the return block so Nanami can run around while handling 'e' triggers!
         boolean moving = false;
         int dx = 0, dy = 0;
         GreenfootImage[] currentFrames = idleFrames;
@@ -150,7 +160,6 @@ public class Nanami extends Actor
         }
         setImage(currentFrames[animFrame]);
 
-        // Dash trigger
         if (Greenfoot.isKeyDown("r") && dashCooldown == 0 && (dx != 0 || dy != 0))
         {
             dashDuration = 10;
@@ -164,19 +173,16 @@ public class Nanami extends Actor
     {
         MouseInfo mouse = Greenfoot.getMouseInfo();
         
-        // 1. Press 'e' to load the bar safely in real time without stopping
         if (Greenfoot.isKeyDown("e") && attackCooldown == 0 && !ratioActive)
         {
-            ratio.play();
             ratioActive = true;
             ratioBar = new RatioBar();
             getWorld().addObject(ratioBar, getX(), getY() - 45); 
+            ratioSound.play(); // Play single utility notification trigger
         }
 
-        // 2. Left click strikes
         if (mouse != null && Greenfoot.mousePressed(null) && mouse.getButton() == 1 && attackCooldown == 0)
         {
-            swing.play();
             double dx = mouse.getX() - getX();
             double dy = mouse.getY() - getY();
             double angleRad = Math.atan2(dy, dx);
@@ -186,7 +192,10 @@ public class Nanami extends Actor
             {
                 boolean isCritical = ratioBar.checkRatioTiming();
                 executeBluntStrike(angleDeg, angleRad, isCritical);
-                swing.play();
+                
+                // Audio overlap trigger loop for swings
+                swingPool[swingIndex].play();
+                swingIndex = (swingIndex + 1) % SWING_POOL_SIZE;
                 
                 attackCooldown = 40; 
                 getWorld().removeObject(ratioBar);
@@ -196,6 +205,11 @@ public class Nanami extends Actor
             else if (!ratioActive)
             {
                 executeBluntStrike(angleDeg, angleRad, false);
+                
+                // Audio overlap trigger loop for swings
+                swingPool[swingIndex].play();
+                swingIndex = (swingIndex + 1) % SWING_POOL_SIZE;
+                
                 attackCooldown = 15;
             }
         }
@@ -205,7 +219,12 @@ public class Nanami extends Actor
     {
         if (getWorld() == null) return;
         SwingVisual slash = new SwingVisual(this, angleDeg, isCritical);
-        if (isCritical == true) hit.play();
+        
+        if (isCritical) {
+            // Audio overlap trigger loop for critical hits
+            hitPool[hitIndex].play();
+            hitIndex = (hitIndex + 1) % HIT_POOL_SIZE;
+        }
         getWorld().addObject(slash, getX(), getY());
     }
 
