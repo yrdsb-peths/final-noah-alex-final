@@ -29,7 +29,7 @@ public class Maki extends Actor
     private int animTimer = 0;
     private final int ANIM_SPEED = 8;
     
-    // Stun Mechanics (FIXED: Added missing states to handle Turtle impacts)
+    // Stun Mechanics
     private int stunTimer = 0;
 
     GreenfootSound swing = new GreenfootSound("makiswing.mp3");
@@ -66,7 +66,6 @@ public class Maki extends Actor
         setImage(downFrames[0]);
     }
 
-    // FIXED: Added missing getStunned method called by Turtle
     public void getStunned(int frames)
     {
         this.stunTimer = frames;
@@ -81,7 +80,7 @@ public class Maki extends Actor
 
     public void act()
     {
-        // FIXED: Handle stun countdown and block inputs while stunned
+        // Handle stun countdown and block inputs while stunned
         if (stunTimer > 0)
         {
             stunTimer--;
@@ -152,47 +151,45 @@ public class Maki extends Actor
             if (dashIcon != null) dashIcon.updateIcon(3);
         }
 
-        // Combat Engine Input Maps
-        if (mouse != null)
+        // --- UPDATED COMBAT ENGINE INPUT MAPS ---
+        
+        // 1. LEFT MOUSE CLICK: Orbit Cloud
+        if (mouse != null && Greenfoot.mousePressed(null) && mouse.getButton() == 1 && laserCooldown == 0)
         {
-            boolean mousePressed = Greenfoot.mousePressed(null);
+            Greenfoot.playSound("makiarc.mp3");
+            if (orbitCloud != null && orbitCloud.getWorld() != null)
+                getWorld().removeObject(orbitCloud);
+            orbitCloud = new MakiCloud("ORBIT", getX(), getY(), 0);
+            getWorld().addObject(orbitCloud, getX(), getY());
+            laserCooldown = 30;
+        }
 
-            if (mousePressed && mouse.getButton() == 1 && laserCooldown == 0)
-            {
-                // FIX: Use sequential static file player or verify audio channels are free
-                Greenfoot.playSound("makiarc.mp3");
-                if (orbitCloud != null && orbitCloud.getWorld() != null)
-                    getWorld().removeObject(orbitCloud);
-                orbitCloud = new MakiCloud("ORBIT", getX(), getY(), 0);
-                getWorld().addObject(orbitCloud, getX(), getY());
-                laserCooldown = 30;
-            }
-
-            if (mousePressed && mouse.getButton() == 2 && laserCooldown == 0)
-            {
-                // FIX: Play attack sounds natively so overlapping triggers work instantly
-                Greenfoot.playSound("makiswing.mp3");
+        // 2. Q KEY: Maki Swing (Replaces Middle Mouse Button)
+        if (Greenfoot.isKeyDown("q") && laserCooldown == 0)
+        {
+            if (mouse != null) {
                 turnTowards(mouse.getX(), mouse.getY());
-                int angle = getRotation();
-                setRotation(0);
-                
-                MakiSwing visualSwing = new MakiSwing(this, angle);
-                getWorld().addObject(visualSwing, getX(), getY());
-                laserCooldown = 25;
             }
+            Greenfoot.playSound("makiswing.mp3");
+            int angle = getRotation();
+            setRotation(0);
+            
+            MakiSwing visualSwing = new MakiSwing(this, angle);
+            getWorld().addObject(visualSwing, getX(), getY());
+            laserCooldown = 25;
+        }
 
-            if (mousePressed && mouse.getButton() == 3 && laserCooldown == 0)
-            {
-                // FIX: Standardize sound routing rules without altering existing fields
-                Greenfoot.playSound("makistrike.mp3");
-                turnTowards(mouse.getX(), mouse.getY());
-                int angle = getRotation();
-                setRotation(0);
-                
-                MakiCloud boomerang = new MakiCloud("BOOMERANG", getX(), getY(), angle);
-                getWorld().addObject(boomerang, getX(), getY());
-                laserCooldown = 40;
-            }
+        // 3. RIGHT MOUSE CLICK: Boomerang Cloud
+        if (mouse != null && Greenfoot.mousePressed(null) && mouse.getButton() == 3 && laserCooldown == 0)
+        {
+            Greenfoot.playSound("makistrike.mp3");
+            turnTowards(mouse.getX(), mouse.getY());
+            int angle = getRotation();
+            setRotation(0);
+            
+            MakiCloud boomerang = new MakiCloud("BOOMERANG", getX(), getY(), angle);
+            getWorld().addObject(boomerang, getX(), getY());
+            laserCooldown = 40;
         }
 
         checkEnemyContact();
