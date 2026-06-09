@@ -150,38 +150,55 @@ public class MakiCloud extends Actor
     {
         if (getWorld() == null) return;
 
+        // 1. Regular Crabs
         List<Crab> crabs = getObjectsInRange(18, Crab.class);
         for (Crab c : crabs)
         {
             if (c.getWorld() != null && !hitActors.contains(c)) 
             { 
                 c.takeDamage(damage); 
-                hitActors.add(c); 
+                hitActors.add(c); // Remember we hit this crab!
             }
         }
 
+        // 2. Regular Fish
         List<Fish> fish = getObjectsInRange(18, Fish.class);
         for (Fish f : fish)
         {
-            if (!hitActors.contains(f)) { f.takeDamage(damage); hitActors.add(f); }
+            if (f.getWorld() != null && !hitActors.contains(f)) { f.takeDamage(damage); hitActors.add(f); }
         }
 
+        // 3. Pufferfish
         List<Pufferfish> puffers = getObjectsInRange(18, Pufferfish.class);
         for (Pufferfish p : puffers)
         {
-            if (!hitActors.contains(p)) { p.takeDamage(damage); hitActors.add(p); }
+            if (p.getWorld() != null && !hitActors.contains(p)) { p.takeDamage(damage); hitActors.add(p); }
         }
 
+        // 4. Swordfish Boss
         List<SwordfishBoss> bosses = getObjectsInRange(18, SwordfishBoss.class);
         for (SwordfishBoss b : bosses)
         {
-            if (!hitActors.contains(b)) { b.takeDamage(damage); hitActors.add(b); }
+            if (b.getWorld() != null && !hitActors.contains(b)) { b.takeDamage(damage); hitActors.add(b); }
         }
 
+        // 5. Kraken Boss
         List<Kraken> krakens = getObjectsInRange(18, Kraken.class);
         for (Kraken k : krakens)
         {
-            if (!hitActors.contains(k)) { k.takeDamage(damage); hitActors.add(k); }
+            if (k.getWorld() != null && !hitActors.contains(k)) { k.takeDamage(damage); hitActors.add(k); }
+        }
+
+        // --- NEW: ADD DAGON TO MAKI'S DIRECT ATTACK LISTS ---
+        // This ensures Dagon gets cleanly processed here too, capping his max damage intake per swing!
+        List<Dagon> dagons = getObjectsInRange(45, Dagon.class); // Slightly larger range to match boss asset sizes
+        for (Dagon d : dagons)
+        {
+            if (d.getWorld() != null && !hitActors.contains(d)) 
+            { 
+                d.takeDamage(damage); 
+                hitActors.add(d); // Safely freezes further damage calculations from this asset instance!
+            }
         }
     }
 }

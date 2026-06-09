@@ -66,23 +66,16 @@ public class Dagon extends Actor
             takeDamage(1); 
             if (getWorld() == null) return; // Terminate early if Dagon died here
         }
-
+        
         // 2. Maki's physical weapon slices
         Actor makiSwing = getOneIntersectingObject(MakiSwing.class);
         if (makiSwing != null)
         {
             getWorld().removeObject(makiSwing);
-            takeDamage(2); 
+            takeDamage(1); 
             if (getWorld() == null) return; 
         }
         
-        Actor makiCloud = getOneIntersectingObject(MakiCloud.class);
-        if (makiCloud != null)
-        {
-            takeDamage(1);
-            if (getWorld() == null) return; 
-        }
-
         // 3. Nanami's 7:3 Ratio Blunt Strike slashes
         Actor nanamiSlash = getOneIntersectingObject(SwingVisual.class);
         if (nanamiSlash != null)
