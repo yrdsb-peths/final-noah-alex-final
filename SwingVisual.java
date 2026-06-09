@@ -67,16 +67,19 @@ public class SwingVisual extends Actor
         }
     }
     
+    public boolean isCritical()
+    {
+        return this.isCritical;
+    }
+    
     private void checkMeleeHit()
     {
         if (getWorld() == null) return;
         
-        // FIX: Get all intersecting targets in the sweep area instead of just one random object
         List<Actor> targets = getIntersectingObjects(Actor.class);
         
         for (Actor enemy : targets)
         {
-            // Ignore self, UI components, or other swings
             if (enemy != owner && !(enemy instanceof RatioBar) && !(enemy instanceof SwingVisual))
             {
                 if (enemy.getWorld() != null)
@@ -98,6 +101,10 @@ public class SwingVisual extends Actor
                     }
                     else if (enemy instanceof Turtle) {
                         ((Turtle) enemy).takeDamage(damageDealt);
+                    }
+                    // --- 2. ADD THIS ADDITION SO NANAMI CAN HIT DAGON DIRECTLY ---
+                    else if (enemy instanceof Dagon) {
+                        ((Dagon) enemy).takeDamage(damageDealt);
                     }
                 }
             }
