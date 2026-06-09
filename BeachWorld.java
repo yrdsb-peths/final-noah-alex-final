@@ -132,7 +132,8 @@ public class BeachWorld extends World
     
     public void act()
     {
-        if (!isTimeFrozen)
+        // ONLY allow normal minion wave cycles if Dagon hasn't broken into the battlefield yet
+        if (!isTimeFrozen && !dagonSpawned)
         {
             handlePhaseSpawning();
         }
@@ -148,24 +149,11 @@ public class BeachWorld extends World
             spawnMultipleTurtles(1);
             spawnDelay = 20; 
         }
-        if (Greenfoot.isKeyDown("y") && spawnDelay <= 0)
+        
+        // Key listener cheat to manually spawn Dagon for testing
+        if (Greenfoot.isKeyDown("y") && spawnDelay <= 0 && !dagonSpawned)
         {
-            dagonSpawned = true;
-                
-                // Wipe out standard small fish/crabs to clear the stage arena
-                removeObjects(getObjects(Crab.class));
-                removeObjects(getObjects(Turtle.class));
-    
-                // Setup the Boss Health Bar at top center
-                HpBar dagonBar = new HpBar();
-                dagonBar.setBarDimensions(400, 15);
-                dagonBar.setLineColor(new Color(139, 0, 0)); // Dark red color scheme
-                addObject(dagonBar, 400, 45);
-    
-                // Spawn Dagon in the upper-right corner to start Phase 1
-                Dagon boss = new Dagon();
-                addObject(boss, 700, 100);
-                boss.setHpBar(dagonBar);
+            spawnDagonBossInstance();
         }
         
         if (spawnDelay > 0) spawnDelay--;
@@ -173,15 +161,17 @@ public class BeachWorld extends World
 
     private void handlePhaseSpawning()
     {
+        // If Dagon is on the field, completely freeze all minion generation cycles
+        if (dagonSpawned) return;
+
         phaseTimer++;
         if (phaseTimer >= SPAWN_RATE)
         {
-            phaseTimer = 0; // Reset individual clock cycle
+            phaseTimer = 0; 
 
-            // PHASE 1: Score up to 12 -> Only drop 1 Crab at a time gradually
+            // PHASE 1: Score up to 12 -> Drop 1 Crab at a time gradually
             if (score <= 12)
             {
-                // Safety limit: Don't choke the player if they aren't killing them fast enough
                 if (getObjects(Crab.class).size() < 5)
                 {
                     spawnMultipleCrabs(1);
@@ -190,9 +180,9 @@ public class BeachWorld extends World
             // PHASE 2: Score 13 to 25 -> Mix of Crabs and occasional single Turtles
             else if (score >= 13 && score <= 25)
             {
-                if (Greenfoot.getRandomNumber(10) < 3) // 30% chance to drop a Turtle
+                if (Greenfoot.getRandomNumber(10) < 3) 
                 {
-                    if (getObjects(Turtle.class).size() < 1) // Keep max 1 turtle active at a time
+                    if (getObjects(Turtle.class).size() < 1) 
                     {
                         spawnMultipleTurtles(1);
                     }
@@ -206,10 +196,10 @@ public class BeachWorld extends World
                     spawnMultipleCrabs(2);
                 }
             }
-            // PHASE 3: Score 26+ -> Chaotic gradient drop of crabs and turtles simultaneously
-            else if(score >= 26 && score <= 34)
+            // PHASE 3: Score 26 to 34 -> Intense minion combination rush
+            else if (score >= 26 && score <= 34)
             {
-                if (Greenfoot.getRandomNumber(10) < 4) // 40% chance for heavy armor units
+                if (Greenfoot.getRandomNumber(10) < 4) 
                 {
                     spawnMultipleTurtles(1);
                 }
@@ -218,37 +208,32 @@ public class BeachWorld extends World
                     spawnMultipleCrabs(1);
                 }
             }
-            else if (score >= 35 && !dagonSpawned)
+            // FINAL PHASE STEP: Boss threshold reached!
+            else if (score >= 35)
             {
-                dagonSpawned = true;
-                
-                // Wipe out standard small fish/crabs to clear the stage arena
-                removeObjects(getObjects(Crab.class));
-                removeObjects(getObjects(Turtle.class));
-    
-                // Setup the Boss Health Bar at top center
-                HpBar dagonBar = new HpBar();
-                dagonBar.setBarDimensions(400, 15);
-                dagonBar.setLineColor(new Color(139, 0, 0)); // Dark red color scheme
-                addObject(dagonBar, 400, 45);
-    
-                // Spawn Dagon in the upper-right corner to start Phase 1
-                Dagon boss = new Dagon();
-                addObject(boss, 700, 100);
-                boss.setHpBar(dagonBar);
-            }
-            else 
-            {
-                if (Greenfoot.getRandomNumber(10) < 4) // 40% chance for heavy armor units
-                {
-                    spawnMultipleTurtles(1);
-                }
-                else
-                {
-                    spawnMultipleCrabs(1);
-                }
+                spawnDagonBossInstance();
             }
         }
+    }
+    
+    private void spawnDagonBossInstance()
+    {
+        dagonSpawned = true;
+        
+        // Instantly wipe existing entities to clear out crowded clutter lanes
+        removeObjects(getObjects(Crab.class));
+        removeObjects(getObjects(Turtle.class));
+
+        // Setup the Boss Health Bar at top center
+        HpBar dagonBar = new HpBar();
+        dagonBar.setBarDimensions(400, 15);
+        dagonBar.setLineColor(new Color(139, 0, 0)); 
+        addObject(dagonBar, 400, 45);
+
+        // Spawn Dagon in the upper-right corner
+        Dagon boss = new Dagon();
+        addObject(boss, 700, 100);
+        boss.setHpBar(dagonBar);
     }
     
     public void increaseScore()
