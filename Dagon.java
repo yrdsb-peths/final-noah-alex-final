@@ -61,17 +61,18 @@ public class Dagon extends Actor
         Actor punch = getOneIntersectingObject(PunchVisual.class);
         if (punch != null)
         {
-            takeDamage(1); 
+            // FIX: Remove projectile asset FIRST while world reference is guaranteed
             getWorld().removeObject(punch); 
-            if (getWorld() == null) return; // EMERGENCY RETURN SAFETY GATE
+            takeDamage(1); 
+            if (getWorld() == null) return; // Terminate early if Dagon died here
         }
 
         // 2. Maki's physical weapon slices
         Actor makiSwing = getOneIntersectingObject(MakiSwing.class);
         if (makiSwing != null)
         {
-            takeDamage(2); 
             getWorld().removeObject(makiSwing);
+            takeDamage(2); 
             if (getWorld() == null) return; 
         }
         
@@ -86,7 +87,12 @@ public class Dagon extends Actor
         Actor nanamiSlash = getOneIntersectingObject(SwingVisual.class);
         if (nanamiSlash != null)
         {
-            if (((SwingVisual)nanamiSlash).isCritical())
+            boolean isCrit = ((SwingVisual)nanamiSlash).isCritical();
+            
+            // FIX: Clear the slice asset out of the world space FIRST
+            getWorld().removeObject(nanamiSlash);
+            
+            if (isCrit)
             {
                 takeDamage(5); 
                 Greenfoot.playSound("glassbreak.mp3"); 
@@ -95,7 +101,6 @@ public class Dagon extends Actor
             {
                 takeDamage(2); 
             }
-            getWorld().removeObject(nanamiSlash);
             if (getWorld() == null) return; 
         }
         
@@ -103,8 +108,8 @@ public class Dagon extends Actor
         Actor glassBlock = getOneIntersectingObject(GlassPanel.class);
         if (glassBlock != null)
         {
-            takeDamage(4); 
             getWorld().removeObject(glassBlock);
+            takeDamage(4); 
             if (getWorld() == null) return; 
         }
     }
@@ -194,6 +199,13 @@ public class Dagon extends Actor
             Label winLabel = new Label("DOMAIN COLLAPSED - VICTORY!", 40);
             winLabel.setLineColor(Color.GREEN);
             getWorld().addObject(winLabel, 400, 300);
+            
+            // --- NEW: Wipes his specific HP bar container off the screen ---
+            if (bossHpBar != null && bossHpBar.getWorld() != null)
+            {
+                getWorld().removeObject(bossHpBar);
+            }
+            
             getWorld().removeObject(this);
         }
     }
