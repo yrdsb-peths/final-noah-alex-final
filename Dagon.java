@@ -32,19 +32,81 @@ public class Dagon extends Actor
     public void act()
     {
         if (getWorld() == null) return;
+
+        // Skip movement/attack loops if Naobito locks him inside a frame
         if (getWorld() instanceof BeachWorld && ((BeachWorld)getWorld()).isTimeFrozen()) return;
+
+        // --- FIXED: Checked every single frame regardless of stance/attack states ---
+        checkJujutsuStrikes();
+        if (getWorld() == null) return; // Terminate execution branch safely if dead
 
         if (moving)
         {
             processMovement();
         }
-        else if (!isAttacking) 
+        else 
         {
+            // Advance his attack clock even while charging to keep hitboxes vulnerable
             actionTimer++;
             runAttackAI();
         }
     }
+    
+    private void checkJujutsuStrikes()
+    {
+        // Double-check world presence initially to block premature coordinate trace lookups
+        if (getWorld() == null) return;
 
+        // 1. Naobito's Close Range Jab punches
+        Actor punch = getOneIntersectingObject(PunchVisual.class);
+        if (punch != null)
+        {
+            // FIX: Remove projectile asset FIRST while world reference is guaranteed
+            getWorld().removeObject(punch); 
+            takeDamage(1); 
+            if (getWorld() == null) return; // Terminate early if Dagon died here
+        }
+        
+        // 2. Maki's physical weapon slices
+        Actor makiSwing = getOneIntersectingObject(MakiSwing.class);
+        if (makiSwing != null)
+        {
+            getWorld().removeObject(makiSwing);
+            takeDamage(1); 
+            if (getWorld() == null) return; 
+        }
+        
+        // 3. Nanami's 7:3 Ratio Blunt Strike slashes
+        Actor nanamiSlash = getOneIntersectingObject(SwingVisual.class);
+        if (nanamiSlash != null)
+        {
+            boolean isCrit = ((SwingVisual)nanamiSlash).isCritical();
+            
+            // FIX: Clear the slice asset out of the world space FIRST
+            getWorld().removeObject(nanamiSlash);
+            
+            if (isCrit)
+            {
+                takeDamage(5); 
+                Greenfoot.playSound("glassbreak.mp3"); 
+            }
+            else
+            {
+                takeDamage(2); 
+            }
+            if (getWorld() == null) return; 
+        }
+        
+        // 4. Naobito's Launched Glass Panels 
+        Actor glassBlock = getOneIntersectingObject(GlassPanel.class);
+        if (glassBlock != null)
+        {
+            getWorld().removeObject(glassBlock);
+            takeDamage(4); 
+            if (getWorld() == null) return; 
+        }
+    }
+    
     private void runAttackAI()
     {
         // Execute attack from current location every 2.5 seconds (150 frames)
@@ -130,6 +192,13 @@ public class Dagon extends Actor
             Label winLabel = new Label("DOMAIN COLLAPSED - VICTORY!", 40);
             winLabel.setLineColor(Color.GREEN);
             getWorld().addObject(winLabel, 400, 300);
+            
+            // --- NEW: Wipes his specific HP bar container off the screen ---
+            if (bossHpBar != null && bossHpBar.getWorld() != null)
+            {
+                getWorld().removeObject(bossHpBar);
+            }
+            
             getWorld().removeObject(this);
         }
     }

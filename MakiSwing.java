@@ -22,8 +22,8 @@ public class MakiSwing extends Actor
         setRotation(baseAngle + currentOffsetAngle);
         
         GreenfootImage img = new GreenfootImage("cloudarc.png");
-img.scale(75, 75);
-setImage(img);
+        img.scale(75, 75);
+        setImage(img);
     }
 
     public void act()
