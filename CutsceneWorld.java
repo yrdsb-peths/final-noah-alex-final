@@ -2,14 +2,14 @@ import greenfoot.*;
 
 public class CutsceneWorld extends World
 {
-    private int savedScore; // Variable to keep the score safe
+    private int savedScore; 
     private String[][] dialogueData = {
         { "???", "oh... a stupid human has shown up in this realm...", "HIDDEN" },
         { "Hero", "...", "HIDDEN" },
         { "Dagon", "I'm surprised you defeated the kraken...", "REVEALED" },
         { "Dagon", "but now your time ends *here.*", "REVEALED" },
-        { "Dagon", "Domain expansion....", "HANDSIGN" }, // ---> Triggers the close-up cut
-        { "Dagon", "HORIZON OF THE CAPTIVATING SKANDHA!!", "FINALE" } // ---> Fixed spelling
+        { "Dagon", "Domain expansion....", "HANDSIGN" }, 
+        { "Dagon", "HORIZON OF THE CAPTIVATING SKANDHA!!", "FINALE" } 
     };
 
     private int currentLine = 0;
@@ -20,18 +20,16 @@ public class CutsceneWorld extends World
     private CutsceneActor heroSprite;
     private CutsceneActor dagonSprite;
     
-    // --- AUDIO HANDLING ENGINE ---
     private GreenfootSound cutsceneBgm = new GreenfootSound("shrine.mp3");
     
     public CutsceneWorld(int scoreFromPreviousWorld)
     {    
         super(800, 600, 1); 
-        this.savedScore = scoreFromPreviousWorld; // Save it!
+        this.savedScore = scoreFromPreviousWorld; 
         GreenfootImage bg = new GreenfootImage("background.png");
         bg.scale(800, 600);
         setBackground(bg);
 
-        // --- SILENCE THE KRAKEN AND MYWORLD SOUNDS IMMEDIATELY ---
         if (MyWorld.regularBgm != null && MyWorld.regularBgm.isPlaying()) {
             MyWorld.regularBgm.stop();
         }
@@ -39,20 +37,26 @@ public class CutsceneWorld extends World
             MyWorld.krakenBgm.stop();
         }
 
-        // --- START CUTSCENE BGM (Comfortable 40% Volume) ---
         cutsceneBgm.setVolume(40);
         cutsceneBgm.playLoop();
 
+        // Initialize dialogue layouts
         nameBox = new DialogueBox(180, 40);
-        textBox = new DialogueBox(680, 90);
-        addObject(nameBox, 110, 490);
-        addObject(textBox, 420, 550);
+        nameBox.setCentered(true); // ---> ENABLES MIDDLE NAME ALIGNMENT!
+        
+        textBox = new DialogueBox(760, 150); // ---> SCALED UP BIGGER DIALOGUE BOX
+        textBox.setSpacePrompt(true);
+
+        // --- PERFECTED POSITIONING ARRAYS (Top edge sits exactly at Y = 440) ---
+        addObject(nameBox, 110, 420); 
+        addObject(textBox, 400, 515); 
 
         heroSprite  = new CutsceneActor("hero-talk.png",  160, 240);
         dagonSprite = new CutsceneActor("dagon-talk.png", 160, 240);
 
-        addObject(heroSprite,  150, 300);
-        addObject(dagonSprite, 650, 300);
+        // Position sprites at Y=320 so their bottoms (320 + 120 = 440) touch the dialogue box flawlessly
+        addObject(heroSprite,  150, 320);
+        addObject(dagonSprite, 650, 320);
 
         displayLine(currentLine);
     }
@@ -115,31 +119,51 @@ public class CutsceneWorld extends World
         if (state.equals("HIDDEN"))
         {
             heroSprite.getImage().setTransparency(255);
-            dagonSprite.applySilhouetteFilter(true);
+            dagonSprite.getImage().setTransparency(255);
+
+            heroSprite.applySilhouetteFilter(false);
+            dagonSprite.applySilhouetteFilter(true); 
+
+            if (speaker.equals("Hero")) {
+                heroSprite.setDimmed(false);
+            } else {
+                heroSprite.setDimmed(true); 
+            }
         }
         else if (state.equals("REVEALED"))
         {
             heroSprite.getImage().setTransparency(255);
-            dagonSprite.applySilhouetteFilter(false);
             dagonSprite.getImage().setTransparency(255);
+            
+            heroSprite.applySilhouetteFilter(false);
+            dagonSprite.applySilhouetteFilter(false);
+
+            if (speaker.equals("Hero"))
+            {
+                heroSprite.setDimmed(false);  
+                dagonSprite.setDimmed(true);  
+            }
+            else 
+            {
+                heroSprite.setDimmed(true);   
+                dagonSprite.setDimmed(false); 
+            }
         }
         else if (state.equals("HANDSIGN"))
         {
-            // --- 1. CUT TO BLACK BACKGROUND ---
             GreenfootImage darkBg = new GreenfootImage(800, 600);
             darkBg.setColor(Color.BLACK);
             darkBg.fillRect(0, 0, 800, 600);
             setBackground(darkBg);
 
-            // --- 2. VANISH THE HERO ---
             heroSprite.getImage().setTransparency(0);
 
-            // --- 3. SHOW DAGON CLOSE-UP USING HANDSIGN.PNG ---
-            // Swap to handsign sprite sheet image, make it large, and center him up
             GreenfootImage handImg = new GreenfootImage("handsign.png");
-            handImg.scale(400, 400); // Massive close-up dimensions
+            handImg.scale(400, 400); 
             dagonSprite.setImage(handImg);
-            dagonSprite.setLocation(400, 250); // Move him to absolute center stage
+            
+            // Adjust center point to Y=240 so the massive close-up aligns directly on the dialogue bar top
+            dagonSprite.setLocation(400, 240); 
             dagonSprite.getImage().setTransparency(255);
         }
         else if (state.equals("FINALE"))
