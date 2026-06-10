@@ -4,7 +4,7 @@ public class DagonAttack extends Actor
 {
     private String type;
     private int timer = 0;
-    private int maxDuration = 110; // Slightly extended to allow rotation time (2.6 seconds)
+    private int maxDuration = 110; 
     private int rotationSpeed;
     private int spawnedRotation; // Remembers the initial direction pointing to center
 

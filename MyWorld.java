@@ -123,7 +123,6 @@ public class MyWorld extends World {
         }
         if (Greenfoot.isKeyDown("k"))
         {
-            // Debug key override: Ensure regular music stops and battle track triggers smoothly
             if (!krakenSpawned) {
                 regularBgm.stop();
                 krakenBgm.playLoop();
@@ -182,6 +181,7 @@ public class MyWorld extends World {
     {
         spawnTridentPickup();
 
+        //basically instructions on how to use the trident
         tridentHintTitle = new Label("Press E to throw the trident", 26);
         tridentHintTitle.setLineColor(new Color(255, 215, 0)); 
         addObject(tridentHintTitle, 400, 95);
@@ -249,6 +249,7 @@ public class MyWorld extends World {
     
     public void clearTridentTutorialText()
     {
+        //removes the text after 
         if (tridentHintTitle != null && tridentHintTitle.getWorld() != null)
         {
             removeObject(tridentHintTitle);

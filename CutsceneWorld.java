@@ -7,9 +7,9 @@ public class CutsceneWorld extends World
         { "???", "oh... a stupid human has shown up in this realm...", "HIDDEN" },
         { "Hero", "...", "HIDDEN" },
         { "Dagon", "I'm surprised you defeated the kraken...", "REVEALED" },
-        { "Dagon", "but now your time ends *here.*", "REVEALED" },
-        { "Dagon", "Domain expansion....", "HANDSIGN" }, // ---> Triggers the close-up cut
-        { "Dagon", "HORIZON OF THE CAPTIVATING SKANDHA!!", "FINALE" } // ---> Fixed spelling
+        { "Dagon", "but now your time ends here.", "REVEALED" },
+        { "Dagon", "Domain expansion....", "HANDSIGN" }, 
+        { "Dagon", "HORIZON OF THE CAPTIVATING SKANDHA!!", "FINALE" } 
     };
 
     private int currentLine = 0;
@@ -20,26 +20,24 @@ public class CutsceneWorld extends World
     private CutsceneActor heroSprite;
     private CutsceneActor dagonSprite;
     
-    // --- AUDIO HANDLING ENGINE ---
+    //bgm
     private GreenfootSound cutsceneBgm = new GreenfootSound("shrine.mp3");
     
     public CutsceneWorld(int scoreFromPreviousWorld)
     {    
         super(800, 600, 1); 
-        this.savedScore = scoreFromPreviousWorld; // Save it!
+        this.savedScore = scoreFromPreviousWorld;
         GreenfootImage bg = new GreenfootImage("background.png");
         bg.scale(800, 600);
         setBackground(bg);
 
-        // --- SILENCE THE KRAKEN AND MYWORLD SOUNDS IMMEDIATELY ---
+        //stops bgm
         if (MyWorld.regularBgm != null && MyWorld.regularBgm.isPlaying()) {
             MyWorld.regularBgm.stop();
         }
         if (MyWorld.krakenBgm != null && MyWorld.krakenBgm.isPlaying()) {
             MyWorld.krakenBgm.stop();
         }
-
-        // --- START CUTSCENE BGM (Comfortable 40% Volume) ---
         cutsceneBgm.setVolume(40);
         cutsceneBgm.playLoop();
 
@@ -75,6 +73,7 @@ public class CutsceneWorld extends World
     
     public void act()
     {
+        //if u press space it goes to the next dialogue thing
         if (Greenfoot.isKeyDown("space"))
         {
             if (!spacePressedLastFrame)
@@ -91,6 +90,7 @@ public class CutsceneWorld extends World
 
     private void advanceDialogue()
     {
+        //goes to next line
         currentLine++;
         if (currentLine < dialogueData.length)
         {
@@ -112,6 +112,7 @@ public class CutsceneWorld extends World
         nameBox.drawText(speaker, 18, Color.YELLOW);
         textBox.drawText(text, 16, Color.WHITE);
 
+        //hides dagon, reveals him or shows his handsign 
         if (state.equals("HIDDEN"))
         {
             heroSprite.getImage().setTransparency(255);
@@ -125,21 +126,21 @@ public class CutsceneWorld extends World
         }
         else if (state.equals("HANDSIGN"))
         {
-            // --- 1. CUT TO BLACK BACKGROUND ---
+            // black bgm
             GreenfootImage darkBg = new GreenfootImage(800, 600);
             darkBg.setColor(Color.BLACK);
             darkBg.fillRect(0, 0, 800, 600);
             setBackground(darkBg);
 
-            // --- 2. VANISH THE HERO ---
+            // hero gone
             heroSprite.getImage().setTransparency(0);
 
-            // --- 3. SHOW DAGON CLOSE-UP USING HANDSIGN.PNG ---
-            // Swap to handsign sprite sheet image, make it large, and center him up
+            // shows his hand sign cuz its a domain expansion
+            // handsign image, make it larger, and center him 
             GreenfootImage handImg = new GreenfootImage("handsign.png");
-            handImg.scale(400, 400); // Massive close-up dimensions
+            handImg.scale(400, 400); 
             dagonSprite.setImage(handImg);
-            dagonSprite.setLocation(400, 250); // Move him to absolute center stage
+            dagonSprite.setLocation(400, 250); // centers him
             dagonSprite.getImage().setTransparency(255);
         }
         else if (state.equals("FINALE"))

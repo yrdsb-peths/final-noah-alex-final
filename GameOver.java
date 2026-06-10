@@ -7,13 +7,7 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 public class GameOver extends World
 {
     private boolean cameFromBeach;
-
-    // --- AUDIO HANDLING ENGINE ---
     private GreenfootSound gameOverBgm = new GreenfootSound("gameover.mp3");
-
-    /**
-     * Default constructor
-     */
     public GameOver()
     {    
         this(false); 
@@ -27,37 +21,29 @@ public class GameOver extends World
         super(800, 600, 1); 
         this.cameFromBeach = cameFromBeach;
 
-        // --- 1. SHUT DOWN BEACHWORLD MUSIC (IF PLAYING) ---
+        // stops bgm
         if (BeachWorld.beachBgm != null && BeachWorld.beachBgm.isPlaying()) {
             BeachWorld.beachBgm.stop();
         }
-
-        // --- 2. SHUT DOWN MYWORLD REGULAR MUSIC (IF PLAYING) ---
         if (MyWorld.regularBgm != null && MyWorld.regularBgm.isPlaying()) {
             MyWorld.regularBgm.stop();
         }
-
-        // --- 3. SHUT DOWN MYWORLD KRAKEN BATTLE MUSIC (IF PLAYING) ---
         if (MyWorld.krakenBgm != null && MyWorld.krakenBgm.isPlaying()) {
             MyWorld.krakenBgm.stop();
         }
-
-        // --- START GAME OVER BGM (Comfortable 40% Volume) ---
         gameOverBgm.setVolume(40);
         gameOverBgm.playLoop();
 
-        // Darkened background layout
+        // dark bgm
         GreenfootImage bg = new GreenfootImage(800, 600);
         bg.setColor(new Color(15, 5, 5));
         bg.fillRect(0, 0, 800, 600);
         setBackground(bg);
 
-        // Giant red Game Over label in the center
+        // red label
         Label gameOverLabel = new Label("GAME OVER", 70);
         gameOverLabel.setLineColor(Color.RED);
         addObject(gameOverLabel, getWidth() / 2, 240);
-
-        // Smaller instruction label underneath
         Label restartLabel = new Label("Press Space to Try Again", 30);
         addObject(restartLabel, getWidth() / 2, 340);
     }

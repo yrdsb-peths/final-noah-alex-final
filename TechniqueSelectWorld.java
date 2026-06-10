@@ -5,15 +5,9 @@ public class TechniqueSelectWorld extends World
     private TechniqueButton makiBtn;
     private TechniqueButton naoBtn;
     private TechniqueButton nanamiBtn;
-    
-    // --- TRACKING SCORE ACROSS TRANSITIONS ---
     private int preservedScore = 0;
-
     GreenfootSound ratio = new GreenfootSound("ratio.mp3");
-    
-    /**
-     * Primary constructor carrying score forward from previous maps
-     */
+    //tried to carry the score over from different worlds 
     public TechniqueSelectWorld(int scoreCarryOver)
     {
         super(800, 600, 1);
@@ -54,13 +48,12 @@ public class TechniqueSelectWorld extends World
 
     public void act()
     {
-        // 1. Hover updates must happen every frame before checking key clicks!
         MouseInfo mouse = Greenfoot.getMouseInfo();
         makiBtn.update(mouse);
         naoBtn.update(mouse);
         nanamiBtn.update(mouse);
 
-        // 2. Check confirmation
+        //confirmation
         if (Greenfoot.isKeyDown("space"))
         {
             String selected = "";
@@ -71,10 +64,6 @@ public class TechniqueSelectWorld extends World
             if (!selected.equals(""))
             {
                 ratio.play();
-                
-                // If your ControlsScreen takes the score parameter, pass it here:
-                // Greenfoot.setWorld(new ControlsScreen(selected, preservedScore));
-                // Otherwise, standard call:
                 Greenfoot.setWorld(new ControlsScreen(selected));
             }
         }
