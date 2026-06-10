@@ -8,8 +8,8 @@ public class Crab extends Actor
     
     public Crab()
     {
-        baseCrabImage = new GreenfootImage("CRAB.jpg");
-        baseCrabImage.scale(30, 30);
+        baseCrabImage = new GreenfootImage("crab.png");
+        baseCrabImage.scale(40, 30);
         updateFishAppearance();
     }
     

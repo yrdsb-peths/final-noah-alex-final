@@ -8,7 +8,7 @@ public class Turtle extends Actor
     
     public Turtle()
     {
-        baseCrabImage = new GreenfootImage("turtle.jpg");
+        baseCrabImage = new GreenfootImage("turtle.png");
         baseCrabImage.scale(100, 100);
         updateFishAppearance();
     }
