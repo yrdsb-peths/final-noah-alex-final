@@ -1,39 +1,34 @@
 import greenfoot.*;
 
 public class MyWorld extends World {
-    // --- CHANGED TO PUBLIC STATIC: Allows GameOver to find and kill them instantly ---
     public static GreenfootSound regularBgm = new GreenfootSound("spongebob.mp3");
     public static GreenfootSound krakenBgm = new GreenfootSound("spongebobbattle.mp3");
-    
-    // Non-static sound effect (only plays once, doesn't need global tracking)
     GreenfootSound krakenSpawnSFX = new GreenfootSound("kraken_spawn.mp3");
-
     private int score = 0;
-    private boolean bossSpawned = false;
-    private boolean bossDefeated = false;
-    private int nemoKillsAfterBoss = 0;
-    private boolean pufferWaveSpawned = false;
+    private boolean bossSpawned = false; //swordfish stuff
+    private boolean bossDefeated = false; 
+    private int nemoKillsAfterBoss = 0; 
+    private boolean pufferWaveSpawned = false; //pufferfish
     private int spawnTimer = 0;
     private int nemoSpawnCount = 0; // how many nemos have been spawned in puffer wave
     private Label scoreLabel;
     private int phase2EndScore = -1;
     private boolean krakenSpawned = false;
-    private Label tridentHintTitle;
+    private Label tridentHintTitle; //added to know how to use the trident
     private Label tridentHintSubtitle;
 
     public MyWorld() {
         super(800, 600, 1);
         GreenfootImage bg = new GreenfootImage("background.png");
-        bg.scale(800, 600); // match your world dimensions
+        bg.scale(800, 600); 
         setBackground(bg);
         
-        // --- FIXED BGM SETTINGS (Comfortable 40% Volume) ---
+        // background music
         regularBgm.setVolume(40);
         krakenBgm.setVolume(40);
-        
-        // Start playing the standard background music on loop immediately when the world loads
         regularBgm.playLoop();
         
+        //hes named al before cuz originially he was an alligator
         Hero al = new Hero();
         addObject(al, 300, 300);
 
@@ -47,18 +42,15 @@ public class MyWorld extends World {
         
         spawnFish();
         
-        // ADDED DASH ICON TO THE BOTTOM LEFT 
+        // dash icon
         DashIcon dIcon = new DashIcon();
-        // Positioned at X: 210, Y: 370 (cleanly sitting to the right of your health bar)
         addObject(dIcon, 210, 570);
         al.setDashIcon(dIcon);
     }
 
-    // --- GREENFOOT LIFECYCLE HOOKS FOR AUDIO MANAGEMENT ---
     @Override
     public void started()
     {
-        // Safe check to resume whichever background theme was active when paused
         if (krakenSpawned) {
             krakenBgm.playLoop();
         } else {
@@ -69,7 +61,6 @@ public class MyWorld extends World {
     @Override
     public void stopped()
     {
-        // Pause both sound slots immediately on runtime pause
         regularBgm.pause();
         krakenBgm.pause();
     }
@@ -79,7 +70,7 @@ public class MyWorld extends World {
         int fishCount = getObjects(Fish.class).size();
         int pufferCount = getObjects(Pufferfish.class).size();
 
-        // Phase 1: Normal nemo spawning before boss
+        // phase 1: normal fish
         if (!bossSpawned && !bossDefeated)
         {
             if (fishCount < 2)
@@ -89,7 +80,7 @@ public class MyWorld extends World {
         }
         int swordfishCount = getObjects(SwordfishBoss.class).size();
 
-        // Phase 2: After boss dies, spawn 10 nemos in intervals + 1 pufferfish
+        // phase 2: more fish + pufferfish
         if (bossDefeated && !pufferWaveSpawned)
         {
             spawnTimer++;
@@ -97,14 +88,11 @@ public class MyWorld extends World {
             {
                 spawnFish();
                 nemoSpawnCount++;
-
-                // Spawn the pufferfish alongside the first nemo
                 if (nemoSpawnCount == 1)
                 {
                     spawnPufferfish();
                 }
             }
-
             if (nemoSpawnCount >= 10)
             {
                 pufferWaveSpawned = true;
@@ -112,18 +100,17 @@ public class MyWorld extends World {
             }
         }
         
-        // Phase 3: Transition into the Kraken Boss
+        // phase 3: kraken
         if (pufferWaveSpawned && !krakenSpawned)
         {
             if (fishCount == 0 && pufferCount == 0)
             {
-                krakenSpawned = true; // Flips safety gate
+                krakenSpawned = true; 
                 
-                // Stop the regular background music before starting the battle music
+                //changes music and kraken roars
                 regularBgm.stop();
-                
-                krakenSpawnSFX.play();  // Unleash the kraken spawn roar sound effect!
-                krakenBgm.playLoop();   // Spin up the intense SpongeBob battle loop!
+                krakenSpawnSFX.play(); 
+                krakenBgm.playLoop();  
                 
                 spawnKrakenBoss();
             }

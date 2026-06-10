@@ -4,22 +4,23 @@ public class BeachWorld extends World
 {
     private String technique;
     
-    // --- Hook variables for Projection Sorcery / Mechanics ---
+    // specifically for Naobito when he freezes time and enemies 
     private boolean isTimeFrozen = false;
     private Actor frozenEnemyObject = null;
 
-    // --- SCORE AND WAVE ENGINE TRACKING ---
+    // score
     private int score = 0;
     private Label scoreLabel;
     private int spawnDelay = 0; 
-
-    private int phaseTimer = 0;
-    private final int SPAWN_RATE = 90; // Spawns an enemy every 90 frames (~1.5 seconds)
     
-    // --- CHANGED TO PUBLIC STATIC: ALLOWS OTHER WORLDS TO SHUT IT DOWN ---
+    //phases
+    private int phaseTimer = 0;
+    private final int SPAWN_RATE = 90; // Spawns an enemy every 90 frames 
+    
+    //bgm
     public static GreenfootSound beachBgm = new GreenfootSound("delirious.mp3");
 
-    private boolean dagonSpawned = false; // Add this field variable at the top of BeachWorld
+    private boolean dagonSpawned = false; 
     
     public void setTimeFreeze(boolean freeze) {
         this.isTimeFrozen = freeze;
@@ -37,7 +38,6 @@ public class BeachWorld extends World
         return this.frozenEnemyObject;
     }
 
-    // --- GREENFOOT LIFECYCLE HOOKS FOR AUDIO MANAGEMENT ---
     @Override
     public void started()
     {
@@ -62,15 +62,16 @@ public class BeachWorld extends World
         beachBg.scale(800, 600);
         setBackground(beachBg);
 
-        // Score Label Setup
+        // score label
         scoreLabel = new Label("Score: 0", 30);
         scoreLabel.setLineColor(Color.WHITE);
         addObject(scoreLabel, 80, 30);
 
-        // Spawn UI Components
+        // ui 
         HpBar bar = new HpBar();
         DashIcon dIcon = new DashIcon();
 
+        //technique selection
         if (technique.equals("MAKI"))
         {
             Maki player = new Maki();
@@ -130,13 +131,13 @@ public class BeachWorld extends World
     
     public void act()
     {
-        // ONLY allow normal minion wave cycles if Dagon hasn't broken into the battlefield yet
+        //summons enemies w/o dagon
         if (!isTimeFrozen && !dagonSpawned)
         {
             handlePhaseSpawning();
         }
 
-        // Manual Spawning Cheats
+        //cheats
         if (Greenfoot.isKeyDown("p") && spawnDelay <= 0)
         {
             spawnMultipleCrabs(1);
@@ -147,19 +148,16 @@ public class BeachWorld extends World
             spawnMultipleTurtles(1);
             spawnDelay = 20; 
         }
-        
-        // Key listener cheat to manually spawn Dagon for testing
         if (Greenfoot.isKeyDown("y") && spawnDelay <= 0 && !dagonSpawned)
         {
             spawnDagonBossInstance();
         }
-        
         if (spawnDelay > 0) spawnDelay--;
     }
 
     private void handlePhaseSpawning()
     {
-        // If Dagon is on the field, completely freeze all minion generation cycles
+        // if dagon exists, stops all minion generation cycles
         if (dagonSpawned) return;
 
         phaseTimer++;
@@ -167,7 +165,7 @@ public class BeachWorld extends World
         {
             phaseTimer = 0; 
 
-            // PHASE 1: Score up to 12 -> Drop 1 Crab at a time gradually
+            // phase 1 of crabs
             if (score <= 12)
             {
                 if (getObjects(Crab.class).size() < 5)
@@ -175,7 +173,7 @@ public class BeachWorld extends World
                     spawnMultipleCrabs(1);
                 }
             }
-            // PHASE 2: Score 13 to 25 -> Mix of Crabs and occasional single Turtles
+            // phase 2 lots of crabs and some turtles 
             else if (score >= 13 && score <= 25)
             {
                 if (Greenfoot.getRandomNumber(10) < 3) 
@@ -194,7 +192,7 @@ public class BeachWorld extends World
                     spawnMultipleCrabs(2);
                 }
             }
-            // PHASE 3: Score 26 to 34 -> Intense minion combination rush
+            // phase 3 lots of turtles and crabs
             else if (score >= 26 && score <= 34)
             {
                 if (Greenfoot.getRandomNumber(10) < 4) 
@@ -206,7 +204,7 @@ public class BeachWorld extends World
                     spawnMultipleCrabs(1);
                 }
             }
-            // FINAL PHASE STEP: Boss threshold reached!
+            // phase 4 dagon
             else if (score >= 35)
             {
                 spawnDagonBossInstance();
@@ -218,17 +216,17 @@ public class BeachWorld extends World
     {
         dagonSpawned = true;
         
-        // Instantly wipe existing entities to clear out crowded clutter lanes
+        //gets rid of other annoying enemies to make it easier
         removeObjects(getObjects(Crab.class));
         removeObjects(getObjects(Turtle.class));
 
-        // Setup the Boss Health Bar at top center
+        //hp
         HpBar dagonBar = new HpBar();
         dagonBar.setBarDimensions(400, 15);
         dagonBar.setLineColor(new Color(139, 0, 0)); 
         addObject(dagonBar, 400, 45);
 
-        // Spawn Dagon in the upper-right corner
+        //spawns him in the corner 
         Dagon boss = new Dagon();
         addObject(boss, 700, 100);
         boss.setHpBar(dagonBar);
@@ -241,8 +239,6 @@ public class BeachWorld extends World
         {
             scoreLabel.setValue("Score: " + score);
         }
-
-        
     }
 
     private void spawnCrabWave()
@@ -253,6 +249,7 @@ public class BeachWorld extends World
 
     private void spawnMultipleCrabs(int count)
     {
+        //spawns crabs in locations
         for (int i = 0; i < count; i++)
         {
             int edge = Greenfoot.getRandomNumber(4);
@@ -277,6 +274,7 @@ public class BeachWorld extends World
         }
     }
 
+    //default value so it doesnt crash
     public BeachWorld()
     {
         this("MAKI");
