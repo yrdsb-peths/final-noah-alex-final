@@ -165,17 +165,33 @@ public class Maki extends Actor
         }
 
         // 2. Q KEY: Maki Swing (Replaces Middle Mouse Button)
+        // 2. Q KEY: Cloud Arc Burst (Melee Swing / Boomerang Option)
+// 2. Q KEY: Cloud Arc Burst (Melee Swing / Sweeping Arc from Right Corner)
+        // 2. Q KEY: Cloud Arc Burst (Sweeping Arc - Pushed Forward & Reversed)
         if (Greenfoot.isKeyDown("q") && laserCooldown == 0)
         {
+            Greenfoot.playSound("makiarc.mp3");
+            int angle = 0;
             if (mouse != null) {
                 turnTowards(mouse.getX(), mouse.getY());
+                angle = getRotation();
+                setRotation(0); 
             }
-            Greenfoot.playSound("makiswing.mp3");
-            int angle = getRotation();
-            setRotation(0);
             
-            MakiSwing visualSwing = new MakiSwing(this, angle);
-            getWorld().addObject(visualSwing, getX(), getY());
+            // --- FIXED: PUSHED FURTHER IN FRONT ---
+            // Increased distance from 30 to 48 pixels out to clear her body
+            int handDistance = 48; 
+            
+            // Mirroring the angle check to the opposite side to handle the reversed swing start position
+            double cornerRadians = Math.toRadians(angle - 50); 
+            
+            int spawnX = getX() + (int)(handDistance * Math.cos(cornerRadians));
+            int spawnY = getY() + (int)(handDistance * Math.sin(cornerRadians));
+            
+            // Pass the reversed initialization status down
+            MakiSwing visualSwing = new MakiSwing(this, angle, true);
+            getWorld().addObject(visualSwing, spawnX, spawnY);
+            
             laserCooldown = 25;
         }
 
