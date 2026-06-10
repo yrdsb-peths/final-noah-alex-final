@@ -50,7 +50,6 @@ public class Naobito extends Actor
     private int stunTimer = 0;
     
     // --- AUDIO FIELDS ---
-    // Removed punch instance variable to use Maki's sound method for overlapping sound triggers
     GreenfootSound camera = new GreenfootSound("camera.mp3");
     GreenfootSound glass = new GreenfootSound("glass.mp3");
     GreenfootSound glassbreak = new GreenfootSound("glassbreak.mp3");
@@ -58,9 +57,9 @@ public class Naobito extends Actor
     
     public void getStunned(int frames)
     {
-        glass.play(); // Restored to original behavior
+        glass.play(); 
         this.stunTimer = frames;
-        getImage().setColor(new Color(0, 150, 255)); // Blue freeze tint
+        getImage().setColor(new Color(0, 150, 255)); 
     }
     
     // --- Constructor ---
@@ -153,14 +152,8 @@ public class Naobito extends Actor
         if (animTimer >= ANIM_SPEED)
         {
             animTimer = 0;
-            if (keyIsPressed)
-            {
-                animFrame = (animFrame + 1) % 4;
-            }
-            else
-            {
-                animFrame = 0;
-            }
+            if (keyIsPressed) animFrame = (animFrame + 1) % 4;
+            else animFrame = 0;
         }
         setImage(currentFrames[animFrame]);
 
@@ -184,7 +177,6 @@ public class Naobito extends Actor
     {
         if (mouse == null || getWorld() == null) return;
 
-        // ONLY punches use the optimized sound routing to prevent swift consecutive clicks from lagging
         Greenfoot.playSound("punch.mp3"); 
         
         double angleRad = Math.atan2(mouse.getY() - getY(), mouse.getX() - getX());
@@ -220,7 +212,7 @@ public class Naobito extends Actor
 
             if (target != null)
             {
-                glass.play(); // Restored to original behavior
+                glass.play(); 
                 frozenEnemy = target;
                 frozenTimer = 180; 
                 
@@ -237,7 +229,7 @@ public class Naobito extends Actor
             }
             else
             {
-                camera.play(); // Restored to original behavior
+                camera.play(); 
                 psState = PS_FROZEN;
                 psTimer = FREEZE_DURATION;
                 tracedPath.clear();
@@ -258,14 +250,15 @@ public class Naobito extends Actor
 
             int secondsLeft = (psTimer / 60) + 1; 
             
-            String directionPrompt = "";
-            if (firstMoveDir == 2) directionPrompt = "Keep moving Left! Hold [A] when zone ends!";
-            else if (firstMoveDir == 3) directionPrompt = "Keep moving Right! Hold [D] when zone ends!";
-            else if (firstMoveDir == 0) directionPrompt = "Keep moving Up! Hold [W] when zone ends!";
-            else if (firstMoveDir == 1) directionPrompt = "Keep moving Down! Hold [S] when zone ends!";
+            String targetKey = "A KEY";
+            if (firstMoveDir == 0) targetKey = "[W]";
+            else if (firstMoveDir == 1) targetKey = "[S]";
+            else if (firstMoveDir == 2) targetKey = "[A]";
+            else if (firstMoveDir == 3) targetKey = "[D]";
             
-            String subtitleText = "TIME FREEZE: " + secondsLeft + "... | " + directionPrompt;
-            drawFreezeSubtitles(subtitleText);
+            // Outputs countdown dynamically during active tracing zone frames
+            String subtitleText = "PRESS " + targetKey + " ... " + secondsLeft;
+            drawFreezeSubtitles(subtitleText, new Color(255, 215, 0));
 
             int tx = getX(), ty = getY();
             boolean moved = false;
@@ -290,7 +283,7 @@ public class Naobito extends Actor
                 psState = PS_CONFIRM;
                 psTimer = 90; 
                 applyGreyOut(false);
-                drawFreezeSubtitles(""); 
+                drawFreezeSubtitles("", Color.WHITE); 
                 
                 if (currentWorld != null) {
                     currentWorld.setTimeFreeze(false);
@@ -343,7 +336,7 @@ public class Naobito extends Actor
         // --- PHASE 4: EXECUTION MODE ---
         if (psState == PS_EXECUTING)
         {
-            speed.play(); // Restored to original behavior
+            speed.play(); 
             if (pathIndex < tracedPath.size())
             {
                 int[] point = tracedPath.get(pathIndex);
@@ -361,8 +354,11 @@ public class Naobito extends Actor
         // --- PHASE 5: FREEZE PENALTY ACTIVE ---
         if (psState == PS_LOCKED)
         {
-            glass.play(); // Restored to original behavior
+            glass.play(); 
             psTimer--;
+            
+            // Clean error feedback subtitle mapping
+            drawFreezeSubtitles("You pressed the wrong key!", new Color(255, 60, 60));
             
             if (playerGlassTrap != null && playerGlassTrap.getWorld() != null) {
                 playerGlassTrap.setLocation(getX(), getY());
@@ -371,6 +367,7 @@ public class Naobito extends Actor
             if (psTimer <= 0) 
             {
                 psState = PS_NONE;
+                drawFreezeSubtitles("", Color.WHITE);
                 
                 if (playerGlassTrap != null && playerGlassTrap.getWorld() != null) {
                     getWorld().removeObject(playerGlassTrap);
@@ -397,7 +394,7 @@ public class Naobito extends Actor
                 activeGlassPanel = null;
                 frozenEnemy = null;
                 frozenTimer = 0;
-                glassbreak.play(); // Restored to original behavior
+                glassbreak.play(); 
             }
         }
     }
@@ -463,15 +460,19 @@ public class Naobito extends Actor
         frozenTimer = 0;
     }
     
-    private void drawFreezeSubtitles(String message)
+    /**
+     * Refactored Subtitle Engine
+     * Generates a cleaner letterbox strip layout positioned at the lower bound area.
+     */
+    private void drawFreezeSubtitles(String message, Color textColor)
     {
         World w = getWorld();
         if (w == null) return;
         
         GreenfootImage bg = w.getBackground();
         
-        int bannerHeight = 40;
-        int bannerY = w.getHeight() - 75; 
+        int bannerHeight = 35;
+        int bannerY = w.getHeight() - 55; 
         
         GreenfootImage cleanPatch = new GreenfootImage("beach.png");
         cleanPatch.scale(w.getWidth(), w.getHeight());
@@ -479,9 +480,9 @@ public class Naobito extends Actor
         GreenfootImage slice = new GreenfootImage(w.getWidth(), bannerHeight);
         slice.drawImage(cleanPatch, 0, -bannerY);
         
-        if (greyedOut || psState == PS_FROZEN || psState == PS_TRACING) {
+        if (greyedOut || psState == PS_LOCKED || psState == PS_FROZEN || psState == PS_TRACING) {
             GreenfootImage tint = new GreenfootImage(w.getWidth(), bannerHeight);
-            tint.setColor(new Color(100, 100, 120, 160));
+            tint.setColor(new Color(0, 0, 0, 140)); 
             tint.fillRect(0, 0, w.getWidth(), bannerHeight);
             slice.drawImage(tint, 0, 0);
         }
@@ -490,20 +491,21 @@ public class Naobito extends Actor
         
         if (message == null || message.isEmpty()) return;
 
-        Font subtitleFont = new Font("Arial", true, false, 24);
+        Font subtitleFont = new Font("Arial", true, false, 20); 
         bg.setFont(subtitleFont);
         
-        int textWidth = message.length() * 12; 
-        int x = (w.getWidth() / 2) - (textWidth / 2) + 40; 
-        int y = w.getHeight() - 50;
+        int textWidth = message.length() * 10; 
+        int x = (w.getWidth() / 2) - (textWidth / 2); 
+        int y = w.getHeight() - 30; 
         
+        // High visibility text border dropshadow mechanics
         bg.setColor(Color.BLACK);
-        bg.drawString(message, x + 2, y + 2);
-        bg.drawString(message, x - 2, y - 2);
-        bg.drawString(message, x + 2, y - 2);
-        bg.drawString(message, x - 2, y + 2);
+        bg.drawString(message, x + 1, y + 1);
+        bg.drawString(message, x - 1, y - 1);
+        bg.drawString(message, x + 1, y - 1);
+        bg.drawString(message, x - 1, y + 1);
         
-        bg.setColor(new Color(255, 215, 0));
+        bg.setColor(textColor);
         bg.drawString(message, x, y);
     }
 
