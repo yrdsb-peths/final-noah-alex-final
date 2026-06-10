@@ -37,6 +37,29 @@ public class Turtle extends Actor
         if (getWorld() == null) return;
         
         checkLaserCollision();
+        
+        // --- UPDATED: CHECK FOR BOTH LASERS AND MAKI'S MELEE SWINGS ---
+        checkLaserCollision();
+        checkMakiMeleeCollision(); // <-- ADDED THIS CHECK
+        if (getWorld() == null) return;
+        
+        checkHeroContact();
+    }
+    
+    private void checkMakiMeleeCollision()
+    {
+        if (getWorld() == null) return;
+
+        // Scan if Maki's visual crescent swing is overlapping the turtle's sprite boundary
+        Actor swing = getOneIntersectingObject(MakiSwing.class);
+        if (swing != null)
+        {
+            // Delete the single-use swing object so it doesn't multi-hit
+            getWorld().removeObject(swing);
+            
+            // MakiSwing hits for heavy damage (2 points!)
+            takeDamage(2); 
+        }
     }
     
     private void checkHeroContact()

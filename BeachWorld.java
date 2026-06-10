@@ -13,9 +13,14 @@ public class BeachWorld extends World
     private Label scoreLabel;
     private int spawnDelay = 0; 
 
+    private int phaseTimer = 0;
+    private final int SPAWN_RATE = 90; // Spawns an enemy every 90 frames (~1.5 seconds)
+    
     // --- CHANGED TO PUBLIC STATIC: ALLOWS OTHER WORLDS TO SHUT IT DOWN ---
     public static GreenfootSound beachBgm = new GreenfootSound("delirious.mp3");
 
+    private boolean dagonSpawned = false; // Add this field variable at the top of BeachWorld
+    
     public void setTimeFreeze(boolean freeze) {
         this.isTimeFrozen = freeze;
     }
@@ -117,7 +122,7 @@ public class BeachWorld extends World
         }
 
         // Spawn initial waves
-        spawnCrabWave();
+        spawnMultipleCrabs(2);
     }
 
     public BeachWorld(String technique)
@@ -127,10 +132,10 @@ public class BeachWorld extends World
     
     public void act()
     {
-        // Continuous wave manager loop
-        if (getObjects(Crab.class).isEmpty() && !isTimeFrozen)
+        // ONLY allow normal minion wave cycles if Dagon hasn't broken into the battlefield yet
+        if (!isTimeFrozen && !dagonSpawned)
         {
-            spawnCrabWave();
+            handlePhaseSpawning();
         }
 
         // Manual Spawning Cheats
@@ -145,9 +150,92 @@ public class BeachWorld extends World
             spawnDelay = 20; 
         }
         
+        // Key listener cheat to manually spawn Dagon for testing
+        if (Greenfoot.isKeyDown("y") && spawnDelay <= 0 && !dagonSpawned)
+        {
+            spawnDagonBossInstance();
+        }
+        
         if (spawnDelay > 0) spawnDelay--;
     }
 
+    private void handlePhaseSpawning()
+    {
+        // If Dagon is on the field, completely freeze all minion generation cycles
+        if (dagonSpawned) return;
+
+        phaseTimer++;
+        if (phaseTimer >= SPAWN_RATE)
+        {
+            phaseTimer = 0; 
+
+            // PHASE 1: Score up to 12 -> Drop 1 Crab at a time gradually
+            if (score <= 12)
+            {
+                if (getObjects(Crab.class).size() < 5)
+                {
+                    spawnMultipleCrabs(1);
+                }
+            }
+            // PHASE 2: Score 13 to 25 -> Mix of Crabs and occasional single Turtles
+            else if (score >= 13 && score <= 25)
+            {
+                if (Greenfoot.getRandomNumber(10) < 3) 
+                {
+                    if (getObjects(Turtle.class).size() < 1) 
+                    {
+                        spawnMultipleTurtles(1);
+                    }
+                    else
+                    {
+                        spawnMultipleCrabs(1);
+                    }
+                }
+                else
+                {
+                    spawnMultipleCrabs(2);
+                }
+            }
+            // PHASE 3: Score 26 to 34 -> Intense minion combination rush
+            else if (score >= 26 && score <= 34)
+            {
+                if (Greenfoot.getRandomNumber(10) < 4) 
+                {
+                    spawnMultipleTurtles(1);
+                }
+                else
+                {
+                    spawnMultipleCrabs(1);
+                }
+            }
+            // FINAL PHASE STEP: Boss threshold reached!
+            else if (score >= 35)
+            {
+                spawnDagonBossInstance();
+            }
+        }
+    }
+    
+    private void spawnDagonBossInstance()
+    {
+        dagonSpawned = true;
+        
+        // Instantly wipe existing entities to clear out crowded clutter lanes
+        removeObjects(getObjects(Crab.class));
+        removeObjects(getObjects(Turtle.class));
+
+        // Setup the Boss Health Bar at top center
+        HpBar dagonBar = new HpBar();
+        dagonBar.setBarDimensions(400, 15);
+        dagonBar.setLineColor(new Color(139, 0, 0)); 
+        addObject(dagonBar, 400, 45);
+
+        // Spawn Dagon in the upper-right corner
+        Dagon boss = new Dagon();
+        addObject(boss, 700, 100);
+        boss.setHpBar(dagonBar);
+    }
+    
     public void increaseScore()
     {
         score++;
@@ -155,16 +243,13 @@ public class BeachWorld extends World
         {
             scoreLabel.setValue("Score: " + score);
         }
+
         
-        if (score > 0 && score % 7 == 0)
-        {
-            spawnMultipleTurtles(1);
-        }
     }
 
     private void spawnCrabWave()
     {
-        int totalCrabsToSpawn = 2 + (score / 3);
+        int totalCrabsToSpawn = 2 + (score / 7);
         spawnMultipleCrabs(totalCrabsToSpawn);
     }
 
