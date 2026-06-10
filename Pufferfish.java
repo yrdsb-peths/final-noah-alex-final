@@ -143,15 +143,15 @@ public class Pufferfish extends Actor
     }
     
     public void takeDamage(int amount)
-{
-    pufferHp -= amount;
-    if (pufferHp <= 0)
     {
-        die();
+        pufferHp -= amount;
+        if (pufferHp <= 0)
+        {
+            die();
+        }
+        else
+        {
+            updatePuffAppearance();
+        }
     }
-    else
-    {
-        updatePuffAppearance();
-    }
-}
 }

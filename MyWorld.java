@@ -18,6 +18,8 @@ public class MyWorld extends World {
     private Label scoreLabel;
     private int phase2EndScore = -1;
     private boolean krakenSpawned = false;
+    private Label tridentHintTitle;
+    private Label tridentHintSubtitle;
 
     public MyWorld() {
         super(800, 600, 1);
@@ -192,6 +194,14 @@ public class MyWorld extends World {
     public void notifyPufferKilled()
     {
         spawnTridentPickup();
+
+        tridentHintTitle = new Label("Press E to throw the trident", 26);
+        tridentHintTitle.setLineColor(new Color(255, 215, 0)); 
+        addObject(tridentHintTitle, 400, 95);
+
+        tridentHintSubtitle = new Label("After you throw it, run back and pick it back up", 18);
+        tridentHintSubtitle.setLineColor(Color.WHITE);
+        addObject(tridentHintSubtitle, 400, 130);
     }
 
     private void spawnTridentPickup()
@@ -248,5 +258,17 @@ public class MyWorld extends World {
     public int getScore()
     {
         return this.score;
+    }
+    
+    public void clearTridentTutorialText()
+    {
+        if (tridentHintTitle != null && tridentHintTitle.getWorld() != null)
+        {
+            removeObject(tridentHintTitle);
+        }
+        if (tridentHintSubtitle != null && tridentHintSubtitle.getWorld() != null)
+        {
+            removeObject(tridentHintSubtitle);
+        }
     }
 }

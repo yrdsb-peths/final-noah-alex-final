@@ -52,39 +52,39 @@ public class Trident extends Actor
         }
     }
 
-private void pierceEnemies()
-{
-    List<Fish> fish = getObjectsInRange(15, Fish.class);
-    for (Fish f : fish)
+    private void pierceEnemies()
     {
-        if (!hitActors.contains(f)) { f.takeDamage(5); hitActors.add(f); }
-    }
-
-    List<Pufferfish> puffers = getObjectsInRange(15, Pufferfish.class);
-    for (Pufferfish p : puffers)
-    {
-        if (!hitActors.contains(p)) { p.takeDamage(5); hitActors.add(p); }
-    }
-
-    List<SwordfishBoss> bosses = getObjectsInRange(15, SwordfishBoss.class);
-    for (SwordfishBoss b : bosses)
-    {
-        if (!hitActors.contains(b)) { b.takeDamage(5); hitActors.add(b); }
-    }
-
-    List<Kraken> kraken = getObjectsInRange(50, Kraken.class); // increase range to 50 to test
-for (Kraken k : kraken)
-{
-    if (!hitActors.contains(k))
-    {
-        if (k.isVulnerable())
+        List<Fish> fish = getObjectsInRange(15, Fish.class);
+        for (Fish f : fish)
         {
-            k.takeDamage(5);
-            hitActors.add(k);
+            if (!hitActors.contains(f)) { f.takeDamage(5); hitActors.add(f); }
+        }
+    
+        List<Pufferfish> puffers = getObjectsInRange(15, Pufferfish.class);
+        for (Pufferfish p : puffers)
+        {
+            if (!hitActors.contains(p)) { p.takeDamage(5); hitActors.add(p); }
+        }
+    
+        List<SwordfishBoss> bosses = getObjectsInRange(15, SwordfishBoss.class);
+        for (SwordfishBoss b : bosses)
+        {
+            if (!hitActors.contains(b)) { b.takeDamage(5); hitActors.add(b); }
+        }
+    
+        List<Kraken> kraken = getObjectsInRange(50, Kraken.class); // increase range to 50 to test
+        for (Kraken k : kraken)
+        {
+            if (!hitActors.contains(k))
+            {
+                if (k.isVulnerable())
+                {
+                    k.takeDamage(5);
+                    hitActors.add(k);
+                }
+            }
         }
     }
-}
-}
 
     public void launch(int angle)
     {

@@ -30,6 +30,10 @@ public class TridentPickup extends Actor
             {
                 GreenfootSound pickup = new GreenfootSound("trident_pickup.mp3");
                 pickup.play();
+                if (getWorld() instanceof MyWorld)
+                {
+                    ((MyWorld) getWorld()).clearTridentTutorialText();
+                }
                 Trident t = new Trident();
                 getWorld().addObject(t, hero.getX() + 15, hero.getY() + 15);
                 t.setCarried(true);
