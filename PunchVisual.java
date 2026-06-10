@@ -2,31 +2,29 @@ import greenfoot.*;
 
 public class PunchVisual extends Actor
 {
-    private int lifetime = 6; // How many frames the punch effect stays on screen
-    private int speed = 8;     // How fast the punch moves forward
+    private int lifetime = 10; // Extended slightly for maximum range extension
+    private int speed = 15;     // Swift, snappier jab to outrange enemy advance
     
     public PunchVisual(int angle)
     {
         setRotation(angle);
         
-        // Create a custom fist/swipe graphic using code shapes
-        GreenfootImage img = new GreenfootImage(30, 15);
+        // --- BUFFED: Much larger size canvas so the hitbox hits easily ---
+        GreenfootImage img = new GreenfootImage(70, 35);
         
-        // Inner bright white core of the jab
+        // Outer glowing Projection Sorcery gold streak energy aura
+        img.setColor(new Color(255, 215, 0, 160));
+        img.fillOval(0, 0, 70, 35);
+        
+        // Inner bright white core of the high-speed strike
         img.setColor(new Color(255, 255, 255, 230));
-        img.fillOval(5, 2, 20, 10);
-        
-        // Outer glowing gold streak energy
-        img.setColor(new Color(255, 215, 0, 180));
-        img.drawOval(0, 0, 28, 14);
+        img.fillOval(10, 5, 50, 25);
         
         setImage(img);
     }
 
     public void act()
     {
-        // 1. CRITICAL SAFETY: If this object was already removed during this frame, 
-        // stop executing immediately so we don't call methods on a null world!
         if (getWorld() == null) return;
 
         // Move forward in the direction of the angle
@@ -35,11 +33,8 @@ public class PunchVisual extends Actor
         // Check for collisions and damage enemies during flight
         checkMeleeHit();
         
-        // 2. CRITICAL SAFETY: Check again, because checkMeleeHit() might have 
-        // just removed this object if it successfully struck an enemy!
         if (getWorld() == null) return;
         
-        // Fade out and self-destruct quickly based on lifetime expiration
         lifetime--;
         if (lifetime <= 0) {
             getWorld().removeObject(this);
@@ -63,6 +58,13 @@ public class PunchVisual extends Actor
                 }
                 else if (enemy instanceof Crab) {
                     ((Crab) enemy).takeDamage(1);
+                }
+                // --- FIXED: NAOBITO CAN NOW HURT TURTLES ---
+                else if (enemy instanceof Turtle) {
+                    ((Turtle) enemy).takeDamage(1);
+                }
+                else if (enemy instanceof Dagon) {
+                    ((Dagon) enemy).takeDamage(1);
                 }
                 
                 // Remove this punch visual after a successful hit

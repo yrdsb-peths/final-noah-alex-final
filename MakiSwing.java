@@ -9,19 +9,36 @@ public class MakiSwing extends Actor
     private int currentOffsetAngle;       
     private int baseAngle;                
     private Maki owner;                 
-    private int damage = 5; // Balanced with MakiCloud's damage values
+    private int damage = 5; 
+    private boolean isReversed = false;
 
-    public MakiSwing(Maki owner, int angle)
+    // Overloaded constructor so it doesn't break any other code scripts
+    public MakiSwing(Maki owner, int angle) {
+        this(owner, angle, false);
+    }
+
+    public MakiSwing(Maki owner, int angle, boolean isReversed)
     {
         this.owner = owner;
         this.baseAngle = angle;
+        this.isReversed = isReversed;
         
-        this.currentOffsetAngle = -45; 
-        this.degreesPerFrame = TOTAL_ARC / lifetime; 
+        // --- REVERSED ANGULAR MATH ---
+        if (isReversed) {
+            this.currentOffsetAngle = 45; // Start on the positive side
+            this.degreesPerFrame = -(TOTAL_ARC / lifetime); // Step backward each frame
+        } else {
+            this.currentOffsetAngle = -45;
+            this.degreesPerFrame = TOTAL_ARC / lifetime;
+        }
         
         setRotation(baseAngle + currentOffsetAngle);
         
         GreenfootImage img = new GreenfootImage("cloudarc.png");
+        // Optional: Mirror the image visual horizontally if it looks backwards
+        if (isReversed) {
+            img.mirrorVertically(); 
+        }
         img.scale(75, 75);
         setImage(img);
     }
@@ -33,18 +50,16 @@ public class MakiSwing extends Actor
             return;
         }
         
-        // PIVOT LOCK: Lock onto Maki's coordinates
-        setLocation(owner.getX(), owner.getY());
+        // Pushes the spinning pivot slightly out forward during the swing processing phase
+        int forwardProjection = 20;
+        double rad = Math.toRadians(baseAngle);
+        int targetX = owner.getX() + (int)(forwardProjection * Math.cos(rad));
+        int targetY = owner.getY() + (int)(forwardProjection * Math.sin(rad));
+        setLocation(targetX, targetY);
         
         currentOffsetAngle += degreesPerFrame;
         setRotation(baseAngle + currentOffsetAngle);
         
-        // EXTRA LONG RANGE RADIUS OFFSET: Projects the swing arc far out from Maki's body center
-        double rad = Math.toRadians(getRotation());
-        int radiusOffset = 75; 
-        setLocation(getX() + (int)(Math.cos(rad) * radiusOffset), getY() + (int)(Math.sin(rad) * radiusOffset));
-        
-        // FIXED DAMAGE ENGINE: Checks everything caught in the swing footprint
         checkMeleeHit();
         
         if (getWorld() == null) return;
@@ -59,9 +74,7 @@ public class MakiSwing extends Actor
     {
         if (getWorld() == null) return;
         
-        // Grab all overlapping entities in the crescent path
         List<Actor> targets = getIntersectingObjects(Actor.class);
-        
         for (Actor enemy : targets)
         {
             if (enemy != null && !(enemy instanceof Maki) && !(enemy instanceof MakiCloud) && !(enemy instanceof DashIcon) && !(enemy instanceof HpBar))
@@ -77,11 +90,17 @@ public class MakiSwing extends Actor
                     else if (enemy instanceof Crab) { 
                         ((Crab) enemy).takeDamage(damage); 
                     }
+                    else if (enemy instanceof Turtle) { 
+                        ((Turtle) enemy).takeDamage(damage); 
+                    }
                     else if (enemy instanceof SwordfishBoss) { 
                         ((SwordfishBoss) enemy).takeDamage(damage); 
                     }
                     else if (enemy instanceof Kraken) { 
                         ((Kraken) enemy).takeDamage(damage); 
+                    }
+                    else if (enemy instanceof Dagon) {
+                        ((Dagon) enemy).takeDamage(damage);
                     }
                 }
             }
