@@ -55,8 +55,6 @@ public class BeachWorld extends World
         super(800, 600, 1);
         this.technique = technique;
         this.score = startingScore;
-    
-        // --- FIXED BGM SETTINGS (Comfortable 40% Volume) ---
         beachBgm.setVolume(40); 
         beachBgm.playLoop();   
 
@@ -121,7 +119,7 @@ public class BeachWorld extends World
             addObject(hint, 330, 105);
         }
 
-        // Spawn initial waves
+        // Spawn enemies
         spawnMultipleCrabs(2);
     }
 

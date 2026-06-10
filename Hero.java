@@ -1,4 +1,4 @@
-import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
+import greenfoot.*;  
 
 public class Hero extends Actor
 {
@@ -8,37 +8,31 @@ public class Hero extends Actor
     private GreenfootImage[] rightFrames;
     private int animFrame = 0;
     private int animTimer = 0;
-    private final int ANIM_SPEED = 8; // lower = faster animation
+    private final int ANIM_SPEED = 8; // lower or faster animation
         
     private int laserCooldown = 0;
     private int hp = 10;
     private int invincibilityTimer = 0;
-    private final int INVINCIBILITY_DURATION = 30; // About half a second of safety
+    //how long invinciviiltiy lasts for
+    private final int INVINCIBILITY_DURATION = 30; 
     private HpBar healthBar;
-    
-    // --- AUDIO ---
-    // Removed bubble instance to use static playSound for overlapping/low latency
     GreenfootSound trident = new GreenfootSound("trident.mp3");
-    
     private Trident activeTrident = null;
     private boolean hasTrident = false;
-    
-    private int dashCooldown = 0;      // Ticks down from 180 (3 seconds)
-    private int dashDuration = 0;      // Ticks down from 10 frames during active burst
-    private int moveAngle = 0;         // Stores movement vector angle
+    private int dashCooldown = 0;      
+    private int dashDuration = 0;    
+    private int moveAngle = 0; 
     private DashIcon dashIcon;
-
     private int stunTimer = 0; 
     
-    // CRAB CAN FREEZE THE HERO
+    //stun
     public void getStunned(int frames)
     {
         this.stunTimer = frames;
-        // Turn the hero blue/gray when stunned
         getImage().setColor(new Color(0, 150, 255)); 
     }
 
-    // --- Constructor ---
+    // constructor
     public Hero() 
     {
         idleFrames = new GreenfootImage[4];
@@ -71,21 +65,18 @@ public class Hero extends Actor
     
     public void act()
     {
-        // 1. Tick down the stun lock
+        // stun timer
         if (stunTimer > 0)
         {
             stunTimer--;
-            
-            // If stun just ended, restore normal look appearance
             if (stunTimer == 0) {
-                // Fixed: used idleFrames[0] instead of unassigned idleImage
                 setImage(idleFrames[0]); 
                 getImage().setColor(new Color(255, 255, 255, 255)); // Reset color
             }
             return; 
         }
         
-        // 1. Handle Invincibility Frame Visual Countdown
+        // creates a flickering effect for invincibility 
         if (invincibilityTimer > 0) 
         {
             invincibilityTimer--;
@@ -97,12 +88,12 @@ public class Hero extends Actor
             getImage().setTransparency(255); 
         }
         
-        // 2. Laser Cooldown Ticker
+        // Laser Cooldown 
         if (laserCooldown > 0) {
             laserCooldown--; 
         }
         
-        // 3. Dash Cooldown Clock Updater
+        // Dash Cooldown 
         if (dashCooldown > 0)
         {
             dashCooldown--;
@@ -112,7 +103,7 @@ public class Hero extends Actor
             }
         }
 
-        // 4. Dash Movement Execution
+        // Dash Movement 
         if (dashDuration > 0)
         {
             dashDuration--;
@@ -134,6 +125,7 @@ public class Hero extends Actor
         int dy1 = 0;
         GreenfootImage[] currentFrames = idleFrames;
 
+        //movement
         if (Greenfoot.isKeyDown("a"))
         {
             setLocation(getX() - 4, getY());
@@ -173,7 +165,7 @@ public class Hero extends Actor
 
         setImage(currentFrames[animFrame]);
         
-        // 6. Dash Activation Input
+        // dash
         if (Greenfoot.isKeyDown("r") && dashCooldown == 0 && (dx1 != 0 || dy1 != 0))
         {
             dashDuration = 10;
@@ -182,7 +174,7 @@ public class Hero extends Actor
             if (dashIcon != null) dashIcon.updateIcon(3); 
         }
         
-        // 7. Trident Retrieval
+        // Trident Retrieval
         if (activeTrident != null && activeTrident.isStuck())
         {
             int dx = Math.abs(activeTrident.getX() - getX());
@@ -194,7 +186,7 @@ public class Hero extends Actor
             }
         }
 
-        // 8. Launch Trident
+        // Launch Trident
         if (Greenfoot.isKeyDown("e") && hasTrident && activeTrident != null && !activeTrident.isFlying() && mouse != null)
         {
             turnTowards(mouse.getX(), mouse.getY());
@@ -205,16 +197,18 @@ public class Hero extends Actor
             hasTrident = false;
         }
 
-        // 9. Primary Laser (Bubble) Attack
+        // m1 lazer atk
         if (Greenfoot.mousePressed(null) && laserCooldown == 0 && mouse != null)
         {
+            //goes wherever ur mouse is
             turnTowards(mouse.getX(), mouse.getY());
             int angleToMouse = getRotation();
             setRotation(0); 
             
-            // OPTIMIZATION: Used static playSound for the bubble effect
+            //sound
             Greenfoot.playSound("bubble.mp3");
             
+            //lazer
             Lazer laser = new Lazer();
             getWorld().addObject(laser, getX(), getY());
             laser.setRotation(angleToMouse);
