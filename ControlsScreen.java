@@ -48,7 +48,7 @@ public class ControlsScreen extends World
             charTitle.setLineColor(new Color(180, 60, 60));
             
             weaponDesc.setValue("Left Click: Attack with floating weapon\n" +
-                                "Middle Click: Heavy sweep attack\n" +
+                                "Q: Heavy sweep attack\n" +
                                 "Right Click: Throw weapon like a boomerang\n\n" +
                                 "Passive: Moves faster and breaks blocks easily");
             
