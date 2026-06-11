@@ -19,6 +19,7 @@ public class BeachWorld extends World
     
     //bgm
     public static GreenfootSound beachBgm = new GreenfootSound("delirious.mp3");
+    public static GreenfootSound victoryBgm = new GreenfootSound("smash.mp3"); // Add this line!
 
     private boolean dagonSpawned = false; 
     
@@ -38,16 +39,21 @@ public class BeachWorld extends World
         return this.frozenEnemyObject;
     }
 
-    @Override
+@Override
     public void started()
     {
-        beachBgm.playLoop();
+        if (dagonSpawned && getObjects(Dagon.class).isEmpty() && score >= 35) {
+            victoryBgm.play();
+        } else {
+            beachBgm.playLoop();
+        }
     }
 
     @Override
     public void stopped()
     {
         beachBgm.pause();
+        victoryBgm.pause(); 
     }
 
     public BeachWorld(String technique, int startingScore)

@@ -185,6 +185,10 @@ public class Dagon extends Actor
 
         if (hp <= 0)
         {
+            BeachWorld.beachBgm.stop();         
+            BeachWorld.victoryBgm.setVolume(40); 
+            BeachWorld.victoryBgm.playLoop(); //smash.mp3 looping music
+
             Label winLabel = new Label("VICTORY!", 40);
             winLabel.setLineColor(Color.GREEN);
             getWorld().addObject(winLabel, 400, 300);
