@@ -195,8 +195,8 @@ public class SwordfishBoss extends Actor
         if (healthBarWidth < 0) healthBarWidth = 0;
         
         // Color shifts from Green -> Yellow -> Red as boss loses health
-        if (bossHp > 6) canvas.setColor(Color.GREEN);
-        else if (bossHp > 3) canvas.setColor(Color.YELLOW);
+        if (bossHp > 4) canvas.setColor(Color.GREEN);
+        else if (bossHp > 2) canvas.setColor(Color.YELLOW);
         else canvas.setColor(Color.RED);
         
         canvas.fillRect(1, 1, healthBarWidth, barHeight - 2);
