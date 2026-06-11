@@ -30,6 +30,9 @@ public class CutsceneWorld extends World
         bg.scale(800, 600);
         setBackground(bg);
 
+        //layering 
+        setPaintOrder(DialogueBox.class, CutsceneActor.class);
+
         if (MyWorld.regularBgm != null && MyWorld.regularBgm.isPlaying()) {
             MyWorld.regularBgm.stop();
         }
@@ -40,21 +43,22 @@ public class CutsceneWorld extends World
         cutsceneBgm.setVolume(40);
         cutsceneBgm.playLoop();
 
-        // Initialize dialogue layouts
-        nameBox = new DialogueBox(180, 40);
-        nameBox.setCentered(true); // ---> ENABLES MIDDLE NAME ALIGNMENT!
+        nameBox = new DialogueBox(180, 45);
+        nameBox.setCentered(true); 
         
-        textBox = new DialogueBox(760, 150); // ---> SCALED UP BIGGER DIALOGUE BOX
+        textBox = new DialogueBox(760, 150); 
         textBox.setSpacePrompt(true);
+        
+        textBox.setTextOffset(215); 
 
-        // --- PERFECTED POSITIONING ARRAYS (Top edge sits exactly at Y = 440) ---
-        addObject(nameBox, 110, 420); 
+
         addObject(textBox, 400, 515); 
+        addObject(nameBox, 125, 515); 
 
         heroSprite  = new CutsceneActor("hero-talk.png",  160, 240);
         dagonSprite = new CutsceneActor("dagon-talk.png", 160, 240);
 
-        // Position sprites at Y=320 so their bottoms (320 + 120 = 440) touch the dialogue box flawlessly
+    
         addObject(heroSprite,  150, 320);
         addObject(dagonSprite, 650, 320);
 
@@ -113,6 +117,7 @@ public class CutsceneWorld extends World
         String text    = dialogueData[index][1];
         String state   = dialogueData[index][2];
 
+
         nameBox.drawText(speaker, 18, Color.YELLOW);
         textBox.drawText(text, 16, Color.WHITE);
 
@@ -162,13 +167,13 @@ public class CutsceneWorld extends World
             handImg.scale(400, 400); 
             dagonSprite.setImage(handImg);
             
-            // Adjust center point to Y=240 so the massive close-up aligns directly on the dialogue bar top
             dagonSprite.setLocation(400, 240); 
             dagonSprite.getImage().setTransparency(255);
         }
         else if (state.equals("FINALE"))
         {
-            nameBox.drawText("", 1, Color.BLACK);
+            textBox.setTextOffset(20); 
+            nameBox.drawText("", 1, Color.BLACK); 
             textBox.drawText("HORIZON OF THE CAPTIVATING SKANDHA!!", 24, Color.RED);
         }
     }

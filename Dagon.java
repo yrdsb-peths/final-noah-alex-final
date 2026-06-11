@@ -17,7 +17,7 @@ public class Dagon extends Actor
 
     public Dagon()
     {
-        GreenfootImage img = new GreenfootImage("dagon_normal.png");
+        GreenfootImage img = new GreenfootImage("dagon.png");
         img.scale(90, 90);
         setImage(img);
     }
@@ -111,6 +111,9 @@ public class Dagon extends Actor
 
             if (activeStance == 1)
             {
+                GreenfootImage atk = new GreenfootImage("dagon-attack.png");
+        atk.scale(90, 90);
+        setImage(atk);
                 // 1st stance is corner attack
                 int angleToCenter = (int) Math.toDegrees(Math.atan2(300 - getY(), 400 - getX()));
                 DagonAttack blast = new DagonAttack("CORNER", angleToCenter, 0);
