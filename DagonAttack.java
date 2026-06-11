@@ -4,9 +4,9 @@ public class DagonAttack extends Actor
 {
     private String type;
     private int timer = 0;
-    private int maxDuration = 110; // Slightly extended to allow rotation time (2.6 seconds)
+    private int maxDuration = 110; 
     private int rotationSpeed;
-    private int spawnedRotation; // Remembers the initial direction pointing to center
+    private int spawnedRotation;
 
     public DagonAttack(String type, int baseRotation, int rotationSpeed)
     {
@@ -22,24 +22,20 @@ public class DagonAttack extends Actor
     public void act()
     {
         timer++;
-        
-        // Both attacks now utilize rotation vectors beautifully
         setRotation(getRotation() + rotationSpeed);
-
-        // Flashing telegraphing phase
         if (timer < 90)
         {
             if (timer % 10 == 0) renderAttack(timer % 20 == 0);
         }
         else if (timer == 90)
         {
-            // Frame 90: The real attack triggers and deals damage instantly
+            //deals dmg 
             renderAttack(true);
             checkDamage();
         }
         else if (timer >= maxDuration)
         {
-            // Frame 110: Clean up the arena and only THEN let Dagon relocate
+            //moves after hes done attacking
             notifyDagonAttackFinished();
             getWorld().removeObject(this);
         }
@@ -54,7 +50,6 @@ public class DagonAttack extends Actor
 
         if (type.equals("CORNER"))
         {
-            // Center anchor point of drawing mapping space is at (800, 800)
             int[] xWedge = { 800, 1600, 1400, 1050 };
             int[] yWedge = { 800, 500, 1100, 1300 };
             img.fillPolygon(xWedge, yWedge, 4);
@@ -87,17 +82,13 @@ public class DagonAttack extends Actor
 
         if (type.equals("CORNER"))
         {
-            // Find the player's angle relative to Dagon (-180 to 180 degrees)
             int playerAngle = (int) Math.toDegrees(Math.atan2(dy, dx));
             
-            // Normalize the angles to prevent wrapping bugs near 180/-180 boundary zones
             int diff = playerAngle - spawnedRotation;
             while (diff < -180) diff += 360;
             while (diff > 180)  diff -= 360;
 
-            // --- ACCURATE HITBOX DETECTION ---
-            // If the player is within 650 pixels of Dagon, and caught inside his custom 
-            // 45-degree wedge zone, they take a hit! Anywhere else is completely safe.
+            // if player is inside dagons atk they will take dmg. if not, then no dmg
             if (distance <= 650 && diff >= -15 && diff <= 45)
             {
                 damageHero(hero);

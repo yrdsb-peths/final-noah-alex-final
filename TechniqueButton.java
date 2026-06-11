@@ -139,13 +139,10 @@ public class TechniqueButton extends Actor
 
     private void drawCentered(GreenfootImage img, String text, int fontSize, int y)
     {
-        // Approximate centering since Greenfoot doesn't provide text width
         int approxX = Math.max(5, (W - text.length() * fontSize / 2) / 2);
         img.drawString(text, approxX, y);
     }
 
     public void setSelected(boolean s) { selected = s; }
     public boolean isSelected() { return selected; }
-
-    public void act() {} // Driven by TechniqueSelectWorld
 }

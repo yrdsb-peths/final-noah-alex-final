@@ -17,24 +17,23 @@ public class Crab extends Actor
     {
         if (getWorld() == null) return;
         
-        // --- PROJECTION SORCERY FREEZE ENGINE ---
+        // specifically for naobito and throwing them
         if (getWorld() instanceof BeachWorld) {
             BeachWorld bw = (BeachWorld) getWorld();
-            // Freeze if general time freeze is active OR if this specific crab is trapped in a glass panel
             if (bw.isTimeFrozen() || bw.getFrozenEnemy() == this) {
-                return; // Stop acting instantly! No movement, no damage processing.
+                return; // stops doing anything
             }
         }
         
-        // 1. Move towards whatever hero is alive
+        // move towards whatever hero is alive
         moveTowardsHero();
         if (getWorld() == null) return;
         
-        // 2. Check if we managed to deliver a claw attack!
+        // attack
         checkHeroContact();
         if (getWorld() == null) return;
         
-        // 3. Check if hit by a laser
+        // laser hit
         checkLaserCollision();
     }
     
@@ -82,6 +81,7 @@ public class Crab extends Actor
     
     private void updateFishAppearance()
     {
+        //this specifically deals with the hp bar above the sprite
         int spriteWidth = baseCrabImage.getWidth();
         int spriteHeight = baseCrabImage.getHeight();
         int barHeight = 4;

@@ -149,11 +149,8 @@ public class Maki extends Actor
             dashCooldown = 180;
             moveAngle = (int) Math.toDegrees(Math.atan2(dy1, dx1));
             if (dashIcon != null) dashIcon.updateIcon(3);
-        }
-
-        // --- UPDATED COMBAT ENGINE INPUT MAPS ---
-        
-        // 1. LEFT MOUSE CLICK: Orbit Cloud
+        }        
+        // LEFT MOUSE CLICK: Orbit Cloud
         if (mouse != null && Greenfoot.mousePressed(null) && mouse.getButton() == 1 && laserCooldown == 0)
         {
             Greenfoot.playSound("makiarc.mp3");
@@ -164,10 +161,7 @@ public class Maki extends Actor
             laserCooldown = 30;
         }
 
-        // 2. Q KEY: Maki Swing (Replaces Middle Mouse Button)
-        // 2. Q KEY: Cloud Arc Burst (Melee Swing / Boomerang Option)
-// 2. Q KEY: Cloud Arc Burst (Melee Swing / Sweeping Arc from Right Corner)
-        // 2. Q KEY: Cloud Arc Burst (Sweeping Arc - Pushed Forward & Reversed)
+        // Maki Swing 
         if (Greenfoot.isKeyDown("q") && laserCooldown == 0)
         {
             Greenfoot.playSound("makiarc.mp3");
@@ -178,24 +172,19 @@ public class Maki extends Actor
                 setRotation(0); 
             }
             
-            // --- FIXED: PUSHED FURTHER IN FRONT ---
-            // Increased distance from 30 to 48 pixels out to clear her body
             int handDistance = 48; 
-            
-            // Mirroring the angle check to the opposite side to handle the reversed swing start position
             double cornerRadians = Math.toRadians(angle - 50); 
             
             int spawnX = getX() + (int)(handDistance * Math.cos(cornerRadians));
             int spawnY = getY() + (int)(handDistance * Math.sin(cornerRadians));
             
-            // Pass the reversed initialization status down
             MakiSwing visualSwing = new MakiSwing(this, angle, true);
             getWorld().addObject(visualSwing, spawnX, spawnY);
             
             laserCooldown = 25;
         }
 
-        // 3. RIGHT MOUSE CLICK: Boomerang Cloud
+        // RIGHT CLICK: Boomerang Cloud
         if (mouse != null && Greenfoot.mousePressed(null) && mouse.getButton() == 3 && laserCooldown == 0)
         {
             Greenfoot.playSound("makistrike.mp3");

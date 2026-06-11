@@ -18,13 +18,12 @@ public class Lazer extends Actor
         GreenfootImage image = new GreenfootImage("projectile.png");
         image.scale(20, 20);
         setImage(image);
-        // Add your action code here.
         move(10);
         
-        // 2. Count down the lifetime
+        //Count down the lifetime
         lifeTimer--;
         
-        // 3. If time is up, or if it hits the edge of the world, remove it
+        // If time is up, or if it hits the edge of the world, remove it
         if (lifeTimer <= 0 || isAtEdge())
         {
             getWorld().removeObject(this);

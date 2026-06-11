@@ -33,12 +33,11 @@ public class Dagon extends Actor
     {
         if (getWorld() == null) return;
 
-        // Skip movement/attack loops if Naobito locks him inside a frame
+        // naobito stuff
         if (getWorld() instanceof BeachWorld && ((BeachWorld)getWorld()).isTimeFrozen()) return;
 
-        // --- FIXED: Checked every single frame regardless of stance/attack states ---
         checkJujutsuStrikes();
-        if (getWorld() == null) return; // Terminate execution branch safely if dead
+        if (getWorld() == null) return; //returns so it doesnt crash
 
         if (moving)
         {
@@ -46,7 +45,6 @@ public class Dagon extends Actor
         }
         else 
         {
-            // Advance his attack clock even while charging to keep hitboxes vulnerable
             actionTimer++;
             runAttackAI();
         }
@@ -54,20 +52,19 @@ public class Dagon extends Actor
     
     private void checkJujutsuStrikes()
     {
-        // Double-check world presence initially to block premature coordinate trace lookups
+        //litterally all the attacks from different heros 
         if (getWorld() == null) return;
 
-        // 1. Naobito's Close Range Jab punches
+        // naobito punches
         Actor punch = getOneIntersectingObject(PunchVisual.class);
         if (punch != null)
         {
-            // FIX: Remove projectile asset FIRST while world reference is guaranteed
             getWorld().removeObject(punch); 
             takeDamage(1); 
-            if (getWorld() == null) return; // Terminate early if Dagon died here
+            if (getWorld() == null) return; 
         }
         
-        // 2. Maki's physical weapon slices
+        // maki attacks
         Actor makiSwing = getOneIntersectingObject(MakiSwing.class);
         if (makiSwing != null)
         {
@@ -76,15 +73,12 @@ public class Dagon extends Actor
             if (getWorld() == null) return; 
         }
         
-        // 3. Nanami's 7:3 Ratio Blunt Strike slashes
+        // nanami attacks
         Actor nanamiSlash = getOneIntersectingObject(SwingVisual.class);
         if (nanamiSlash != null)
         {
             boolean isCrit = ((SwingVisual)nanamiSlash).isCritical();
-            
-            // FIX: Clear the slice asset out of the world space FIRST
             getWorld().removeObject(nanamiSlash);
-            
             if (isCrit)
             {
                 takeDamage(5); 
@@ -97,7 +91,7 @@ public class Dagon extends Actor
             if (getWorld() == null) return; 
         }
         
-        // 4. Naobito's Launched Glass Panels 
+        // naobito freeze
         Actor glassBlock = getOneIntersectingObject(GlassPanel.class);
         if (glassBlock != null)
         {
@@ -109,7 +103,7 @@ public class Dagon extends Actor
     
     private void runAttackAI()
     {
-        // Execute attack from current location every 2.5 seconds (150 frames)
+        // attacks every 150 frames
         if (actionTimer >= 150)
         {
             actionTimer = 0;
@@ -117,19 +111,19 @@ public class Dagon extends Actor
 
             if (activeStance == 1)
             {
-                // STANCE 1: Corner Wedge Blast
+                // 1st stance is corner attack
                 int angleToCenter = (int) Math.toDegrees(Math.atan2(300 - getY(), 400 - getX()));
                 DagonAttack blast = new DagonAttack("CORNER", angleToCenter, 0);
                 getWorld().addObject(blast, getX(), getY());
             }
             else if (activeStance == 2)
             {
-                // STANCE 2: Center Rotating Laser Grid (spins slowly at 1 degree per frame)
+                // 2nd stance is spinning attack
                 DagonAttack beams = new DagonAttack("CENTER", Greenfoot.getRandomNumber(360), 1);
                 getWorld().addObject(beams, getX(), getY());
             }
             
-            setRotation(0); // Keep boss sprite perfectly upright
+            setRotation(0); // keeps image upright
         }
     }
 
@@ -137,13 +131,12 @@ public class Dagon extends Actor
     {
         this.isAttacking = false;
         
-        // --- RANDOM STANCE SELECTOR ENGINE ---
-        // Roll a dice from 0 to 9 to determine his next strategy behavior dynamically!
+        //random attack based on rolls 
         int randomRoll = Greenfoot.getRandomNumber(10);
         
         if (randomRoll < 7) 
         {
-            // 70% Chance to pick a corner attack position
+            // 70% Chance to go to corner and attack
             activeStance = 1;
             int nextCorner = Greenfoot.getRandomNumber(4);
             while (nextCorner == lastCorner)
@@ -155,10 +148,10 @@ public class Dagon extends Actor
         }
         else 
         {
-            // 30% Chance to roll a surprise center map ambush positioning!
+            // 30% chance for wide map attack
             activeStance = 2;
             lastCorner = -1;
-            navigateTo(400, 300); // Teleport to exact center coordinates
+            navigateTo(400, 300); 
         }
     }
 
@@ -172,7 +165,7 @@ public class Dagon extends Actor
     private void processMovement()
     {
         turnTowards(targetX, targetY);
-        move(10); // Swift traveling speed so transitions don't stall game flow
+        move(10);
 
         if (Math.hypot(getX() - targetX, getY() - targetY) < 12)
         {
@@ -189,11 +182,11 @@ public class Dagon extends Actor
 
         if (hp <= 0)
         {
-            Label winLabel = new Label("DOMAIN COLLAPSED - VICTORY!", 40);
+            Label winLabel = new Label("VICTORY!", 40);
             winLabel.setLineColor(Color.GREEN);
             getWorld().addObject(winLabel, 400, 300);
             
-            // --- NEW: Wipes his specific HP bar container off the screen ---
+            // when he dies get rid of his bossbar
             if (bossHpBar != null && bossHpBar.getWorld() != null)
             {
                 getWorld().removeObject(bossHpBar);

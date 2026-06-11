@@ -12,7 +12,6 @@ public class MakiSwing extends Actor
     private int damage = 5; 
     private boolean isReversed = false;
 
-    // Overloaded constructor so it doesn't break any other code scripts
     public MakiSwing(Maki owner, int angle) {
         this(owner, angle, false);
     }
@@ -23,7 +22,6 @@ public class MakiSwing extends Actor
         this.baseAngle = angle;
         this.isReversed = isReversed;
         
-        // --- REVERSED ANGULAR MATH ---
         if (isReversed) {
             this.currentOffsetAngle = 45; // Start on the positive side
             this.degreesPerFrame = -(TOTAL_ARC / lifetime); // Step backward each frame
@@ -35,7 +33,6 @@ public class MakiSwing extends Actor
         setRotation(baseAngle + currentOffsetAngle);
         
         GreenfootImage img = new GreenfootImage("cloudarc.png");
-        // Optional: Mirror the image visual horizontally if it looks backwards
         if (isReversed) {
             img.mirrorVertically(); 
         }

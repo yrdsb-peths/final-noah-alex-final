@@ -1,15 +1,7 @@
 import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
-
-/**
- * Write a description of class TitleScreen here.
- * * @author (your name) 
- * @version (a version number or a date)
- */
 public class TitleScreen extends World
 {
     Label titleLabel = new Label("fish shooter", 60);
-    
-    // Declaring the background music instance with smash.mp3
     private GreenfootSound bgm = new GreenfootSound("smash.mp3");
 
     /**
@@ -17,7 +9,6 @@ public class TitleScreen extends World
      * */
     public TitleScreen()
     {    
-        // Create a new world with 600x400 cells with a cell size of 1x1 pixels.
         super(800, 600, 1); 
         GreenfootImage beachBg = new GreenfootImage("background.jpg");
         beachBg.scale(800, 600);
@@ -26,7 +17,6 @@ public class TitleScreen extends World
         addObject(titleLabel, getWidth()/2, 200);
         prepare();
         
-        // Lower the background music volume (e.g., 40%) and start the loop
         bgm.setVolume(40);
         bgm.playLoop();
     }
@@ -35,18 +25,12 @@ public class TitleScreen extends World
     {
         if(Greenfoot.isKeyDown("space"))
         {
-            // STOP the title screen music so it doesn't overlap with the next world's music
             bgm.stop();
-            
             MyWorld gameWorld = new MyWorld();
             Greenfoot.setWorld(gameWorld);
         }
     }
     
-    /**
-     * Prepare the world for the start of the program.
-     * That is: create the initial objects and add them to the world.
-     */
     private void prepare()
     {
         Hero elephant = new Hero();

@@ -14,19 +14,17 @@ public class HealthPack extends Actor
      */
     public HealthPack()
     {
-        // Replace with your actual image file name if different!
         GreenfootImage img = new GreenfootImage("medkit.png");
         img.scale(30, 30);
         setImage(img);
     }
     public void act()
     {
-        // Add your action code here.
         // Check if the Hero touches the health pack
         Hero hero = (Hero) getOneIntersectingObject(Hero.class);
         if (hero != null)
         {
-            // Heal the hero by 1 HP (or up to your max cap)
+            // Heal the hero by 1 HP 
             hero.heal(3);
             
             // Remove the health pack from the world

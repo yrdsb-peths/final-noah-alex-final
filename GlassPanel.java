@@ -58,7 +58,6 @@ public class GlassPanel extends Actor
         }
     }
 
-    // FIXED: Changed from 'private' to 'public' to match standard Greenfoot Actor method signature overrides
     public boolean isAtEdge()
     {
         World w = getWorld();
@@ -68,7 +67,6 @@ public class GlassPanel extends Actor
 
     private void shatterAndExecute()
     {
-        // 1. Immediately wipe the global world tracker so the enemy is freed right now
         if (getWorld() instanceof BeachWorld) {
             ((BeachWorld) getWorld()).setFrozenEnemy(null);
         }
@@ -78,13 +76,13 @@ public class GlassPanel extends Actor
             // Restore normal appearance transparency
             trappedTarget.getImage().setTransparency(255);
             
-            // 2. Deal damage to the target
+            // Deal damage to the target
             if (trappedTarget instanceof Fish) ((Fish) trappedTarget).takeDamage(2);
             else if (trappedTarget instanceof Pufferfish) ((Pufferfish) trappedTarget).takeDamage(2);
             else if (trappedTarget instanceof Crab) ((Crab) trappedTarget).takeDamage(2);
         }
         
-        // 3. Remove the glass panel overlay safely
+        // Remove the glass panel overlay
         getWorld().removeObject(this);
     }
 }
