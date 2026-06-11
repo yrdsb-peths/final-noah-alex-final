@@ -137,9 +137,7 @@ public class Pufferfish extends Actor
         
         // 6. Draw the foreground health level
         canvas.fillRect(1, 1, healthBarWidth, barHeight - 2);
-        
-        // Assign this combined custom graphic to the actor
-        setImage(canvas);
+                setImage(canvas);
     }
     
     public void takeDamage(int amount)

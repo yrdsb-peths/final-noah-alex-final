@@ -22,7 +22,6 @@ public class RatioBar extends Actor
         redraw();
     }
 
-    // FIX: This method must exist for Nanami.java to call it upon Left-Click!
     public boolean checkRatioTiming()
     {
         double lowerBound = RED_ZONE_CENTER - RED_ZONE_HALF;

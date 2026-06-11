@@ -8,8 +8,6 @@ public class PunchVisual extends Actor
     public PunchVisual(int angle)
     {
         setRotation(angle);
-        
-        // --- BUFFED: Much larger size canvas so the hitbox hits easily ---
         GreenfootImage img = new GreenfootImage(70, 35);
         
         // Outer glowing Projection Sorcery gold streak energy aura

@@ -178,7 +178,7 @@ public class Nanami extends Actor
             ratioActive = true;
             ratioBar = new RatioBar();
             getWorld().addObject(ratioBar, getX(), getY() - 45); 
-            ratioSound.play(); // Play single utility notification trigger
+            ratioSound.play(); 
         }
 
         if (mouse != null && Greenfoot.mousePressed(null) && mouse.getButton() == 1 && attackCooldown == 0)

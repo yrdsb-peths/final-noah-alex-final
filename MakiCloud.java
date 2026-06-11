@@ -40,7 +40,6 @@ public class MakiCloud extends Actor
         else if (mode.equals("BOOMERANG"))
         {
             GreenfootImage img = new GreenfootImage("cloudstrike.png");
-            // --- FIXED: Scaled down the thickness (height) from 35 to 15 to make it thinner ---
             img.scale(45, 15);
             setImage(img);
         }
@@ -73,7 +72,6 @@ public class MakiCloud extends Actor
         }
         else if (mode.equals("BOOMERANG"))
         {
-            // Optional visual touch: Add a spinning rotation effect to the slick blade
             setRotation(getRotation() + 15);
             
             if (!returning)
@@ -134,7 +132,6 @@ public class MakiCloud extends Actor
             if (c.getWorld() != null && !hitActors.contains(c)) { c.takeDamage(damage); hitActors.add(c); }
         }
 
-        // --- TURTLE PROXIMITY DAMAGE WORKING ---
         List<Turtle> turtles = getObjectsInRange(22, Turtle.class);
         for (Turtle t : turtles)
         {

@@ -3,7 +3,7 @@ import java.util.List;
 
 public class Turtle extends Actor
 {
-    private int crabHp = 6; // Takes 3 hits to die!
+    private int crabHp = 6; 
     private GreenfootImage baseCrabImage;
     
     public Turtle()
@@ -17,20 +17,20 @@ public class Turtle extends Actor
     {
         if (getWorld() == null) return;
         
-        // --- PROJECTION SORCERY FREEZE ENGINE ---
+        // PROJECTION SORCERY FREEZE ENGINE 
         if (getWorld() instanceof BeachWorld) {
             BeachWorld bw = (BeachWorld) getWorld();
             // Freeze if general time freeze is active OR if this specific turtle is trapped in a glass panel
             if (bw.isTimeFrozen() || bw.getFrozenEnemy() == this) {
-                return; // Stop acting instantly! No movement, no damage processing.
+                return; // stops doing anything
             }
         }
         
-        // 1. Move towards whatever hero is alive in the active world
+        // Move towards whatever hero is alive in the active world
         moveTowardsHero();
         if (getWorld() == null) return;
         
-        // 2. Check if hit by a laser
+        // Check if hit by a laser
         checkLaserCollision();
         
         checkHeroContact();
@@ -38,9 +38,9 @@ public class Turtle extends Actor
         
         checkLaserCollision();
         
-        // --- UPDATED: CHECK FOR BOTH LASERS AND MAKI'S MELEE SWINGS ---
+        // CHECK FOR BOTH LASERS AND MAKI'S MELEE SWINGS 
         checkLaserCollision();
-        checkMakiMeleeCollision(); // <-- ADDED THIS CHECK
+        checkMakiMeleeCollision(); 
         if (getWorld() == null) return;
         
         checkHeroContact();
@@ -57,7 +57,7 @@ public class Turtle extends Actor
             // Delete the single-use swing object so it doesn't multi-hit
             getWorld().removeObject(swing);
             
-            // MakiSwing hits for heavy damage (2 points!)
+            // MakiSwing hits for heavy damage
             takeDamage(2); 
         }
     }

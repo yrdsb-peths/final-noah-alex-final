@@ -18,20 +18,19 @@ public class SwordfishBoss extends Actor
     private int bossHp = 6;
     private GreenfootImage baseBossImage;
     
-    // State Machine Enums (Representing the states as numbers)
+    // State Machine 
     private final int TRACKING = 0;
     private final int CHARGING = 1;
     private final int DASHING  = 2;
     private final int STUCK    = 3;
     private int currentState = TRACKING;
     
-    // Timers (Assuming ~60 frames per second)
+    // Timers 
     private int stateTimer = 80; // 2 seconds to track initially
     private int dashAngle = 0;    // Locks the angle before charging/dashing
     
     public SwordfishBoss()
     {
-        // Replace "swordfish.png" with your actual file name!
         baseBossImage = new GreenfootImage("swordfish.png");
         baseBossImage.scale(80, 40); // Made a bit bigger since it's a boss
         
@@ -40,7 +39,6 @@ public class SwordfishBoss extends Actor
     
     public void act()
     {
-        // Add your action code here.
         // 1. Run behavior based on current state
         switch (currentState)
         {
@@ -79,7 +77,7 @@ public class SwordfishBoss extends Actor
             // Transition to charging: Save the angle, stop tracking, set 1.5s timer
             dashAngle = getRotation();
             currentState = CHARGING;
-            stateTimer = 30; // 90 frames = 1.5 seconds
+            stateTimer = 30;
         }
     }
     
@@ -108,7 +106,7 @@ public class SwordfishBoss extends Actor
     {
         setRotation(dashAngle);
         slash.play();
-        move(30); // Rush forward fast!
+        move(30); // Rush forward fast
         
         checkHeroCollision();
         
@@ -133,44 +131,43 @@ public class SwordfishBoss extends Actor
     }
 
     private void checkLaserCollision()
-{
-    // 1. Get a list of ALL lasers currently in the world
-    List<Lazer> lasers = getWorld().getObjects(Lazer.class);
-    
-    // 2. Loop through the lasers to check their actual distance from the boss's core
-    for (int i = 0; i < lasers.size(); i++)
     {
-        Lazer currentLaser = lasers.get(i);
+        // 1. Get a list of ALL lasers currently in the world
+        List<Lazer> lasers = getWorld().getObjects(Lazer.class);
         
-        // Calculate horizontal and vertical distance
-        int dx = currentLaser.getX() - this.getX();
-        int dy = currentLaser.getY() - this.getY();
-        
-        // Use standard distance formula (or check bounding radius)
-        // Since the boss image is scaled to 60x60, a radius of ~30 pixels is perfect for its real body
-        if (Math.abs(dx) < 30 && Math.abs(dy) < 30)
+        // 2. Loop through the lasers to check their actual distance from the boss's core
+        for (int i = 0; i < lasers.size(); i++)
         {
-            // Valid physical hit! Remove the laser safely
-            getWorld().removeObject(currentLaser);
+            Lazer currentLaser = lasers.get(i);
             
-            bossHp--;
+            // Calculate horizontal and vertical distance
+            int dx = currentLaser.getX() - this.getX();
+            int dy = currentLaser.getY() - this.getY();
             
-            if (bossHp <= 0)
+            // Use standard distance formula (or check bounding radius)
+            if (Math.abs(dx) < 30 && Math.abs(dy) < 30)
             {
-                MyWorld world = (MyWorld) getWorld();
-                world.notifyBossDefeated();
-                getWorld().removeObject(this);
-                return; // Stop running the method immediately since the boss is dead
+                // Valid physical hit! Remove the laser safely
+                getWorld().removeObject(currentLaser);
+                
+                bossHp--;
+                
+                if (bossHp <= 0)
+                {
+                    MyWorld world = (MyWorld) getWorld();
+                    world.notifyBossDefeated();
+                    getWorld().removeObject(this);
+                    return; // Stop running the method immediately since the boss is dead
+                }
+                else
+                {
+                    updateBossAppearance(currentState == TRACKING);
+                }
+                
+                break; // Exit the loop since we handled this frame's hit
             }
-            else
-            {
-                updateBossAppearance(currentState == TRACKING);
-            }
-            
-            break; // Exit the loop since we handled this frame's hit
         }
     }
-}
 
     /**
      * Draws the composite graphic including Boss Sprite, HP bar, and optional Target line
@@ -194,7 +191,7 @@ public class SwordfishBoss extends Actor
         canvas.setColor(Color.BLACK);
         canvas.fillRect(0, 0, spriteWidth, barHeight);
         
-        int healthBarWidth = (int)(((double)bossHp / 10) * (spriteWidth - 2));
+        int healthBarWidth = (int)(((double)bossHp / 6) * (spriteWidth - 2));
         if (healthBarWidth < 0) healthBarWidth = 0;
         
         // Color shifts from Green -> Yellow -> Red as boss loses health
@@ -204,7 +201,7 @@ public class SwordfishBoss extends Actor
         
         canvas.fillRect(1, 1, healthBarWidth, barHeight - 2);
         
-        // --- DRAW THE TELEGRAPH TARGET LINE ---
+        //DRAW THE TELEGRAPH TARGET LINE 
         if (drawTargetLine)
         {
             canvas.setColor(new Color(255, 0, 0, 130)); // Semi-transparent Red
@@ -228,18 +225,18 @@ public class SwordfishBoss extends Actor
     }
     
     public void takeDamage(int amount)
-{
-    bossHp -= amount;
-    if (bossHp <= 0)
     {
-        MyWorld world = (MyWorld) getWorld();
-        world.notifyBossDefeated();
-        getWorld().removeObject(this);
+        bossHp -= amount;
+        if (bossHp <= 0)
+        {
+            MyWorld world = (MyWorld) getWorld();
+            world.notifyBossDefeated();
+            getWorld().removeObject(this);
+        }
+        else
+        {
+            updateBossAppearance(currentState == TRACKING);
+        }
     }
-    else
-    {
-        updateBossAppearance(currentState == TRACKING);
-    }
-}
     
 }

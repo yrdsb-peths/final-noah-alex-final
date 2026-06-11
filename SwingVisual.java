@@ -102,7 +102,6 @@ public class SwingVisual extends Actor
                     else if (enemy instanceof Turtle) {
                         ((Turtle) enemy).takeDamage(damageDealt);
                     }
-                    // --- 2. ADD THIS ADDITION SO NANAMI CAN HIT DAGON DIRECTLY ---
                     else if (enemy instanceof Dagon) {
                         ((Dagon) enemy).takeDamage(damageDealt);
                     }

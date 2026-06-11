@@ -49,8 +49,7 @@ public class Naobito extends Actor
     private boolean greyedOut = false;
     private int stunTimer = 0;
     
-    // --- AUDIO FIELDS ---
-    // Removed punch instance variable to use Maki's sound method for overlapping sound triggers
+    // AUDIO FIELDS 
     GreenfootSound camera = new GreenfootSound("camera.mp3");
     GreenfootSound glass = new GreenfootSound("glass.mp3");
     GreenfootSound glassbreak = new GreenfootSound("glassbreak.mp3");
@@ -63,7 +62,6 @@ public class Naobito extends Actor
         getImage().setColor(new Color(0, 150, 255)); // Blue freeze tint
     }
     
-    // --- Constructor ---
     public Naobito()
     {
         idleFrames = new GreenfootImage[4];
@@ -74,7 +72,7 @@ public class Naobito extends Actor
         for (int i = 0; i < 4; i++)
         {
             String suffix = (i == 0) ? "" : Integer.toString(i + 1);
-            
+         
             idleFrames[i] = new GreenfootImage("naobito" + suffix + ".png");
             idleFrames[i].scale(50, 60);
             

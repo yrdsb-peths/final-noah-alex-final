@@ -34,7 +34,7 @@ public class HpBar extends Actor
     {
         this.barWidth = width;
         this.barHeight = height;
-        updateBar(currentHp); // Redraw the canvas with the new size
+        updateBar(currentHp); 
     }
     
     public void setLineColor(Color newColor)
@@ -47,34 +47,27 @@ public class HpBar extends Actor
     {
         this.currentHp = hp;
         
-        // 1. Create a blank image to act as our canvas
+        // Create a blank image to act as our canvas
         GreenfootImage image = new GreenfootImage(barWidth, barHeight);
         
-        // 2. Draw the white background/outline frame
+        // Draw the white background/outline frame
         image.setColor(Color.WHITE);
         image.drawRect(0, 0, barWidth - 1, barHeight - 1);
         
-        // 3. Prevent errors if HP goes below 0
+        // Prevent errors if HP goes below 0
         if (currentHp < 0) {
             currentHp = 0;
         }
         
-        // 4. Calculate how wide the inner rectangle should be
+        // Calculate how wide the inner rectangle should be
         int fillWidth = (int)(((double)currentHp / maxHp) * (barWidth - 4));
         
-        // 5. Fill in the meter using our dynamic barColor variable
+        // Fill in the meter 
         if (fillWidth > 0)
         {
             image.setColor(barColor);
             image.fillRect(2, 2, fillWidth, barHeight - 4);
         }
-        
-        // Set the newly drawn image to this actor
         setImage(image);
-    }
-    public void act()
-    {
-        // Add your action code here.
-        
     }
 }
